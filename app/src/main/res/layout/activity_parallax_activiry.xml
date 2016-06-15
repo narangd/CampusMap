@@ -19,24 +19,21 @@
             android:layout_height="wrap_content"
             android:text="Listview"
             android:id="@+id/btnList"
-            android:layout_weight="1"
-            android:onClick="onClick"/>
+            android:layout_weight="1"/>
 
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Scrollview"
             android:id="@+id/btnScroll"
-            android:layout_weight="1"
-            android:onClick="onClick"/>
+            android:layout_weight="1"/>
 
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Gridview"
             android:id="@+id/btnGrid"
-            android:layout_weight="1"
-            android:onClick="onClick"/>
+            android:layout_weight="1"/>
     </LinearLayout>
 
     <RelativeLayout

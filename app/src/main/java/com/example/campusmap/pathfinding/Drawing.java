@@ -12,19 +12,21 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.campusmap.pathfinding.graphic.Map;
+import com.example.campusmap.pathfinding.graphic.Tile;
 
 /**
  * Created by DB-31 on 2015-11-03.
  */
 public class Drawing implements View.OnLongClickListener{
+    private static final String TAG = "ADP_Drawing";
+    private static final boolean DEBUG = true;
 
-    private Context context;
-    private ImageView imageView;
+    Context context;
+    ImageView imageView;
     private BitmapDrawable back;
     private Paint paint;
     private Canvas canvas;
     private Bitmap bitmap;
-    private Rect canvasRect;
 
     private Map map;
 
@@ -43,7 +45,7 @@ public class Drawing implements View.OnLongClickListener{
         if (back != null) {
             bitmap = back.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
             canvas = new Canvas(bitmap);
-            canvasRect = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+            Rect canvasRect = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
             map = new Map(canvasRect.width(), canvasRect.height());
             Log.i("Drawing", "create canvas Size  w:" + canvasRect.width() + " h:" + canvasRect.height());
         }
@@ -61,7 +63,10 @@ public class Drawing implements View.OnLongClickListener{
     }
 
     public void reDraw() {
+        if (DEBUG) Log.i(TAG, "+++ reDraw() called! +++");
         map.drawTiles(canvas, paint);
+
+        if (DEBUG) Log.i(TAG, "+++ reDraw Tile count : "+getWallCount()+" +++");
 
         imageView.setImageBitmap(bitmap);
         imageView.invalidate();
@@ -76,5 +81,22 @@ public class Drawing implements View.OnLongClickListener{
 
     public Map getMap() {
         return this.map;
+    }
+
+    public int getWallCount() {
+        int count = 0;
+        Tile[][] tiles = map.getTiles();
+
+        for(int h=0; h<map.ySIZE; h++)
+        {
+            for(int w=0; w<map.xSIZE; w++)
+            {
+                if (tiles[h][w].getState() == Tile.State.WALL) {
+                    count++;
+                }
+            }
+        }
+
+        return count;
     }
 }

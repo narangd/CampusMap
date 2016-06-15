@@ -24,7 +24,9 @@ public class Polygon {
      */
     public Polygon(Map map, String format) {
 //        Log.d("Polygon", format); // good.!
+
         String[] points = format.split("\\,");
+
         for(String point : points) {
             String[] xy = point.split(" ");
             float x = (Float.parseFloat(xy[0])/70) * (map.getxSIZE() * Tile.width);

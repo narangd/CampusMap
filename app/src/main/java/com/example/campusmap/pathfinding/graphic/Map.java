@@ -20,11 +20,11 @@ public class Map {
     public int xSIZE;
     public int ySIZE;
 
-    private Random random;
+    private Random random = new Random();
 
     public Tile start;
     public Tile goal;
-    Path path;
+    Path path = new Path();
 
     // canvas
     public Map(int width, int height) {
@@ -50,8 +50,6 @@ public class Map {
                 tiles[h][w] = new Tile(w*Tile.width, h*Tile.height);
             }
         }
-        random = new Random();
-        path = new Path();
 
         initTile();
     }
@@ -187,6 +185,10 @@ public class Map {
     }
     public int getySIZE() {
         return ySIZE;
+    }
+
+    public Tile[][] getTiles() {
+        return tiles;
     }
 
 }

@@ -29,8 +29,8 @@ public class ListViewTree {
     Animation darkking;
     private final int showColor;
     private final int hideColor;
-    int buildingClickedIndex;
-    int index = 0;
+    private int buildingClickedIndex;
+    private int index = 0;
 
 
     /**

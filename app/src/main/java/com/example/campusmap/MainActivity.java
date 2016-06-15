@@ -8,44 +8,41 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.CursorAdapter;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
-import com.example.campusmap.activity.ParallaxActiviry;
 import com.example.campusmap.activity.SearchResultActivity;
 import com.example.campusmap.fragment.BuildingInfoFragment;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.PathFindingFragment;
 import com.example.campusmap.tree.branch.Parent;
-import com.example.campusmap.xmlparser.BuildingInfoParser;
-
-import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity
         implements SearchView.OnQueryTextListener, MenuItemCompat.OnActionExpandListener {
     public static final int SEARCH_RESULT_ACTIVITY_REQUEST_CODE = 1;
     private boolean isStart = false;
 
+//    private L
+
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     private ViewPager mViewPager;
 
-    SearchView searchView;
-    MenuItem searchItem;
+    private SearchView searchView;
+    private MenuItem searchItem;
+
+    private String previousQuery = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // intro view..
+
+        // ## start IntroView... ##
         if (!isStart) {
             startActivity(
                     new Intent(this, IntroActivity.class)
@@ -53,15 +50,19 @@ public class MainActivity extends AppCompatActivity
             isStart = true;
         }
 
+        // ## Toolbar ##
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if (mSectionsPagerAdapter == null)
+        // ## PagerAdapter... ##
+        if (mSectionsPagerAdapter == null) {
             mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        }
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setOffscreenPageLimit(0);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startActivity(new Intent(this, ParallaxActiviry.class));
+//            startActivity(new Intent(this, ParallaxActiviry.class));
             return true;
         }
 
@@ -104,7 +105,6 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
     }
 
-    String beforeQuery = "";
     @Override
     public boolean onQueryTextSubmit(String query) {
         Intent intent = new Intent(MainActivity.this, SearchResultActivity.class);
@@ -136,13 +136,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onMenuItemActionExpand(MenuItem item) {
-        searchView.setQuery(beforeQuery, false);
+        searchView.setQuery(previousQuery, false);
         return false;
     }
 
     @Override
     public boolean onMenuItemActionCollapse(MenuItem item) {
-        beforeQuery = searchView.getQuery().toString();
+        previousQuery = searchView.getQuery().toString();
         return false;
     }
 
@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    // -------------------------------------------------------------------------------------------//
+    // ------------------------------- SectionsPagerAdapter -------------------------------------//
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 

@@ -71,7 +71,7 @@ public class Tile implements Comparable<Tile>{
 
     public void draw(Canvas canvas, Paint paint) {
         // parent 방향
-        if (debug && parent != null) {
+        if (parent != null) {
             paint.setColor(Color.MAGENTA);
             int dx = parent.rect.centerX() - rect.centerX();
             dx /= 2;
@@ -86,5 +86,9 @@ public class Tile implements Comparable<Tile>{
     @Override
     public int compareTo(Tile another)
     { return F - another.F; }
+
+    public State getState() {
+        return state;
+    }
 
 }
