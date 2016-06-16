@@ -1,7 +1,5 @@
 package com.example.campusmap.fragment;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -18,22 +16,19 @@ import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.pathfinding.Drawing;
-import com.example.campusmap.pathfinding.asynctask.PolygonLoader;
-import com.example.campusmap.pathfinding.graphic.Polygon;
-
-import java.util.ArrayList;
+import com.example.campusmap.pathfinding.asynctask.DrawingLoader;
 
 
-public class PathFindingFragment extends Fragment implements LoaderManager.LoaderCallbacks<ArrayList<Polygon>> {
+public class PathFindingFragment extends Fragment implements LoaderManager.LoaderCallbacks<Drawing> {
     private static final String TAG = "ADP_PathFindingFragment";
     private static final boolean DEBUG = true;
     private static PathFindingFragment fragment = null;
     public static final int TAP_INDEX = 2;
 
-    private Snackbar snackbar;
-    ImageView imageView;
+    private Snackbar mSnackbar;
+    ImageView mImageView;
     FloatingActionButton fab;
-    Drawing drawing;
+    Drawing mDrawing;
 
     public static PathFindingFragment newInstance() {
         if (fragment == null) {
@@ -63,51 +58,59 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
 
         View rootView = inflater.inflate(R.layout.fragment_path_finding, container, false);
 
-        imageView = (ImageView) rootView.findViewById(R.id.path_imageview);
-        drawing = new Drawing(getActivity(), imageView);
+        mImageView = (ImageView) rootView.findViewById(R.id.path_imageview);
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setVisibility(View.VISIBLE);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                snackbar.setText("경로를 표시합니다.");
-//                snackbar.show();
-//                drawing.drawPath();
-                drawing.reDraw();
+                if (mDrawing != null) {
+                    mSnackbar.setText("경로를 표시합니다.");
+                    mSnackbar.show();
+
+                    mDrawing.resetPath();
+                    mDrawing.drawImageView(mImageView);
+                    mImageView.invalidate();
+//                    mDrawing.reDraw();
+                } else {
+                    mSnackbar.setText("잠시 후 다시시도해주세요\n로딩중입니다.");
+                    mSnackbar.show();
+                }
             }
         });
-        snackbar = Snackbar.make(rootView, "", Snackbar.LENGTH_SHORT)
+        mSnackbar = Snackbar.make(rootView, "", Snackbar.LENGTH_SHORT)
                 .setAction("Action", null);
 
-        Toast.makeText(getActivity(), "생성되었습니다.", Toast.LENGTH_SHORT).show();
         return rootView;
     }
 
     // ## Polygon Loader (( LoaderManager.LoaderCallbacks )) ##
     @Override
-    public Loader<ArrayList<Polygon>> onCreateLoader(int id, Bundle args) {
+    public Loader<Drawing> onCreateLoader(int id, Bundle args) {
         if (DEBUG) Log.i(TAG, "+++ onCreateLoader() called! +++");
-        snackbar.setText("로딩중입니다...");
-        snackbar.show();
+        mSnackbar.setText("로딩중입니다...");
+        mSnackbar.show();
 
-        return new PolygonLoader(getActivity(), drawing.getMap());
+        return new DrawingLoader(getActivity(), mImageView);
     }
 
     @Override
-    public void onLoadFinished(Loader<ArrayList<Polygon>> loader, ArrayList<Polygon> data) {
+    public void onLoadFinished(Loader<Drawing> loader, Drawing drawing) {
         if (DEBUG) Log.i(TAG, "+++ onLoadFinished() called! +++");
 
-        drawing.reDraw();
+        mDrawing = drawing;
+        drawing.drawImageView(mImageView);
+        mImageView.invalidate();
 
-        snackbar.setText("로드를 완료했습니다.");
-        snackbar.show();
+        mSnackbar.setText("로드를 완료했습니다.");
+        mSnackbar.show();
     }
 
     @Override
-    public void onLoaderReset(Loader<ArrayList<Polygon>> loader) {
+    public void onLoaderReset(Loader<Drawing> loader) {
         Toast.makeText(getActivity(), "초기화합니다..", Toast.LENGTH_SHORT).show();
-        drawing.getMap().resetPolygon();
+        mDrawing.getMap().resetPolygon();
 
         Log.i("PathFindingFragment", "onLoaderReset!!");
     }

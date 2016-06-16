@@ -5,6 +5,7 @@ import android.graphics.Point;
 import com.example.campusmap.pathfinding.graphic.Map;
 import com.example.campusmap.pathfinding.graphic.Tile;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.TreeSet;
@@ -13,63 +14,73 @@ import java.util.TreeSet;
  * Created by 연구생 on 2015-11-10.
  */
 public class AStar {
-    public static LinkedList<Point> pathfinding(Map map, Tile start, Tile goal) {
+    /**
+     * AStart Path Finding Algorithm
+     * @param map in Tiles
+     * @param start start Tile in Tiles
+     * @param goal goal Tile in Tiles
+     * @return List Path
+     */
+    public static LinkedList<Point> findPath(Map map, Tile start, Tile goal) {
         if(start == null || goal == null)
             return null;
-        TreeSet<Tile> openset = new TreeSet<>();//<Tile>(); //
-        HashSet<Tile> closedset = new HashSet<>();
-        Tile current;
-        int tentative_g_score;
-        int count = 0;
 
-        goal.parent = null;
-        openset.add(start);
+        HashSet<Tile> closedSet = new HashSet<>();
+        TreeSet<Tile> openSet = new TreeSet<>();
+
+        HashMap<Tile, Tile> cameFrom = new HashMap<>();
+
+        openSet.add(start);
+
+//        goal.parent = null;
         start.G = 0;
         start.H = start.getDistance(goal);
         start.F = start.G + start.H;
 
-        // 오픈 셋 검사. search OpenSet.
-        while( openset.size() > 0)//size() > 0 )
+        while( openSet.size() > 0)//size() > 0 )
         {
-            current =  openset.pollFirst(); //pollFirst(); // lowest
+            Tile current =  openSet.pollFirst(); //pollFirst(); // lowest
             if (current == goal)
                 break;
-            openset.remove(current);
-            closedset.add(current);
-            // Add neighbor in OpenSet
-            for ( Tile neighbor : map.neightbor_Tiles(current) )
+
+            openSet.remove(current);
+            closedSet.add(current);
+
+            for ( Tile neighbor : map.getNeighborOfTile(current) )
             {
-                // neighbor이 closedset안에 있거나, 벽이면 넘어감
-                if (closedset.contains(neighbor) || neighbor.state == Tile.State.WALL)
-                    continue;
+                if (closedSet.contains(neighbor) || neighbor.state == Tile.State.WALL)
+                    continue;       // Ignore the neighbor which is already evaluated.
 
-                // neighbor과의 거리를 더한다.
-                tentative_g_score = current.G + current.getDistance(neighbor);
+                // The distance from start to a neighbor
+                int tentative_gScore = current.G + current.getDistance(neighbor);
 
-                // neighbor가 이미 계산되어있지 않거나, 거리가 더작으면
-                if (!openset.contains(neighbor) || tentative_g_score < neighbor.G) {
-                    neighbor.parent = current;
-                    neighbor.G = tentative_g_score;
-                    neighbor.F = neighbor.G + map.getDistance(goal, neighbor);
-                    // openset에 포함되지 않았다면
-                    if (!openset.contains(neighbor)) {
-                        openset.add(neighbor);
-                    }
-                }
+                if (!openSet.contains(neighbor))
+                    openSet.add(neighbor); // Discover a new node
+                else if (tentative_gScore >= neighbor.G)
+                    continue;       // This is not a better path.
+
+                // This path is the best until now. Record it!
+                cameFrom.put(neighbor, current);
+//                neighbor.parent = current;
+                neighbor.G = tentative_gScore;
+                neighbor.F = neighbor.G + map.getDistance(goal, neighbor);
             }
         }
-        openset.clear();
-        closedset.clear();
-        return getPath(goal);
+
+        openSet.clear();
+        closedSet.clear();
+
+        return reconstructPath(cameFrom, goal);
     }
 
-    private static LinkedList<Point> getPath(Tile goal) {
+    private static LinkedList<Point> reconstructPath(HashMap<Tile,Tile> cameFrom, Tile current) {
         LinkedList<Point> path = new LinkedList<>();
-        Tile way = goal;
-        while (way.parent != null) {
-//            Log.d("Way", way.getPoint().toString());
-            path.add(way.parent.getPoint()); // 여기가 문제...
-            way = way.parent;
+//        while (way.parent != null) {
+        while (cameFrom.containsKey(current)) {
+            current = cameFrom.get(current);
+            path.add(current.getPoint());
+//            path.add(current.parent.getPoint()); // 여기가 문제...
+//            current = current.parent;
         }
 //        Log.d("Way Complete", "----------------------------------------------");
         return path;

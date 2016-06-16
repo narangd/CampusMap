@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.campusmap.R;
 import com.example.campusmap.pathfinding.graphic.Map;
 import com.example.campusmap.pathfinding.graphic.Tile;
 
@@ -21,19 +22,15 @@ public class Drawing implements View.OnLongClickListener{
     private static final String TAG = "ADP_Drawing";
     private static final boolean DEBUG = true;
 
-    Context context;
-    ImageView imageView;
-    private BitmapDrawable back;
+    private Context mContext;
     private Paint paint;
-    private Canvas canvas;
-    private Bitmap bitmap;
 
     private Map map;
+    private BitmapDrawable back;
 
     public Drawing(Context context, ImageView imageView) {
-        this.context = context;
+        mContext = context;
 
-        this.imageView = imageView;
         imageView.setLongClickable(true);
         imageView.setOnLongClickListener(this);
 
@@ -43,38 +40,35 @@ public class Drawing implements View.OnLongClickListener{
 
         back = (BitmapDrawable)imageView.getDrawable();
         if (back != null) {
-            bitmap = back.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
-            canvas = new Canvas(bitmap);
-            Rect canvasRect = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+            Bitmap bitmap = back.getBitmap();
+            Rect canvasRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
             map = new Map(canvasRect.width(), canvasRect.height());
-            Log.i("Drawing", "create canvas Size  w:" + canvasRect.width() + " h:" + canvasRect.height());
         }
     }
 
-    public void drawPath() {
-        //Size size = new Size(canvas.getWidth(), canvas.getHeight());
-        if (bitmap != null) bitmap.recycle();
-        bitmap = back.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
-        canvas = new Canvas(bitmap);
-
-        map.initTile();
+    public void resetPath() {
+        map.initRandomToStartGoalTile();
+        map.initTiles();
         map.pathFinding();
-        reDraw();
     }
 
-    public void reDraw() {
-        if (DEBUG) Log.i(TAG, "+++ reDraw() called! +++");
-        map.drawTiles(canvas, paint);
+    public void drawImageView(ImageView imageView) {
+        if (DEBUG) Log.i(TAG, "+++ drawImageView() called! +++");
 
-        if (DEBUG) Log.i(TAG, "+++ reDraw Tile count : "+getWallCount()+" +++");
+        if (back != null) {
+            Bitmap copyBitmap = back.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
+            Canvas copyCanvas = new Canvas(copyBitmap);
 
-        imageView.setImageBitmap(bitmap);
-        imageView.invalidate();
+            if (DEBUG) Log.i(TAG, "+++ reDraw Tile count : "+getWallCount()+" +++");
+            map.drawTiles(copyCanvas, paint); // draw map to copied Canvas.
+
+            imageView.setImageBitmap(copyBitmap);
+        }
     }
 
     @Override
     public boolean onLongClick(View v) {
-        Toast.makeText(context, v.getX() + "," + v.getY(), Toast.LENGTH_LONG)
+        Toast.makeText(mContext, v.getX() + "," + v.getY(), Toast.LENGTH_LONG)
                 .show();
         return true;
     }
@@ -87,9 +81,9 @@ public class Drawing implements View.OnLongClickListener{
         int count = 0;
         Tile[][] tiles = map.getTiles();
 
-        for(int h=0; h<map.ySIZE; h++)
+        for(int h = 0; h<map.yTileSIZE; h++)
         {
-            for(int w=0; w<map.xSIZE; w++)
+            for(int w = 0; w<map.xTileSIZE; w++)
             {
                 if (tiles[h][w].getState() == Tile.State.WALL) {
                     count++;

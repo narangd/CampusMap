@@ -14,14 +14,13 @@ public class Tile implements Comparable<Tile>{
         NONE, WALL, START, GOAL, WAY
     }
     private static final int SIZE = 10;
-    private static final boolean debug = false;
+//    private static final boolean debug = false;
 
     public static int width = SIZE;
     public static int height = SIZE;
     Rect rect;
     public State state;
     public int G, H, F;
-    public Tile parent;
 
     public Tile(int x, int y) {
         rect = new Rect(x, y, x+width, y+height);
@@ -31,7 +30,6 @@ public class Tile implements Comparable<Tile>{
 
     public void init() {
         G = H = F = 0;
-        parent = null;
     }
 
     public int getColor() {
@@ -71,14 +69,14 @@ public class Tile implements Comparable<Tile>{
 
     public void draw(Canvas canvas, Paint paint) {
         // parent 방향
-        if (parent != null) {
-            paint.setColor(Color.MAGENTA);
-            int dx = parent.rect.centerX() - rect.centerX();
-            dx /= 2;
-            int dy = parent.rect.centerY() - rect.centerY();
-            dy /= 2;
-            canvas.drawLine(rect.centerX(), rect.centerY(), rect.centerX()+dx, rect.centerY()+dy, paint);
-        }
+//        if (parent != null) {
+//            paint.setColor(Color.MAGENTA);
+//            int dx = parent.rect.centerX() - rect.centerX();
+//            dx /= 2;
+//            int dy = parent.rect.centerY() - rect.centerY();
+//            dy /= 2;
+//            canvas.drawLine(rect.centerX(), rect.centerY(), rect.centerX()+dx, rect.centerY()+dy, paint);
+//        }
         paint.setColor(getColor());
         canvas.drawRect(rect, paint);
     }
