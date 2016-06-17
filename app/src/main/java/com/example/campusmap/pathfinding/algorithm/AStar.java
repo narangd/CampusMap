@@ -1,6 +1,7 @@
 package com.example.campusmap.pathfinding.algorithm;
 
 import android.graphics.Point;
+import android.util.Log;
 
 import com.example.campusmap.pathfinding.graphic.Map;
 import com.example.campusmap.pathfinding.graphic.Tile;
@@ -31,20 +32,22 @@ public class AStar {
         HashMap<Tile, Tile> cameFrom = new HashMap<>();
 
         openSet.add(start);
+//        start.state = Tile.State.OPEN;
 
 //        goal.parent = null;
-        start.G = 0;
-        start.H = start.getDistance(goal);
-        start.F = start.G + start.H;
+//        start.G = 0;
+//        start.H = map.getDistance(start, goal);
+//        start.F = start.G + start.H;
 
         while( openSet.size() > 0)//size() > 0 )
         {
-            Tile current =  openSet.pollFirst(); //pollFirst(); // lowest
+            Log.d("AStar", "openSet List : " + openSet.toString());
+            Tile current =  openSet.pollFirst(); // error this .... compare...
             if (current == goal)
                 break;
 
-            openSet.remove(current);
             closedSet.add(current);
+
 
             for ( Tile neighbor : map.getNeighborOfTile(current) )
             {
@@ -54,16 +57,18 @@ public class AStar {
                 // The distance from start to a neighbor
                 int tentative_gScore = current.G + current.getDistance(neighbor);
 
-                if (!openSet.contains(neighbor))
+                if (!openSet.contains(neighbor)) {
                     openSet.add(neighbor); // Discover a new node
+                }
                 else if (tentative_gScore >= neighbor.G)
                     continue;       // This is not a better path.
 
                 // This path is the best until now. Record it!
                 cameFrom.put(neighbor, current);
-//                neighbor.parent = current;
+                neighbor.parent = current;
                 neighbor.G = tentative_gScore;
-                neighbor.F = neighbor.G + map.getDistance(goal, neighbor);
+                neighbor.H = map.getDistance(goal, neighbor);
+                neighbor.F = neighbor.G + neighbor.H; // F = G + H.
             }
         }
 
@@ -75,14 +80,10 @@ public class AStar {
 
     private static LinkedList<Point> reconstructPath(HashMap<Tile,Tile> cameFrom, Tile current) {
         LinkedList<Point> path = new LinkedList<>();
-//        while (way.parent != null) {
         while (cameFrom.containsKey(current)) {
             current = cameFrom.get(current);
             path.add(current.getPoint());
-//            path.add(current.parent.getPoint()); // 여기가 문제...
-//            current = current.parent;
-        }
-//        Log.d("Way Complete", "----------------------------------------------");
+        }cameFrom.clear();
         return path;
     }
 }

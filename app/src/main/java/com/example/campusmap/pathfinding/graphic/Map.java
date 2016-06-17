@@ -3,14 +3,20 @@ package com.example.campusmap.pathfinding.graphic;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.Log;
 
 import com.example.campusmap.pathfinding.algorithm.AStar;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeSet;
 
 public class Map {
     private static final String TAG = "ADP_Drawing";
@@ -19,11 +25,11 @@ public class Map {
     /**
      * Width Tile Count
      */
-    public static final int XSIZE = 120;
+    public static final int XSIZE = 120; // before120
     /**
      * Height Tile Count
       */
-    public static final int YSIZE = 90;
+    public static final int YSIZE = 90; // before 90
 
     /**
      * Tile 2D Array
@@ -83,6 +89,11 @@ public class Map {
     }
 
     public void initRandomToStartGoalTile() {
+        if (start != null)
+            start.state = Tile.State.NONE;
+        if (goal != null)
+            goal.state = Tile.State.NONE;
+
         do {
             start = tiles[random.nextInt(yTileSIZE)][random.nextInt(xTileSIZE)];
         } while (start.state == Tile.State.WALL);
@@ -116,7 +127,7 @@ public class Map {
     }
 
     public List<Tile> getNeighborOfTile(Tile tile) {
-        List<Tile> neighbor = new ArrayList<Tile>();
+        List<Tile> neighbor = new ArrayList<>();
 
         for (int x=-1; x<=1; x++) {
             for (int y=-1; y<=1; y++) {
@@ -127,13 +138,50 @@ public class Map {
                 }
             }
         }
+//        int checkX, checkY;
+//
+//        checkX = tile.getX()/Tile.width + 1;
+//        checkY = tile.getY()/Tile.height;
+//        if (checkX >= 0 && checkX < xTileSIZE && checkY >= 0 && checkY < yTileSIZE) {
+//            neighbor.add(tiles[checkY][checkX]);
+//        }
+//
+//        checkX = tile.getX()/Tile.width - 1;
+//        checkY = tile.getY()/Tile.height;
+//        if (checkX >= 0 && checkX < xTileSIZE && checkY >= 0 && checkY < yTileSIZE) {
+//            neighbor.add(tiles[checkY][checkX]);
+//        }
+//
+//        checkX = tile.getX()/Tile.width;
+//        checkY = tile.getY()/Tile.height + 1;
+//        if (checkX >= 0 && checkX < xTileSIZE && checkY >= 0 && checkY < yTileSIZE) {
+//            neighbor.add(tiles[checkY][checkX]);
+//        }
+//
+//        checkX = tile.getX()/Tile.width;
+//        checkY = tile.getY()/Tile.height - 1;
+//        if (checkX >= 0 && checkX < xTileSIZE && checkY >= 0 && checkY < yTileSIZE) {
+//            neighbor.add(tiles[checkY][checkX]);
+//        }
 
         return neighbor;
     }
 
+    /**
+     * H cost..
+     * @param one
+     * @param another
+     * @return
+     */
     public int getDistance(Tile one, Tile another) {
-        return Math.abs(one.getX() - another.getX()) * Tile.width
-                + Math.abs(one.getY() - another.getY()) * Tile.height;
+        int xDistance = Math.abs(one.getX()-another.getX())/ Tile.width;
+        int yDistance = Math.abs(one.getY()-another.getY())/ Tile.height;
+//        return 10*Math.abs((one.getX() - another.getX())/Tile.width +
+//                ((one.getY() - another.getY())/Tile.height)) ;
+        if (xDistance > yDistance)
+            return 14*yDistance + 10*(xDistance-yDistance);
+        else
+            return 14*xDistance + 10*(yDistance-xDistance);
     }
 
     private void updateFromPath(Tile.State state) {
@@ -145,10 +193,11 @@ public class Map {
     }
 
     public void pathFinding() {
-        initTiles();
         updateFromPath(Tile.State.NONE);
-        path.replacePath( AStar.findPath(this, start, goal) );
+        path.replacePath( findPath(start, goal) );
         updateFromPath(Tile.State.WAY);
+        start.state = Tile.State.START;
+        goal.state = Tile.State.GOAL;
     }
 
     public void drawTiles(Canvas canvas, Paint paint) {
@@ -182,15 +231,87 @@ public class Map {
         }
     }
 
+    public LinkedList<Point> findPath(Tile start, Tile goal) {
+        if(start == null || goal == null)
+            return null;
+
+        HashSet<Tile> closedSet = new HashSet<>();
+//        TreeSet<Tile> openSet = new TreeSet<>();
+        ArrayList<Tile> openSet = new ArrayList<>();
+
+        HashMap<Tile, Tile> cameFrom = new HashMap<>();
+
+        openSet.add(start);
+//        start.state = Tile.State.OPEN;
+
+//        goal.parent = null;
+//        start.G = 0;
+//        start.H = map.getDistance(start, goal);
+//        start.F = start.G + start.H;
+
+//        int count = 2;
+
+        while( openSet.size() > 0)//size() > 0 )
+        {
+            Collections.sort(openSet);
+            Tile current =  openSet.get(0); // error this .... compare...
+            if (current == goal)
+                break;
+
+            closedSet.add(current);
+            openSet.remove(current);
+
+            for ( Tile neighbor : getNeighborOfTile(current) )
+            {
+                if (closedSet.contains(neighbor) || neighbor.state == Tile.State.WALL)
+                    continue;       // Ignore the neighbor which is already evaluated.
+
+                // The distance from start to a neighbor
+                int tentative_gScore = current.G + current.getDistance(neighbor);
+
+                if (!openSet.contains(neighbor)) {
+                    openSet.add(neighbor); // Discover a new node
+                }
+                else if (tentative_gScore >= neighbor.G)
+                    continue;       // This is not a better path.
+
+                // This path is the best until now. Record it!
+                cameFrom.put(neighbor, current);
+                neighbor.parent = current;
+                neighbor.G = tentative_gScore;
+                neighbor.H = getDistance(goal, neighbor);
+                neighbor.F = neighbor.G + neighbor.H; // F = G + H.
+            }
+//            if (--count <= 0)
+//                break;
+        }
+
+        openSet.clear();
+        closedSet.clear();
+
+        return reconstructPath(cameFrom, goal);
+    }
+
+    private LinkedList<Point> reconstructPath(HashMap<Tile,Tile> cameFrom, Tile current) {
+        LinkedList<Point> path = new LinkedList<>();
+        while (cameFrom.containsKey(current)) {
+            current = cameFrom.get(current);
+            path.add(current.getPoint());
+        }cameFrom.clear();
+        return path;
+    }
+
+
+
+
+
+
+
     public Tile getTile(int x, int y)
     {
-        if(x<0 || x>= xTileSIZE *Tile.width || y<0 || y>= yTileSIZE *Tile.height)
+        if(x<0 || x>= xTileSIZE*Tile.width || y<0 || y>= yTileSIZE*Tile.height)
             return null;
         return tiles[y/Tile.height][x/Tile.width];
-    }
-    public Tile getTile(Point point)
-    {
-        return getTile(point.x, point.y);
     }
     public int getxTileSIZE() {
         return xTileSIZE;

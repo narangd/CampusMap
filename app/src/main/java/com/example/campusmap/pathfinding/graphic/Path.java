@@ -9,16 +9,9 @@ import java.util.LinkedList;
  */
 public class Path {
 
-    private LinkedList<Point> path = new LinkedList<Point>();
+    private LinkedList<Point> path = new LinkedList<>();
 
-    public Path()
-    {
-    }
-
-    public Path(LinkedList<Point> points)
-    {
-        replacePath(points);
-    }
+    public Path() {}
 
     public void replacePath(LinkedList<Point> points)
     {

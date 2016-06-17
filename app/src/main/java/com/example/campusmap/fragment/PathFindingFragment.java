@@ -12,11 +12,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.pathfinding.Drawing;
 import com.example.campusmap.pathfinding.asynctask.DrawingLoader;
+import com.example.campusmap.pathfinding.graphic.Tile;
+
+import java.util.HashSet;
+import java.util.Random;
+import java.util.TreeSet;
 
 
 public class PathFindingFragment extends Fragment implements LoaderManager.LoaderCallbacks<Drawing> {
@@ -29,6 +35,7 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
     ImageView mImageView;
     FloatingActionButton fab;
     Drawing mDrawing;
+    private ProgressBar mProgressBar;
 
     public static PathFindingFragment newInstance() {
         if (fragment == null) {
@@ -49,6 +56,7 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
                 null, // 추가 인자
                 this  // Loader 로 부터 콜백을 받기 위해서 LoaderManager.LoaderCallbacks 를 구현한 객체를 넘겨준다.
         );
+
     }
 
     @Override
@@ -59,6 +67,11 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
         View rootView = inflater.inflate(R.layout.fragment_path_finding, container, false);
 
         mImageView = (ImageView) rootView.findViewById(R.id.path_imageview);
+
+        mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
+        mProgressBar.setIndeterminate(true);
+
+        final Random random = new Random();
 
         fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setVisibility(View.VISIBLE);
@@ -73,6 +86,19 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
                     mDrawing.drawImageView(mImageView);
                     mImageView.invalidate();
 //                    mDrawing.reDraw();
+//                    TreeSet<Tile> testingSet = new TreeSet<>();
+//                    for (int i=1; i<=10; i++)  {
+//                        int number = random.nextInt(100);
+//                        Tile newTile = new Tile(0,0);
+//                        newTile.F = number;
+//                        testingSet.add(newTile);
+//                        if (DEBUG) Log.i(TAG, "==testingSet== : insert number : " + number);
+//                    }
+//                    if (DEBUG) Log.i(TAG, "==testingSet== : " + testingSet.toString());
+////                    while (!testingSet.isEmpty()) {
+////                        int number = testingSet.pollFirst();
+////                        if (DEBUG) Log.i(TAG, "==testingSet== : pollFirst result : " + number);
+////                    }
                 } else {
                     mSnackbar.setText("잠시 후 다시시도해주세요\n로딩중입니다.");
                     mSnackbar.show();
@@ -102,6 +128,10 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
         mDrawing = drawing;
         drawing.drawImageView(mImageView);
         mImageView.invalidate();
+
+        mProgressBar.setIndeterminate(false);
+        mProgressBar.setVisibility(View.GONE);
+
 
         mSnackbar.setText("로드를 완료했습니다.");
         mSnackbar.show();
