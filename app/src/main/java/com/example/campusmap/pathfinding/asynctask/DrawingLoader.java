@@ -2,13 +2,12 @@ package com.example.campusmap.pathfinding.asynctask;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.campusmap.pathfinding.Drawing;
-import com.example.campusmap.pathfinding.db.MySQLHelper;
+import com.example.campusmap.pathfinding.db.SQLiteHelperOstacle;
 import com.example.campusmap.pathfinding.graphic.Map;
 import com.example.campusmap.pathfinding.graphic.Polygon;
 
@@ -46,7 +45,7 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
         Map map = drawing.getMap();
 
         ArrayList<Polygon> polygons = new ArrayList<>();
-        Cursor cursor = MySQLHelper.getInstance(getContext()).select();
+        Cursor cursor = SQLiteHelperOstacle.getInstance(getContext()).select();
 
         while (cursor.moveToNext()) {
             Polygon polygon = new Polygon(map, cursor.getString(cursor.getColumnIndex("polygon")));

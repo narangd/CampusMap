@@ -5,8 +5,7 @@ import android.database.Cursor;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
-import com.example.campusmap.pathfinding.Drawing;
-import com.example.campusmap.pathfinding.db.MySQLHelper;
+import com.example.campusmap.pathfinding.db.SQLiteHelperOstacle;
 import com.example.campusmap.pathfinding.graphic.Map;
 import com.example.campusmap.pathfinding.graphic.Polygon;
 
@@ -31,14 +30,8 @@ public class PolygonLoader extends AsyncTaskLoader<ArrayList<Polygon>> {
     public ArrayList<Polygon> loadInBackground() {
         if (DEBUG) Log.i(TAG, "+++ loadInBackground() called! +++");
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         ArrayList<Polygon> polygons = new ArrayList<>();
-        Cursor cursor = MySQLHelper.getInstance(getContext()).select();
+        Cursor cursor = SQLiteHelperOstacle.getInstance(getContext()).select();
 
         while (cursor.moveToNext()) {
             Polygon polygon = new Polygon(map, cursor.getString(cursor.getColumnIndex("polygon")));

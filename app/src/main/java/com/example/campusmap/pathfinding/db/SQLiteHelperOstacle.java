@@ -9,26 +9,26 @@ import android.util.Log;
 /**
  * Created by 연구생 on 2015-11-09.
  */
-public class MySQLHelper extends SQLiteOpenHelper {
-    private static MySQLHelper instance;
+public class SQLiteHelperOstacle extends SQLiteOpenHelper {
+    private static final boolean DEBUG = true;
+    private static SQLiteHelperOstacle instance;
 
-    private static final int VERSION = 7; // 7 : 현재
+    private static final int VERSION = 7;
     private static final String TABLE_NAME = "CompusOstacle";
-    private SQLiteDatabase db;
 
-    public static MySQLHelper getInstance(Context context) {
+    public static SQLiteHelperOstacle getInstance(Context context) {
         if (instance == null)
-            instance = new MySQLHelper(context);
+            instance = new SQLiteHelperOstacle(context);
         return instance;
     }
 
-    private MySQLHelper(Context context) {
+    private SQLiteHelperOstacle(Context context) {
         super(context, "campus.db", null, VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        this.db = db;
+        if (DEBUG)
         Log.i("DataBase Create", "데이터베이스가 생성됩니다.");
         db.execSQL("CREATE TABLE "+TABLE_NAME+" ( id INTEGER PRIMARY KEY AUTOINCREMENT, polygon TEXT NOT NULL);");
         // testing.. data..
