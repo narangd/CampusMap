@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
@@ -12,7 +13,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
-public class IntroActivity extends Activity implements Runnable {
+public class IntroActivity extends Activity {
     public static final String ns = null;
     private static final String TAG = "IntroActivity";
     private static final boolean DEBUG = true;
@@ -20,25 +21,34 @@ public class IntroActivity extends Activity implements Runnable {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_intro);
 
+        if (DEBUG) Log.i(TAG, "onCreate: =============================================");
+
         Handler handler = new Handler();
-//        handler.postDelayed(this, );
-        handler.post(this);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (DEBUG) Log.i(TAG, "run: start..");
+                initDB();
+                finish();
+            }
+        });
+    }
+
+    private void clearDB() {
+        if (DEBUG) Log.i(TAG, "-=- clearDB: clear database... -=-");
+        SQLiteHelperCampusInfo sqliteHelper = SQLiteHelperCampusInfo.getInstance(this);
+        if (sqliteHelper.isCreatedBuilding()) sqliteHelper.deleteBuilding();
+        if (sqliteHelper.isCreatedFloor()) sqliteHelper.deleteFloor();
+        if (sqliteHelper.isCreatedRoom()) sqliteHelper.deleteRoom();
     }
 
     @Override
-    public void run() {
-        if (DEBUG) Log.i(TAG, "run: start..");
-        initDB();
-        finish();
-    }
-
-    @Override
-    public void onBackPressed() { /* block back key */ }
+    public void onBackPressed() { finish(); }
 
     private void initDB() {
+        clearDB();
         if (DEBUG) Log.i(TAG, "-=- initDB: initialize database... -=-");
         SQLiteHelperCampusInfo sqliteHelper = SQLiteHelperCampusInfo.getInstance(this);
         int currentBuildingID=1, currentFloorID=1, currentRoomID=1;
@@ -46,7 +56,6 @@ public class IntroActivity extends Activity implements Runnable {
 //        values.put(SQLiteHelperCampusInfo.BuildingEntry.);
 
         XmlResourceParser parser =  this.getResources().getXml(R.xml.building_info);
-
         try {
             while (parser.next() != XmlResourceParser.END_DOCUMENT) {
                 switch (parser.getEventType()) {
@@ -61,6 +70,7 @@ public class IntroActivity extends Activity implements Runnable {
                                     building_name,
                                     ""
                             );
+//                            if (DEBUG) Log.i(TAG, "-=- building: "+currentBuildingID+", "+building_num+", "+building_name+" -=-");
                             break;
                         case "floor":     // ## <floor num="1"> ##
                             int floor_num = Integer.parseInt( parser.getAttributeValue(ns, "num") );
@@ -69,6 +79,7 @@ public class IntroActivity extends Activity implements Runnable {
                                     floor_num,
                                     currentBuildingID
                             );
+//                            if (DEBUG) Log.i(TAG, "-=- floor: "+currentFloorID+", "+floor_num+", "+currentBuildingID+" -=-");
                             break;
                         case "room":      // ## <room name="방재센터"> ##
                             String room_name = parser.getAttributeValue(ns, "name");
@@ -81,6 +92,7 @@ public class IntroActivity extends Activity implements Runnable {
                                     room_description,
                                     currentFloorID
                             );
+//                            if (DEBUG) Log.i(TAG, "-=- room: "+currentRoomID+", "+room_name+", "+room_description+", "+currentFloorID+" -=-");
                             break;
                     }
                     break;
@@ -91,6 +103,7 @@ public class IntroActivity extends Activity implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        parser.close();
 
         if (DEBUG) {
             Log.i(TAG, "database insert building count : " + (currentBuildingID-1));

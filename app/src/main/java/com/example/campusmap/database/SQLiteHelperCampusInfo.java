@@ -2,6 +2,7 @@ package com.example.campusmap.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
@@ -13,7 +14,7 @@ import android.util.Log;
 public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
     private static final String TAG = "SQLiteHelperCampusInfo";
     private static final boolean DEBUG = true;
-    private static final int DATABACE_VERSION = 1;
+    private static final int DATABACE_VERSION = 4;
     private static final String DATABACE_NAME = "CampusInfo.db";
     private static SQLiteHelperCampusInfo instance;
 
@@ -22,7 +23,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
     public static final String IF_EXISTS = "IF EXISTS ";
     public static final String TYPE_INTEGER = " INTEGER";
     public static final String TYPE_CHARACTER = " CHAR(20)";
-    public static final String TYPE_TEXT = "  TEXT";
+    public static final String TYPE_TEXT = " TEXT";
     public static final String PRIMARY_KEY = " PRIMARY KEY";
     public static final String FOREIGN_KEY = " FOREIGN KEY";
     public static final String REFERENCES = " REFERENCES ";
@@ -54,7 +55,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                         _ID + TYPE_INTEGER + PRIMARY_KEY + COMMA_SEP +
                         COLUMN_NAME_BUILDING_ID + TYPE_INTEGER + COMMA_SEP +
                         COLUMN_NAME_NUMBER + TYPE_CHARACTER + COMMA_SEP +
-                        FOREIGN_KEY + COLUMN_START + COLUMN_NAME_BUILDING_ID +
+                        FOREIGN_KEY + COLUMN_START + COLUMN_NAME_BUILDING_ID + COLUMN_END +
                             REFERENCES + BuildingEntry.TABLE_NAME + COLUMN_START + BuildingEntry._ID + COLUMN_END +
                         COLUMN_END;
         public static final String SQL_DELETE_TABLE =
@@ -71,8 +72,8 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                         _ID + TYPE_INTEGER + PRIMARY_KEY + COMMA_SEP +
                         COLUMN_NAME_FLOOR_ID + TYPE_INTEGER + COMMA_SEP +
                         COLUMN_NAME_NAME + TYPE_CHARACTER + COMMA_SEP +
-                        COLUMN_NAME_DESCRIPTION + TYPE_TEXT + COLUMN_END +
-                        FOREIGN_KEY + COLUMN_START + COLUMN_NAME_FLOOR_ID +
+                        COLUMN_NAME_DESCRIPTION + TYPE_TEXT + COMMA_SEP +
+                        FOREIGN_KEY + COLUMN_START + COLUMN_NAME_FLOOR_ID  +COLUMN_END +
                             REFERENCES + FloorEntry.TABLE_NAME + COLUMN_START + FloorEntry._ID + COLUMN_END +
                         COLUMN_END;
         public static final String SQL_DELETE_TABLE =
@@ -134,6 +135,47 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         if (DEBUG) Log.i(TAG, "-=- RoomEntry: execSQL(SQL_DELETE_TABLE) -=-");
         if (DEBUG) Log.i(TAG, "-=- RoomEntry: {"+RoomEntry.SQL_DELETE_TABLE+"} -=-");
         db.execSQL(RoomEntry.SQL_DELETE_TABLE);
+
+        onCreate(db);
+    }
+
+    public boolean isCreatedBuilding() {
+        boolean isCreated = false;
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(BuildingEntry.TABLE_NAME, null, null, null, null, null, null);
+
+        if  (cursor.moveToNext()) {
+            isCreated = true;
+        }
+        cursor.close();
+
+        return isCreated;
+    }
+
+    public boolean isCreatedFloor() {
+        boolean isCreated = false;
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(FloorEntry.TABLE_NAME, null, null, null, null, null, null);
+
+        if  (cursor.moveToNext()) {
+            isCreated = true;
+        }
+        cursor.close();
+
+        return isCreated;
+    }
+
+    public boolean isCreatedRoom() {
+        boolean isCreated = false;
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(FloorEntry.TABLE_NAME, null, null, null, null, null, null);
+
+        if  (cursor.moveToNext()) {
+            isCreated = true;
+        }
+        cursor.close();
+
+        return isCreated;
     }
 
     public void insertBuilding(int ID, int number, String name, String description) {
@@ -170,10 +212,25 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             values.put(RoomEntry._ID, ID);
             values.put(RoomEntry.COLUMN_NAME_NAME, name);
             values.put(RoomEntry.COLUMN_NAME_DESCRIPTION, desc);
-            values.put(FloorEntry.COLUMN_NAME_BUILDING_ID, floorID);
+            values.put(RoomEntry.COLUMN_NAME_FLOOR_ID, floorID);
             db.insert(RoomEntry.TABLE_NAME, null, values);
         } else {
             Log.e(TAG, "insertBuilding: SQLiteDatabase is not Writable..");
         }
+    }
+
+    public void deleteBuilding() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(BuildingEntry.TABLE_NAME, null, null);
+    }
+
+    public void deleteFloor() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(FloorEntry.TABLE_NAME, null, null);
+    }
+
+    public void deleteRoom() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(RoomEntry.TABLE_NAME, null, null);
     }
 }
