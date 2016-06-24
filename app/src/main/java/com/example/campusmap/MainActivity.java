@@ -1,6 +1,7 @@
 package com.example.campusmap;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -37,18 +38,26 @@ public class MainActivity extends AppCompatActivity
 
     private String previousQuery = "";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
         // ## start IntroView... ##
-        if (!isStart) {
-            startActivity(
-                    new Intent(this, IntroActivity.class)
-            );
-            isStart = true;
-        }
+        AsyncTask.execute(new Runnable() { // Start Intro Splash...
+            @Override
+            public void run() {
+                if (!isStart) {
+                    startActivity(
+                            new Intent(MainActivity.this, IntroActivity.class)
+                    );
+                    isStart = true;
+                }
+            }
+        });
+
+        // ## Layout ##
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         // ## Toolbar ##
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
