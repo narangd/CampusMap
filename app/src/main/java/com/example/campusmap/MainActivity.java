@@ -1,8 +1,10 @@
 package com.example.campusmap;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,8 +17,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.campusmap.activity.SearchResultActivity;
+import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.fragment.BuildingInfoFragment;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.PathFindingFragment;
@@ -100,6 +104,18 @@ public class MainActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
 //            startActivity(new Intent(this, ParallaxActiviry.class));
+            SQLiteHelperCampusInfo sqLiteHelperCampusInfo = SQLiteHelperCampusInfo.getInstance(this);
+            SQLiteDatabase db = sqLiteHelperCampusInfo.getWritableDatabase();
+
+            sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME);
+            sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME);
+            sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME);
+
+            Toast.makeText(getApplicationContext(), "데이터를 모두 삭제하였습니다.", Toast.LENGTH_SHORT).
+                    show();
+
+            Log.i("MainActivity", "onOptionsItemSelected: Delete Data (building, floor, room");
+
             return true;
         }
 

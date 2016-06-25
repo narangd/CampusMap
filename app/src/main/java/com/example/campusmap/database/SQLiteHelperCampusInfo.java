@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.XmlResourceParser;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,6 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.provider.BaseColumns;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.campusmap.R;
 
@@ -133,9 +135,6 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             Log.i(TAG, "-=- RoomEntry: {"+RoomEntry.SQL_CREATE_TABLE+"} -=-");
         }
         db.execSQL(RoomEntry.SQL_CREATE_TABLE);
-
-        mAsyncTask = new CampusInfoInsertAsyncTask(mContext);
-        mAsyncTask.execute(R.xml.building_info);
     }
 
     @Override
@@ -158,6 +157,16 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         db.execSQL(RoomEntry.SQL_DELETE_TABLE);
 
         onCreate(db);
+    }
+
+    public void startInsertData() {
+        if (mAsyncTask != null && !mAsyncTask.isCancelled() ) {
+            Toast.makeText(mContext, "실행중인 AsyncTask가 있습니다.", Toast.LENGTH_SHORT).
+                    show();
+            return;
+        }
+        mAsyncTask = new CampusInfoInsertAsyncTask(mContext);
+        mAsyncTask.execute(R.xml.building_info);
     }
 
     public Boolean isInsertFinished() throws ExecutionException, InterruptedException {
@@ -204,17 +213,19 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         }
     }
 
-//    public void deleteBuilding(SQLiteDatabase db) {
-//        db.delete(BuildingEntry.TABLE_NAME, null, null);
-//    }
-//
-//    public void deleteFloor(SQLiteDatabase db) {
-//        db.delete(FloorEntry.TABLE_NAME, null, null);
-//    }
-//
-//    public void deleteRoom(SQLiteDatabase db) {
-//        db.delete(RoomEntry.TABLE_NAME, null, null);
-//    }
+    public int getTableSize(SQLiteDatabase db, String tableName) {
+        int count = 0;
+        Cursor cursor = db.query(tableName, null,
+                null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            count++;
+        }
+        return count;
+    }
+
+    public void deleteTable(SQLiteDatabase db, String tableName) {
+        db.delete(tableName, null, null);
+    }
 
     public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boolean> {
         private Context mContext;
@@ -336,13 +347,19 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             if (values == null || values.length < 1) {
                 return;
             }
+            mDlg.setMessage("데이터를 삽입하는 중입니다.\n" + values[0] + "번째 작업을 완료하였습니다.");
             mDlg.setProgress(values[0]);
-            mDlg.setMessage(values[0] + "번째 작업을 완료하였습니다.");
         }
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
             Log.i(TAG, "-=##=- onPostExecute -=##=-");
+            if (mDlg != null)
+                mDlg.dismiss();
+            if (!isCancelled()) {
+                cancel(true);
+            }
         }
 
         @Override
