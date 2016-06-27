@@ -11,6 +11,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
+import java.util.Calendar;
+
 /**
  * Created by 연구생 on 2015-10-05.
  */
@@ -33,6 +35,12 @@ public class ViewTouchImage extends ImageView implements View.OnTouchListener {
     private PointF mid = new PointF();
     private float oldDist = 1f;
     private final int MAX_ZOOM = 2;
+
+    private long beforeTime;
+    private static final int ZOOM_NONE = 1;
+    private static final int ZOOM_DOUBLE = 2;
+    private static final int ZOOM_QUAD = 4;
+    private int curZoom = ZOOM_NONE;
 
     private static final int WIDTH = 0;
     private static final int HEIGHT = 1;
@@ -152,12 +160,33 @@ public class ViewTouchImage extends ImageView implements View.OnTouchListener {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         ImageView view = (ImageView) v;
+        float distTime = Calendar.getInstance().getTimeInMillis() - beforeTime;
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 savedMatrix.set(matrix);
                 start.set(event.getX(), event.getY());
                 mode = DRAG;
+
+//                mid.set(event.getX(), event.getY());
+//                if (distTime < 1000) {
+//                    matrix.postScale(1, 1);
+//                    curZoom = (curZoom+1)%3;
+//                    Log.i(TAG, "onTouch: postScale "+curZoom+" zoom");
+//                    switch (curZoom) {
+//                        case 0:
+//                            matrix.setScale(ZOOM_NONE, ZOOM_NONE, mid.x, mid.y);
+//                            break;
+//                        case 1:
+//                            matrix.setScale(ZOOM_DOUBLE, ZOOM_DOUBLE, mid.x, mid.y);
+//                            break;
+//                        case 2:
+//                            matrix.setScale(ZOOM_QUAD, ZOOM_QUAD, mid.x, mid.y);
+//                            break;
+//                    }
+//                    beforeTime -= distTime - 1000;
+//                } else
+//                    beforeTime = Calendar.getInstance().getTimeInMillis();
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 oldDist = spacing(event);

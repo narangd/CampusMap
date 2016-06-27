@@ -8,8 +8,8 @@ import android.widget.ImageView;
 
 import com.example.campusmap.pathfinding.Drawing;
 import com.example.campusmap.database.SQLiteHelperOstacle;
-import com.example.campusmap.pathfinding.graphic.Map;
-import com.example.campusmap.pathfinding.graphic.Polygon;
+import com.example.campusmap.pathfinding.Map;
+import com.example.campusmap.pathfinding.Polygon;
 
 import java.util.ArrayList;
 
@@ -131,7 +131,8 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
 
         super.onCanceled(drawing);
 
-        drawing.getMap().resetPolygon();
+        if (drawing != null)
+            drawing.getMap().resetPolygon();
     }
 
     @Override

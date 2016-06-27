@@ -17,12 +17,9 @@ import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.pathfinding.Drawing;
-import com.example.campusmap.pathfinding.asynctask.DrawingLoader;
-import com.example.campusmap.pathfinding.graphic.Tile;
+import com.example.campusmap.asynctask.loader.DrawingLoader;
 
-import java.util.HashSet;
 import java.util.Random;
-import java.util.TreeSet;
 
 
 public class PathFindingFragment extends Fragment implements LoaderManager.LoaderCallbacks<Drawing> {

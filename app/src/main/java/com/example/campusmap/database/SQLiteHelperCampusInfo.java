@@ -15,6 +15,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.campusmap.R;
+import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -28,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
     private static final String TAG = "SQLiteHelperCampusInfo";
     private static final boolean DEBUG = true;
-    public static final String ns = null;
+    private static final String ns = null;
     private static final int DATABACE_VERSION = 14;
     private static final String DATABACE_NAME = "CampusInfo.db";
     private static SQLiteHelperCampusInfo instance;
@@ -102,13 +103,8 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         return instance;
     }
 
-    private Context mContext;
-    private CampusInfoInsertAsyncTask mAsyncTask;
-
     private SQLiteHelperCampusInfo(Context context) {
         super(context, DATABACE_NAME, null, DATABACE_VERSION);
-        mContext = context;
-//        mHandler = handler;
     }
 
     @Override
@@ -159,21 +155,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void startInsertData() {
-        if (mAsyncTask != null && !mAsyncTask.isCancelled() ) {
-            Toast.makeText(mContext, "실행중인 AsyncTask가 있습니다.", Toast.LENGTH_SHORT).
-                    show();
-            return;
-        }
-        mAsyncTask = new CampusInfoInsertAsyncTask(mContext);
-        mAsyncTask.execute(R.xml.building_info);
-    }
 
-    public Boolean isInsertFinished() throws ExecutionException, InterruptedException {
-        if (mAsyncTask == null)
-            return true;
-        return mAsyncTask.get();
-    }
 
     public void insertBuilding(SQLiteDatabase db, int ID, int number, String name, String description) {
         if ( !db.isReadOnly() ) {
@@ -227,163 +209,5 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         db.delete(tableName, null, null);
     }
 
-    public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boolean> {
-        private Context mContext;
-        private ProgressDialog mDlg;
 
-        public CampusInfoInsertAsyncTask(Context context) {
-            mContext = context;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Log.i(TAG, "-=##=- onPreExecute -=##=-");
-
-            mDlg = new ProgressDialog(mContext);
-            mDlg.setCancelable(false);
-            mDlg.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            mDlg.show();
-        }
-
-        @Override
-        protected Boolean doInBackground(Integer... IDs) {
-            if (DEBUG) Log.i(TAG, "doInBackground: called");
-            if (IDs == null || IDs.length < 1) {
-                return false;
-            }
-
-            int count=0;
-            int currentBuildingID=1, currentFloorID=1, currentRoomID=1;
-
-            for (int ID : IDs) {
-                count += getTotalCampusInfoTag(ID);
-            }
-            mDlg.setMax(count);
-
-//            for (int i=0; i<=mDlg.getMax(); i++) {
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                publishProgress(i);
-//            }
-
-            count = 0;
-            SQLiteDatabase db = getWritableDatabase();
-            for (int ID : IDs) {
-                XmlResourceParser parser = mContext.getResources().getXml(ID);
-                int number;
-                String name, text;
-
-                db.beginTransaction();
-                try {
-                    while (parser.next() != XmlResourceParser.END_DOCUMENT) {
-                        if (parser.getEventType() != XmlResourceParser.START_TAG) {
-                            continue;
-                        }
-
-                        switch (parser.getName()) {
-                            case "building":  // ## <building num="1" name="100주년 기념관"> ##
-                                number = Integer.parseInt(parser.getAttributeValue(ns, "num"));
-                                name = parser.getAttributeValue(ns, "name");
-                                insertBuilding(db,
-                                        currentBuildingID++,
-                                        number,
-                                        name,
-                                        ""
-                                );
-                                break;
-                            case "floor":     // ## <floor num="1"> ##
-                                number = Integer.parseInt( parser.getAttributeValue(ns, "num") );
-                                insertFloor(db,
-                                        currentFloorID++,
-                                        number,
-                                        currentBuildingID
-                                );
-                                break;
-                            case "room":      // ## <room name="방재센터"> ##
-                                name = parser.getAttributeValue(ns, "name");
-                                parser.require(XmlResourceParser.START_TAG, ns, "room");
-                                parser.next();
-                                text = parser.getText();
-                                insertRoom(db,
-                                        currentRoomID++,
-                                        name,
-                                        text,
-                                        currentFloorID
-                                );
-                                break;
-                        }
-
-                        publishProgress(++count);
-                    }
-                    db.setTransactionSuccessful();
-                } catch (XmlPullParserException | IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    db.endTransaction();
-                }
-
-                if (DEBUG) {
-                    Log.i(TAG, "database insert building count : " + (currentBuildingID-1));
-                    Log.i(TAG, "database insert floor count : " + (currentFloorID-1));
-                    Log.i(TAG, "database insert room count : " + (currentRoomID-1));
-                }
-
-                parser.close();
-            }
-            db.close();
-
-            mDlg.setMessage("데이터베이스의 정리가 완료되었습니다.");
-            mDlg.dismiss();
-
-            return true;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            if (values == null || values.length < 1) {
-                return;
-            }
-            mDlg.setMessage("데이터를 삽입하는 중입니다.\n" + values[0] + "번째 작업을 완료하였습니다.");
-            mDlg.setProgress(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(Boolean aBoolean) {
-            super.onPostExecute(aBoolean);
-            Log.i(TAG, "-=##=- onPostExecute -=##=-");
-            if (mDlg != null)
-                mDlg.dismiss();
-            if (!isCancelled()) {
-                cancel(true);
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-
-            if (mDlg != null)
-                mDlg.dismiss();
-        }
-
-        private int getTotalCampusInfoTag(int xml_ID) {
-            int max = 0;
-            XmlResourceParser parser = mContext.getResources().getXml(xml_ID);
-            try {
-                while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                    if (parser.getEventType() == XmlPullParser.START_TAG) {
-                        max ++;
-                    }
-                }
-            } catch (XmlPullParserException | IOException e) {
-                e.printStackTrace();
-            }
-            parser.close();
-            return max;
-        }
-    }
 }

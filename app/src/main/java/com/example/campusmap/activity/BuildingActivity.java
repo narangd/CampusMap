@@ -7,9 +7,14 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.campusmap.R;
@@ -23,7 +28,9 @@ public class BuildingActivity extends AppCompatActivity {
 
         int b_num = getIntent().getExtras().getInt("index");
         TextView textView=(TextView)findViewById(R.id.testTextView11);
-        textView.setText(b_num + " : data sended");
+        textView.setText(Html.fromHtml("test<br><a href='http://www.naver.com/'>NAVER</a>endtest"));
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
+        // Html.fromHtml("test<br><a href='http://www.daum.com/'>DAUM</a>endtest")
 
         ImageView imageView =(ImageView)findViewById(R.id.imageView);
 

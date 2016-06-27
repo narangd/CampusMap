@@ -11,10 +11,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.example.campusmap.R;
-import com.example.campusmap.pathfinding.graphic.Map;
-import com.example.campusmap.pathfinding.graphic.Tile;
-
 /**
  * Created by DB-31 on 2015-11-03.
  */

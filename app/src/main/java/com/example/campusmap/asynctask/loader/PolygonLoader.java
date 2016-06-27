@@ -6,8 +6,8 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.example.campusmap.database.SQLiteHelperOstacle;
-import com.example.campusmap.pathfinding.graphic.Map;
-import com.example.campusmap.pathfinding.graphic.Polygon;
+import com.example.campusmap.pathfinding.Map;
+import com.example.campusmap.pathfinding.Polygon;
 
 import java.util.ArrayList;
 

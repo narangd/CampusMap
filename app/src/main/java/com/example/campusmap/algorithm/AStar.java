@@ -3,8 +3,8 @@ package com.example.campusmap.algorithm;
 import android.graphics.Point;
 import android.util.Log;
 
-import com.example.campusmap.pathfinding.graphic.Map;
-import com.example.campusmap.pathfinding.graphic.Tile;
+import com.example.campusmap.pathfinding.Map;
+import com.example.campusmap.pathfinding.Tile;
 
 import java.util.HashMap;
 import java.util.HashSet;
