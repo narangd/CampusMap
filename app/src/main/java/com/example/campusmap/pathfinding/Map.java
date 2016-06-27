@@ -1,13 +1,10 @@
-package com.example.campusmap.pathfinding.graphic;
+package com.example.campusmap.pathfinding;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.Log;
-
-import com.example.campusmap.pathfinding.algorithm.AStar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +13,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.TreeSet;
 
 public class Map {
     private static final String TAG = "ADP_Drawing";

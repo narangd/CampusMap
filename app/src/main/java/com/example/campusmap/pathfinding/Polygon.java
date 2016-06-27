@@ -1,4 +1,4 @@
-package com.example.campusmap.pathfinding.graphic;
+package com.example.campusmap.pathfinding;
 
 import android.graphics.Point;
 

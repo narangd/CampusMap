@@ -1,10 +1,9 @@
-package com.example.campusmap;
+package com.example.campusmap.activity;
 
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,7 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.example.campusmap.activity.SearchResultActivity;
+import com.example.campusmap.R;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.fragment.BuildingInfoFragment;
 import com.example.campusmap.fragment.CampusMapFragment;

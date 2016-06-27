@@ -1,4 +1,4 @@
-package com.example.campusmap.pathfinding.algorithm;
+package com.example.campusmap.algorithm;
 
 import android.graphics.Point;
 import android.util.Log;

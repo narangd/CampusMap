@@ -1,4 +1,4 @@
-package com.example.campusmap;
+package com.example.campusmap.activity;
 
 import android.app.Activity;
 import android.database.sqlite.SQLiteDatabase;
@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.campusmap.R;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 
 import org.xmlpull.v1.XmlPullParser;

@@ -1,4 +1,4 @@
-package com.example.campusmap.pathfinding.db;
+package com.example.campusmap.database;
 
 import android.content.Context;
 import android.database.Cursor;

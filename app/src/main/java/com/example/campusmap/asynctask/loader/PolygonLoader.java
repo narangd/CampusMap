@@ -1,48 +1,34 @@
-package com.example.campusmap.pathfinding.asynctask;
+package com.example.campusmap.asynctask.loader;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
-import android.widget.ImageView;
 
-import com.example.campusmap.pathfinding.Drawing;
-import com.example.campusmap.pathfinding.db.SQLiteHelperOstacle;
+import com.example.campusmap.database.SQLiteHelperOstacle;
 import com.example.campusmap.pathfinding.graphic.Map;
 import com.example.campusmap.pathfinding.graphic.Polygon;
 
 import java.util.ArrayList;
 
 /**
- * Created by DBLAB on 2016-06-16.
+ * Created by 연구생 on 2015-11-16.
  */
-public class DrawingLoader extends AsyncTaskLoader<Drawing> {
-    private static final String TAG = "ADP_MapLoader";
+public class PolygonLoader extends AsyncTaskLoader<ArrayList<Polygon>> {
+    private static final String TAG = "ADP_PolygonLoader";
     private static final boolean DEBUG = true;
 
-    private Context mContext;
-    private ImageView mImageView;
-    private Drawing mDrawing;
+    private Map map;
+    private ArrayList<Polygon> mPolygons;
 
-    public DrawingLoader(Context context, ImageView imageView) {
+    public PolygonLoader(Context context, Map map) {
         super(context);
-        mContext = context;
-        mImageView = imageView;
+        this.map = map;
     }
 
     @Override
-    public Drawing loadInBackground() {
+    public ArrayList<Polygon> loadInBackground() {
         if (DEBUG) Log.i(TAG, "+++ loadInBackground() called! +++");
-
-//        try {
-//            Thread.sleep(2000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
-        if (DEBUG) Log.i(TAG, "+++ create new Map +++");
-        Drawing drawing = new Drawing(mContext, mImageView);
-        Map map = drawing.getMap();
 
         ArrayList<Polygon> polygons = new ArrayList<>();
         Cursor cursor = SQLiteHelperOstacle.getInstance(getContext()).select();
@@ -58,47 +44,47 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
         Log.i("PolygonLoader", "cursor size : " + cursor.getCount());
         Log.i("PolygonLoader", "polygons size : " + polygons.size());
 
-        return drawing;
+        return polygons;
     }
 
     @Override
-    public void deliverResult(Drawing drawing) {
+    public void deliverResult(ArrayList<Polygon> polygons) {
         if (isReset()) {
             if (DEBUG) Log.w(TAG, "+++ Warning! An async query came in while the Loader was reset! +++");
 
-            if (drawing != null) {
+            if (polygons != null) {
                 if (DEBUG) Log.w(TAG, "+++ polygons.clear() called! +++");
-                drawing.getMap().resetPolygon();
+                polygons.clear();
                 return;
             }
         }
 
-        Drawing oldDrawing = mDrawing;
-        mDrawing = drawing;
+        ArrayList<Polygon> oldPolygons = mPolygons;
+        mPolygons = polygons;
 
         if (isStarted()) {
             if (DEBUG) Log.i(TAG, "+++ Delivering results to the LoaderManager for" +
                     " the Fragment to display! +++");
 
-            super.deliverResult(drawing);
+            super.deliverResult(polygons);
         }
 
-        if (oldDrawing != null && oldDrawing != drawing) {
+        if (oldPolygons != null && oldPolygons != polygons) {
             if (DEBUG) Log.i(TAG, "+++ Releasing any old data associated with this Loader. +++");
-            if (DEBUG) Log.w(TAG, "+++ oldMap.resetPolygon() called! +++");
-            oldDrawing.getMap().resetPolygon();
+            if (DEBUG) Log.w(TAG, "+++ oldPolygons.clear() called! +++");
+            oldPolygons.clear();
         }
 
-        super.deliverResult(drawing);
+        super.deliverResult(polygons);
     }
 
     @Override
     protected void onStartLoading() {
         if (DEBUG) Log.i(TAG, "+++ onStartLoading() called! +++");
 
-        if (mDrawing != null) {
+        if (mPolygons != null) {
             if (DEBUG) Log.i(TAG, "+++ Delivering previously loaded data to the client...");
-            deliverResult(mDrawing);
+            deliverResult(mPolygons);
         } else {
             if (DEBUG) Log.i(TAG, "+++ The current data is data is null... so force load! +++");
             forceLoad();
@@ -118,20 +104,20 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
 
         onStopLoading();
 
-        if (mDrawing != null) {
-            if (DEBUG) Log.w(TAG, "+++ mMap.resetPolygon() called! +++");
-            mDrawing.getMap().resetPolygon(); // release map
-            mDrawing = null;
+        if (mPolygons != null) {
+            if (DEBUG) Log.w(TAG, "+++ mPolygons.clear() called! +++");
+            mPolygons.clear();
+            mPolygons = null;
         }
     }
 
     @Override
-    public void onCanceled(Drawing drawing) {
+    public void onCanceled(ArrayList<Polygon> polygons) {
         if (DEBUG) Log.i(TAG, "+++ onCanceled() called! +++");
 
-        super.onCanceled(drawing);
+        super.onCanceled(polygons);
 
-        drawing.getMap().resetPolygon();
+        polygons.clear();
     }
 
     @Override

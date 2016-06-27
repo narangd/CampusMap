@@ -1,14 +1,10 @@
-package com.example.campusmap.pathfinding.graphic;
+package com.example.campusmap.pathfinding;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.support.annotation.NonNull;
-
-import java.io.Serializable;
-import java.util.Comparator;
 
 /**
  * Created by DB-31 on 2015-11-03.
