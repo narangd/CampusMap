@@ -8,6 +8,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.database.SearchResultItem;
 import com.example.campusmap.fragment.BuildingInfoFragment;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.PathFindingFragment;
@@ -27,10 +29,10 @@ import com.example.campusmap.tree.branch.Parent;
 
 public class MainActivity extends AppCompatActivity
         implements SearchView.OnQueryTextListener, MenuItemCompat.OnActionExpandListener {
+    private static final String TAG = "MainActivity";
+//    private static final boolean
     public static final int SEARCH_RESULT_ACTIVITY_REQUEST_CODE = 1;
     private boolean isStart = false;
-
-//    private L
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(0);
+//        mViewPager.setOffscreenPageLimit(0);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
@@ -173,20 +175,25 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case SEARCH_RESULT_ACTIVITY_REQUEST_CODE:
-                if (resultCode == SearchResultActivity.RESULT_OK) {
-                    Bundle extras = data.getExtras();
-                    Parent parent = (Parent) extras.get("parent");
+        if (requestCode == SEARCH_RESULT_ACTIVITY_REQUEST_CODE ) {
+            if (resultCode == SearchResultActivity.RESULT_OK) {
+                Bundle extras = data.getExtras();
+                SearchResultItem searchResultItem = (SearchResultItem) extras.get("SearchResultItem");
 
-                    Log.d("Serializeable Parent", "Data : " + parent);
-                    if (parent != null) {
+                Log.d(TAG, "Serializeable SearchResultItem Data : " + searchResultItem);
+                if (searchResultItem != null) {
 
-                        mViewPager.setCurrentItem(CampusMapFragment.TAP_INDEX);
-                        CampusMapFragment.newInstance().sendPath(parent);
-                    }
+//                    FragmentPagerAdapter fragmentPagerAdapter = (FragmentPagerAdapter)mViewPager.getAdapter();
+//                    Fragment fragment = fragmentPagerAdapter.getItem(CampusMapFragment.TAP_INDEX);
+//                    Bundle bundle = new Bundle();
+//                    bundle.putInt("building", 18);
+////                        bundle.putInt(); // floor
+//                    fragment.setArguments(bundle); // send building to campusmap_fragment
+                    Intent intent = new Intent(this, CampusmapActivity.class);
+                    intent.putExtra("building", searchResultItem);
+                    startActivity(intent);
                 }
-                break;
+            }
         }
     }
 

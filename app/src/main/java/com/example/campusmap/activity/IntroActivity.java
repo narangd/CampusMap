@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.campusmap.R;
+import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -39,6 +40,8 @@ public class IntroActivity extends Activity {
         final String BUILDING = SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME;
         final String FLOOR = SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME;
         final String ROOM = SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME;
+        
+        // # check data #
         if (sqLiteHelper.getTableSize(db, BUILDING) == getTagSize(BUILDING) &&
                 sqLiteHelper.getTableSize(db, FLOOR) == getTagSize(FLOOR) &&
                 sqLiteHelper.getTableSize(db, ROOM) == getTagSize(ROOM)) {
@@ -60,17 +63,19 @@ public class IntroActivity extends Activity {
             sqLiteHelper.deleteTable(db, BUILDING);
             sqLiteHelper.deleteTable(db, FLOOR);
             sqLiteHelper.deleteTable(db, ROOM);
+            db.close();
 
-            sqLiteHelper.startInsertData();
+            final CampusInfoInsertAsyncTask asyncTask = new CampusInfoInsertAsyncTask(this);
+            asyncTask.execute(R.xml.building_info);
 
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        while (!sqLiteHelper.isInsertFinished()) {
+                        while (!asyncTask.isCompleted()) {
                             Thread.sleep(500);
                         }
-                    } catch (ExecutionException | InterruptedException e) {
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     Log.i(TAG, "run: done wait..");
@@ -81,7 +86,6 @@ public class IntroActivity extends Activity {
                         e.printStackTrace();
                     }
 
-                    db.close();
                     finish();
 
 //                handler.sendEmptyMessage(0);

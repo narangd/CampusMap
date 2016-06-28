@@ -2,6 +2,7 @@ package com.example.campusmap.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.campusmap.R;
+import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.database.SearchItemAdapter;
+import com.example.campusmap.database.SearchResultItem;
 import com.example.campusmap.tree.branch.Parent;
 import com.example.campusmap.xmlparser.BuildingInfoParser;
 import com.example.campusmap.xmlparser.search.ParentAdapter;
@@ -23,6 +27,7 @@ import java.util.Collections;
 
 public class SearchResultActivity extends AppCompatActivity
         implements AdapterView.OnItemClickListener, DialogInterface.OnClickListener {
+    private static final String TAG = "SearchResultActivity";
     public static final int RESULT_OK = 1;
 
     String query;
@@ -37,11 +42,22 @@ public class SearchResultActivity extends AppCompatActivity
         query = getIntent().getStringExtra("query");
 
         ((Toolbar) findViewById(R.id.toolbar) ).setTitle("\"" + query + "\"을(를) 검색한 결과입니다.");
-        ArrayList<Parent> result = BuildingInfoParser.search(getBaseContext(), query);
-        Collections.sort(result);
+
+        SQLiteHelperCampusInfo sqLiteHelperCampusInfo = SQLiteHelperCampusInfo.getInstance(this);
+        SQLiteDatabase db = sqLiteHelperCampusInfo.getReadableDatabase();
+
+        ArrayList<SearchResultItem> result = sqLiteHelperCampusInfo.searchResultItems(db, query);
+        db.close();
+//        ArrayList<Parent> result = BuildingInfoParser.search(getBaseContext(), query);
+//        Collections.sort(result);
 
         ListView listView = (ListView)findViewById(R.id.result_listview);
-        listView.setAdapter(new ParentAdapter(
+//        listView.setAdapter(new ParentAdapter(
+//                this,
+//                android.R.layout.simple_list_item_2,
+//                result
+//        ));
+        listView.setAdapter(new SearchItemAdapter(
                 this,
                 android.R.layout.simple_list_item_2,
                 result
@@ -49,18 +65,17 @@ public class SearchResultActivity extends AppCompatActivity
         listView.setOnItemClickListener(this);
     }
 
-    Parent parent;
+    SearchResultItem searchResultItem;
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        parent = (Parent)adapterView.getItemAtPosition(position);
-        Log.i("Parent", "Parent : " + this.parent);
-        Log.d("Parent Class", parent.getClass().toString());
-        alertMessage(parent.toString());
+        searchResultItem = (SearchResultItem)adapterView.getItemAtPosition(position);
+        Log.i(TAG, "onItemClick: " + searchResultItem.toString());
+        alertMessage(searchResultItem.toString());
     }
 
     public void alertMessage(String destination) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(destination + "로 이동하시겠습니까?")
+        builder.setMessage(destination + "(으)로 이동하시겠습니까?")
                 .setPositiveButton("예", this)
                 .setNegativeButton("취소", this)
                 .show();
@@ -71,7 +86,7 @@ public class SearchResultActivity extends AppCompatActivity
         switch (which) {
             case DialogInterface.BUTTON_POSITIVE:
                 Intent result = new Intent();
-                result.putExtra("parent", parent);
+                result.putExtra("SearchResultItem", searchResultItem);
                 setResult(RESULT_OK, result);
                 finish();
                 break;

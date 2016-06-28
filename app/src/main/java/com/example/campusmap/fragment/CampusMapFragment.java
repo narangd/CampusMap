@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.example.campusmap.R;
 import com.example.campusmap.activity.BuildingActivity;
 import com.example.campusmap.activity.CampusmapActivity;
+import com.example.campusmap.activity.ScrollingActivity;
 import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.tree.branch.Floor;
 import com.example.campusmap.tree.branch.Parent;
@@ -59,6 +60,12 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         context = rootView.getContext();
 
         initListView(rootView);
+
+        if (getArguments() != null) {
+            int building = getArguments().getInt("building");
+            onItemClick(null, null, building, 0);
+        }
+
         return rootView;
     }
 
@@ -80,8 +87,9 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(context, BuildingActivity.class);
-        intent.putExtra("index", position);
+
+        Intent intent = new Intent(context, ScrollingActivity.class);
+        intent.putExtra("building", Integer.valueOf(position));
         startActivity(intent);
     }
 

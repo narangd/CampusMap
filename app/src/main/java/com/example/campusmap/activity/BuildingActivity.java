@@ -26,13 +26,13 @@ public class BuildingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_building);
 
-        int b_num = getIntent().getExtras().getInt("index");
-        TextView textView=(TextView)findViewById(R.id.testTextView11);
+        int b_num = getIntent().getExtras().getInt("building");
+        TextView textView = (TextView) findViewById(R.id.testTextView11);
         textView.setText(Html.fromHtml("test<br><a href='http://www.naver.com/'>NAVER</a>endtest"));
         textView.setMovementMethod(LinkMovementMethod.getInstance());
         // Html.fromHtml("test<br><a href='http://www.daum.com/'>DAUM</a>endtest")
 
-        ImageView imageView =(ImageView)findViewById(R.id.imageView);
+        ImageView imageView =(ImageView)findViewById(R.id.image);
 
         Context context = imageView.getContext();
         int id = context.getResources().getIdentifier("building_" + (b_num + 1), "drawable", context.getPackageName());

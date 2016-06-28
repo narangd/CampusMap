@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,13 +18,15 @@ import android.widget.ListView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.tree.branch.Building;
+import com.example.campusmap.tree.branch.University;
 import com.example.campusmap.xmlparser.BuildingInfoParser;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class CampusmapActivity extends AppCompatActivity {
-    static BuildingInfoParser parser;
+    private static final String TAG = "CampusMapActivity";
+    private static BuildingInfoParser parser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,24 +34,6 @@ public class CampusmapActivity extends AppCompatActivity {
         setContentView(R.layout.activity_campus_map);
 
         ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
-
-        Intent intent = getIntent();
-        Serializable data = intent.getSerializableExtra("path");
-        ArrayList<Integer> path;
-        if (data instanceof ArrayList ) {
-            if (((ArrayList) data).get(0) instanceof Integer) {
-                path = (ArrayList<Integer>) data;
-
-                FloorPagerAdapter mFloorPagerAdapter = new FloorPagerAdapter(getSupportFragmentManager(), path.get(0));
-                mViewPager.setAdapter(mFloorPagerAdapter);
-                if (path.size() > 1) {
-                    mViewPager.setCurrentItem(path.get(1), true);
-                }
-            }
-        }
 
         findViewById(R.id.fab). // FloatingActionButton
                 setOnClickListener(new View.OnClickListener() {
@@ -61,24 +46,52 @@ public class CampusmapActivity extends AppCompatActivity {
 
         if (parser == null)
             parser = BuildingInfoParser.getInstance(getResources().getXml(R.xml.building_info));
+        University buildingList = parser.toBuildingList();
+
+//        Intent intent = getIntent();
+//        Serializable data;
+//
+//        data = intent.getSerializableExtra("building");
+//        if (data != null) {
+//            Log.i(TAG, "onCreate: data to buildingNumber");
+//            int buildingNumber = (int)data;
+//
+//            FloorPagerAdapter mFloorPagerAdapter = new FloorPagerAdapter(getSupportFragmentManager(),
+//                    buildingList.get(buildingNumber) );
+//            Log.i(TAG, "onCreate: mFloorPagerAdapter set " + buildingList.get(buildingNumber).toString());
+//            mViewPager.setAdapter(mFloorPagerAdapter);
+//        } else {
+        {
+            FloorPagerAdapter mFloorPagerAdapter = new FloorPagerAdapter(getSupportFragmentManager(),
+                    buildingList.get(0) );
+            mViewPager.setAdapter(mFloorPagerAdapter);
+            mViewPager.setCurrentItem(0);
+        }
+
+        ((TabLayout) findViewById(R.id.tabs)).
+                setupWithViewPager(mViewPager);
     }
+
+
 
     /**
      * A placeholder fragment containing a simple view.
      */
     public static class FloorFragment extends Fragment {
-        private static final String ARG_SECTION_NUMBER = "floor_number";
-        private static final String FLOOR_NUMBER = "room_number";
+        private static final String BUILDING = "building";
+        private static final String FLOOR_NUMBER = "floor_number";
 
         public FloorFragment() {
         }
 
-        public static FloorFragment newInstance(int building_num, int floor_num) {
+        public static FloorFragment newInstance(Building building, int floor_num) {
             FloorFragment fragment = new FloorFragment();
+
             Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, floor_num);
-            args.putInt(FLOOR_NUMBER, building_num);
+            args.putSerializable(BUILDING, building);
+            args.putInt(FLOOR_NUMBER, floor_num);
             fragment.setArguments(args);
+
             return fragment;
         }
 
@@ -87,56 +100,43 @@ public class CampusmapActivity extends AppCompatActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_building, container, false);
 
-            int floor_index = getArguments().getInt(ARG_SECTION_NUMBER);
-            int building_index = getArguments().getInt(FLOOR_NUMBER);
+            Building building = (Building)getArguments().getSerializable(BUILDING);
+            int floor_index = getArguments().getInt(FLOOR_NUMBER);
 
             ListView listView = (ListView) rootView.findViewById(R.id.room_listview);
-            listView.setAdapter(new ArrayAdapter(
+            listView.setAdapter(new ArrayAdapter<>(
                     getContext(),
                     android.R.layout.simple_list_item_1,
-                    parser.toRoomList(building_index, floor_index)
+                    new String[] { "A", "B", "C", "D"}
             ));
             return rootView;
         }
     }
 
     public class FloorPagerAdapter extends FragmentPagerAdapter {
-        ArrayList<Integer> path;
-        Building building;
-        int mBuildingIndex;
+        Building mBuilding;
 
-        public FloorPagerAdapter(FragmentManager fm, int buildingIndex) {
+        public FloorPagerAdapter(FragmentManager fm, Building building) {
             super(fm);
-            if (path.size() > 0) {
-                mBuildingIndex = buildingIndex;
-                building = parser.toFloorList(buildingIndex);
-            }
+            mBuilding = building;
         }
 
         @Override
         public Fragment getItem(int position) {
-            return FloorFragment.newInstance(mBuildingIndex, position);
+            return FloorFragment.newInstance(mBuilding, position);
         }
 
         @Override
         public int getCount() {
-            if (building != null) {
-                return building.size(); // floor size
+            if (mBuilding != null) {
+                return mBuilding.size(); // floor size
             }
             return 0;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-//            switch (position) {
-//                case 0:
-//                    return "SECTION 1";
-//                case 1:
-//                    return "SECTION 2";
-//                case 2:
-//                    return "SECTION 3";
-//            }
-            return building.get(position).toString();
+            return mBuilding.get(position).toString();
         }
     }
 }

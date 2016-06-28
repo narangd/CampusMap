@@ -157,6 +157,20 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
             mDlg.dismiss();
     }
 
+    public boolean isCompleted() {
+        Boolean isCompleted = null;
+        try {
+            isCompleted = get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (isCompleted == null) {
+            return true;
+        } else {
+            return isCompleted;
+        }
+    }
+
     private int getTotalCampusInfoTag(int xml_ID) {
         int max = 0;
         XmlResourceParser parser = mContext.getResources().getXml(xml_ID);
