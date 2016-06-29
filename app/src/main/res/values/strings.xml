@@ -7,7 +7,7 @@
 
     <string name="flow_duration">500</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
+
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_building">BuildingActivity</string>
     <string name="title_activity_search_result">SearchResultActivity</string>

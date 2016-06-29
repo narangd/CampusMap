@@ -63,6 +63,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
             XmlResourceParser parser = mContext.getResources().getXml(ID);
             int number;
             String name, text;
+            String main;
 
             db.beginTransaction();
             try {
@@ -92,6 +93,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
                             break;
                         case "room":      // ## <room name="방재센터"> ##
                             name = parser.getAttributeValue(ns, "name");
+                            main = parser.getAttributeValue(ns, "main");
                             parser.require(XmlResourceParser.START_TAG, ns, "room");
                             parser.next();
                             text = parser.getText();
@@ -99,7 +101,8 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
                                     currentRoomID++,
                                     name,
                                     text,
-                                    currentFloorID
+                                    currentFloorID,
+                                    main != null
                             );
                             break;
                     }

@@ -8,7 +8,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +24,6 @@ import com.example.campusmap.database.SearchResultItem;
 import com.example.campusmap.fragment.BuildingInfoFragment;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.PathFindingFragment;
-import com.example.campusmap.tree.branch.Parent;
 
 public class MainActivity extends AppCompatActivity
         implements SearchView.OnQueryTextListener, MenuItemCompat.OnActionExpandListener {
@@ -189,7 +187,7 @@ public class MainActivity extends AppCompatActivity
 //                    bundle.putInt("building", 18);
 ////                        bundle.putInt(); // floor
 //                    fragment.setArguments(bundle); // send building to campusmap_fragment
-                    Intent intent = new Intent(this, CampusmapActivity.class);
+                    Intent intent = new Intent(this, CampusMapActivity.class);
                     intent.putExtra("building", searchResultItem);
                     startActivity(intent);
                 }

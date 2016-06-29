@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +13,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.campusmap.R;
-import com.example.campusmap.activity.BuildingActivity;
-import com.example.campusmap.activity.CampusmapActivity;
+import com.example.campusmap.activity.CampusMapActivity;
 import com.example.campusmap.activity.ScrollingActivity;
 import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.tree.branch.Floor;
@@ -25,7 +23,6 @@ import com.example.campusmap.xmlparser.BuildingInfoParser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
 public class CampusMapFragment extends Fragment implements AdapterView.OnItemClickListener {
     public static final int TAP_INDEX = 0;
@@ -123,7 +120,7 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
 
         Toast.makeText(context, Arrays.toString(parentArrayList.toArray()) + "를 찾습니다.(" + Arrays.toString(path.toArray()) + ")", Toast.LENGTH_LONG)
                 .show();
-        Intent intent = new Intent(getContext(), CampusmapActivity.class);
+        Intent intent = new Intent(getContext(), CampusMapActivity.class);
         intent.putExtra("path", path);
         startActivity(intent);
      }

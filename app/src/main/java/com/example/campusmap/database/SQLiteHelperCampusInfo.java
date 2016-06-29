@@ -7,8 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
-
-import com.example.campusmap.tree.branch.Room;
+import android.util.Pair;
 
 import java.util.ArrayList;
 
@@ -28,6 +27,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
     public static final String IF_EXISTS = "IF EXISTS ";
     public static final String TYPE_INTEGER = " INTEGER";
     public static final String TYPE_CHARACTER = " CHAR(20)";
+    public static final String TYPE_CHARACTER2 = " CHAR(100)";
     public static final String TYPE_TEXT = " TEXT";
     public static final String PRIMARY_KEY = " PRIMARY KEY";
     public static final String FOREIGN_KEY = " FOREIGN KEY";
@@ -35,6 +35,10 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
     public static final String COMMA_SEP = ",";
     public static final String COLUMN_START = " (";
     public static final String COLUMN_END = ")";
+    public static final String ORDER_BY_ASCENDING = " ASC";
+
+    public static final int TRUE = 1;
+    public static final int FALSE = 0;
 
     public static abstract class BuildingEntry implements BaseColumns {
         public static final String TABLE_NAME = "building";
@@ -71,15 +75,23 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         public static final String TABLE_NAME = "room";
         public static final String COLUMN_NAME_NAME = "name";
         public static final String COLUMN_NAME_DESCRIPTION = "rdesc";
+        public static final String COLUMN_NAME_PATH = "path";
+        public static final String COLUMN_NAME_MAIN = "main";
         public static final String COLUMN_NAME_FLOOR_ID = "fID";
+        public static final String COLUMN_NAME_BUILDING_ID = "bID";
         public static final String SQL_CREATE_TABLE =
                 CREATE_TABLE_HEAD + TABLE_NAME + COLUMN_START +
                         _ID + TYPE_INTEGER + PRIMARY_KEY + COMMA_SEP +
                         COLUMN_NAME_FLOOR_ID + TYPE_INTEGER + COMMA_SEP +
                         COLUMN_NAME_NAME + TYPE_CHARACTER + COMMA_SEP +
+                        COLUMN_NAME_MAIN + TYPE_INTEGER + COMMA_SEP +
                         COLUMN_NAME_DESCRIPTION + TYPE_TEXT + COMMA_SEP +
-                        FOREIGN_KEY + COLUMN_START + COLUMN_NAME_FLOOR_ID  +COLUMN_END +
-                            REFERENCES + FloorEntry.TABLE_NAME + COLUMN_START + FloorEntry._ID + COLUMN_END +
+                        COLUMN_NAME_PATH + TYPE_CHARACTER2 + COMMA_SEP +
+                        FOREIGN_KEY + COLUMN_START + COLUMN_NAME_FLOOR_ID  +COLUMN_END + // FOREIGN KEY(---)
+                            REFERENCES + FloorEntry.TABLE_NAME + COLUMN_START + FloorEntry._ID + COLUMN_END + //  REFERENCES artist(artistid)
+                        COLUMN_END + COMMA_SEP +
+                        FOREIGN_KEY + COLUMN_START + COLUMN_NAME_BUILDING_ID  +COLUMN_END +
+                            REFERENCES + BuildingEntry.TABLE_NAME + COLUMN_START + BuildingEntry._ID + COLUMN_END +
                         COLUMN_END;
         public static final String SQL_DELETE_TABLE =
                 DELETE_TABLE_HEAD + IF_EXISTS + TABLE_NAME;
@@ -171,13 +183,14 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         }
     }
 
-    public void insertRoom(SQLiteDatabase db, int ID, String name, String desc, int floorID) {
+    public void insertRoom(SQLiteDatabase db, int ID, String name, String desc, int floorID, boolean isMain) {
         if ( !db.isReadOnly() ) {
             ContentValues values = new ContentValues();
             values.put(RoomEntry._ID, ID);
             values.put(RoomEntry.COLUMN_NAME_NAME, name);
             values.put(RoomEntry.COLUMN_NAME_DESCRIPTION, desc);
             values.put(RoomEntry.COLUMN_NAME_FLOOR_ID, floorID);
+            values.put(RoomEntry.COLUMN_NAME_MAIN, isMain? 1 : 0);
             db.insert(RoomEntry.TABLE_NAME, null, values);
         } else {
             Log.e(TAG, "insertBuilding: SQLiteDatabase is not Writable..");
@@ -191,6 +204,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         while (cursor.moveToNext()) {
             count++;
         }
+        cursor.close();
         return count;
     }
 
@@ -209,7 +223,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 BuildingEntry.COLUMN_NAME_NAME + " LIKE ?",
                 new String[]{query},
                 null, null,
-                BuildingEntry.COLUMN_NAME_NAME+" ASC");
+                BuildingEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING);
         while (buildingCursor.moveToNext()) {
             resultList.add(new SearchResultItem(
                     buildingCursor.getString(buildingCursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME)),
@@ -226,7 +240,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 BuildingEntry.COLUMN_NAME_NAME + " LIKE ?",
                 new String[]{query},
                 null, null,
-                RoomEntry.COLUMN_NAME_NAME+" ASC");
+                RoomEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING);
         while (roomCursor.moveToNext()) {
             resultList.add(new SearchResultItem(
                     roomCursor.getString(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME)),
@@ -272,10 +286,81 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             }  else {
                 Log.e(TAG, "searchRoomHierarchy: not found building ID:" + buildingId);
             }
+            buildingCursor.close();
         } else {
             Log.e(TAG, "searchRoomHierarchy: not found floor ID:" + floorId);
         }
+        floorCursor.close();
         return hierarchy;
+    }
+
+    public ContentValues getBuildingDetail(int buildingID) {
+        ContentValues values = null;
+        Cursor cursor = getReadableDatabase().query(
+                BuildingEntry.TABLE_NAME,
+                new String[]{BuildingEntry.COLUMN_NAME_NAME, BuildingEntry.COLUMN_NAME_DESCRIPTION},
+                BuildingEntry._ID + "=?",
+                new String[]{String.valueOf(buildingID)},
+                null, null, null
+        );
+        if (cursor.moveToNext()) {
+            values = new ContentValues();
+            values.put(BuildingEntry.COLUMN_NAME_NAME,
+                    cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME)));
+            values.put(BuildingEntry.COLUMN_NAME_DESCRIPTION,
+                    cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_DESCRIPTION)));
+        }
+        cursor.close();
+        return values;
+    }
+
+    public ArrayList<Pair<String,Integer[]>> getMainRooms(int buildingID) {
+        ArrayList<Pair<String,Integer[]>> mainRooms = new ArrayList<>();
+        Cursor cursor = getReadableDatabase().query(
+                RoomEntry.TABLE_NAME,
+                new String[]{
+                        RoomEntry.COLUMN_NAME_NAME,
+                        RoomEntry._ID,
+                        RoomEntry.COLUMN_NAME_FLOOR_ID,
+                        RoomEntry.COLUMN_NAME_BUILDING_ID
+                },
+                RoomEntry.COLUMN_NAME_BUILDING_ID + "=? AND " + RoomEntry.COLUMN_NAME_MAIN + "=?",
+                new String[]{String.valueOf(buildingID), String.valueOf(TRUE)},
+                null, null,
+                RoomEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING
+        );
+        while (cursor.moveToNext()) {
+            mainRooms.add(new Pair<>(
+                    cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME)),
+                    new Integer[]{
+                            cursor.getInt(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_BUILDING_ID)),
+                            cursor.getInt(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_FLOOR_ID)),
+                            cursor.getInt(cursor.getColumnIndex(RoomEntry._ID))
+                    }
+            ));
+        }
+        cursor.close();
+        return mainRooms;
+    }
+
+    public ContentValues getRoomDetail(int roomID) {
+        ContentValues values = null;
+        Cursor cursor = getReadableDatabase().query(
+                RoomEntry.TABLE_NAME,
+                new String[]{RoomEntry.COLUMN_NAME_NAME, RoomEntry.COLUMN_NAME_DESCRIPTION},
+                RoomEntry._ID + "=?",
+                new String[]{String.valueOf(roomID)},
+                null, null, null
+        );
+        if (cursor.moveToNext()) {
+            values = new ContentValues();
+            values.put(RoomEntry.COLUMN_NAME_NAME,
+                    cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME)));
+            values.put(RoomEntry.COLUMN_NAME_DESCRIPTION,
+                    cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_DESCRIPTION)));
+        }
+        cursor.close();
+        return values;
     }
 
 

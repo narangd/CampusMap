@@ -31,7 +31,7 @@
             android:label="@string/title_activity_search_result"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activity.CampusmapActivity"
+            android:name=".activity.CampusMapActivity"
             android:label="@string/title_activity_campusmap"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

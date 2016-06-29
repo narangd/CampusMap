@@ -690,7 +690,7 @@
             <room num="3" name="대피실"/>
         </floor>
         <floor num="1">
-            <room num="1" name="멀티미디어실"/>
+            <room num="1" name="멀티미디어실" main=""/>
             <room num="1-1" name="영사실"/>
             <room num="2" name="대학원세미나실"/>
             <room num="3" name="기초전기전자실습실"/>

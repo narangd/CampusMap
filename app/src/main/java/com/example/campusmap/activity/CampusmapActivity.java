@@ -1,15 +1,11 @@
 package com.example.campusmap.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +13,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.campusmap.R;
+import com.example.campusmap.fragment.pager.CampusMapPagerAdapter;
 import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.tree.branch.University;
 import com.example.campusmap.xmlparser.BuildingInfoParser;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-public class CampusmapActivity extends AppCompatActivity {
+public class CampusMapActivity extends AppCompatActivity {
     private static final String TAG = "CampusMapActivity";
     private static BuildingInfoParser parser;
 
@@ -34,15 +28,6 @@ public class CampusmapActivity extends AppCompatActivity {
         setContentView(R.layout.activity_campus_map);
 
         ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
-
-        findViewById(R.id.fab). // FloatingActionButton
-                setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         if (parser == null)
             parser = BuildingInfoParser.getInstance(getResources().getXml(R.xml.building_info));
@@ -61,15 +46,16 @@ public class CampusmapActivity extends AppCompatActivity {
 //            Log.i(TAG, "onCreate: mFloorPagerAdapter set " + buildingList.get(buildingNumber).toString());
 //            mViewPager.setAdapter(mFloorPagerAdapter);
 //        } else {
-        {
-            FloorPagerAdapter mFloorPagerAdapter = new FloorPagerAdapter(getSupportFragmentManager(),
-                    buildingList.get(0) );
-            mViewPager.setAdapter(mFloorPagerAdapter);
+
+        if (mViewPager != null){
+            mViewPager.setAdapter(
+                    new CampusMapPagerAdapter(getSupportFragmentManager())
+            );
             mViewPager.setCurrentItem(0);
         }
 
-        ((TabLayout) findViewById(R.id.tabs)).
-                setupWithViewPager(mViewPager);
+//        ((TabLayout) findViewById(R.id.tabs)).
+//                setupWithViewPager(mViewPager);
     }
 
 
@@ -98,7 +84,7 @@ public class CampusmapActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_building, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_floor, container, false);
 
             Building building = (Building)getArguments().getSerializable(BUILDING);
             int floor_index = getArguments().getInt(FLOOR_NUMBER);
@@ -113,7 +99,7 @@ public class CampusmapActivity extends AppCompatActivity {
         }
     }
 
-    public class FloorPagerAdapter extends FragmentPagerAdapter {
+    private class FloorPagerAdapter extends FragmentPagerAdapter {
         Building mBuilding;
 
         public FloorPagerAdapter(FragmentManager fm, Building building) {
@@ -139,4 +125,6 @@ public class CampusmapActivity extends AppCompatActivity {
             return mBuilding.get(position).toString();
         }
     }
+
+
 }
