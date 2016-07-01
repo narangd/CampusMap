@@ -9,6 +9,7 @@ import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.Pair;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -18,7 +19,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
     private static final String TAG = "SQLiteHelperCampusInfo";
     private static final boolean DEBUG = true;
     private static final String ns = null;
-    private static final int DATABACE_VERSION = 14;
+    private static final int DATABACE_VERSION = 16;
     private static final String DATABACE_NAME = "CampusInfo.db";
     private static SQLiteHelperCampusInfo instance;
 
@@ -29,6 +30,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
     public static final String TYPE_CHARACTER = " CHAR(20)";
     public static final String TYPE_CHARACTER2 = " CHAR(100)";
     public static final String TYPE_TEXT = " TEXT";
+    public static final String UNIQUE = " UNIQUE";
     public static final String PRIMARY_KEY = " PRIMARY KEY";
     public static final String FOREIGN_KEY = " FOREIGN KEY";
     public static final String REFERENCES = " REFERENCES ";
@@ -40,6 +42,9 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
     public static final int TRUE = 1;
     public static final int FALSE = 0;
 
+    // FOREIGN KEY(---)
+    // REFERENCES ---(---)
+
     public static abstract class BuildingEntry implements BaseColumns {
         public static final String TABLE_NAME = "building";
         public static final String COLUMN_NAME_NAME = "name";
@@ -48,7 +53,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         public static final String SQL_CREATE_TABLE =
                 CREATE_TABLE_HEAD + TABLE_NAME + COLUMN_START +
                         _ID + TYPE_INTEGER + PRIMARY_KEY + COMMA_SEP +
-                        COLUMN_NAME_NUMBER + TYPE_INTEGER + COMMA_SEP +
+                        COLUMN_NAME_NUMBER + TYPE_INTEGER + UNIQUE + COMMA_SEP +
                         COLUMN_NAME_NAME + TYPE_CHARACTER + COMMA_SEP +
                         COLUMN_NAME_DESCRIPTION + TYPE_TEXT + COLUMN_END;
         public static final String SQL_DELETE_TABLE =
@@ -64,6 +69,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                         _ID + TYPE_INTEGER + PRIMARY_KEY + COMMA_SEP +
                         COLUMN_NAME_BUILDING_ID + TYPE_INTEGER + COMMA_SEP +
                         COLUMN_NAME_NUMBER + TYPE_CHARACTER + COMMA_SEP +
+                        // # reference building #
                         FOREIGN_KEY + COLUMN_START + COLUMN_NAME_BUILDING_ID + COLUMN_END +
                             REFERENCES + BuildingEntry.TABLE_NAME + COLUMN_START + BuildingEntry._ID + COLUMN_END +
                         COLUMN_END;
@@ -83,13 +89,15 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 CREATE_TABLE_HEAD + TABLE_NAME + COLUMN_START +
                         _ID + TYPE_INTEGER + PRIMARY_KEY + COMMA_SEP +
                         COLUMN_NAME_FLOOR_ID + TYPE_INTEGER + COMMA_SEP +
+                        COLUMN_NAME_BUILDING_ID + TYPE_INTEGER + COMMA_SEP +
                         COLUMN_NAME_NAME + TYPE_CHARACTER + COMMA_SEP +
                         COLUMN_NAME_MAIN + TYPE_INTEGER + COMMA_SEP +
                         COLUMN_NAME_DESCRIPTION + TYPE_TEXT + COMMA_SEP +
                         COLUMN_NAME_PATH + TYPE_CHARACTER2 + COMMA_SEP +
-                        FOREIGN_KEY + COLUMN_START + COLUMN_NAME_FLOOR_ID  +COLUMN_END + // FOREIGN KEY(---)
-                            REFERENCES + FloorEntry.TABLE_NAME + COLUMN_START + FloorEntry._ID + COLUMN_END + //  REFERENCES artist(artistid)
-                        COLUMN_END + COMMA_SEP +
+                        // # reference floor #
+                        FOREIGN_KEY + COLUMN_START + COLUMN_NAME_FLOOR_ID  +COLUMN_END +
+                            REFERENCES + FloorEntry.TABLE_NAME + COLUMN_START + FloorEntry._ID + COLUMN_END + COMMA_SEP +
+                        // # reference building #
                         FOREIGN_KEY + COLUMN_START + COLUMN_NAME_BUILDING_ID  +COLUMN_END +
                             REFERENCES + BuildingEntry.TABLE_NAME + COLUMN_START + BuildingEntry._ID + COLUMN_END +
                         COLUMN_END;
@@ -183,13 +191,22 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         }
     }
 
-    public void insertRoom(SQLiteDatabase db, int ID, String name, String desc, int floorID, boolean isMain) {
+    public void insertRoom(
+            SQLiteDatabase db,
+            int ID, String name,
+            String desc,
+            String path,
+            int floorID,
+            int buildingID,
+            boolean isMain) {
         if ( !db.isReadOnly() ) {
             ContentValues values = new ContentValues();
             values.put(RoomEntry._ID, ID);
             values.put(RoomEntry.COLUMN_NAME_NAME, name);
             values.put(RoomEntry.COLUMN_NAME_DESCRIPTION, desc);
+            values.put(RoomEntry.COLUMN_NAME_PATH, path);
             values.put(RoomEntry.COLUMN_NAME_FLOOR_ID, floorID);
+            values.put(RoomEntry.COLUMN_NAME_BUILDING_ID, buildingID);
             values.put(RoomEntry.COLUMN_NAME_MAIN, isMain? 1 : 0);
             db.insert(RoomEntry.TABLE_NAME, null, values);
         } else {
@@ -294,9 +311,70 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         return hierarchy;
     }
 
-    public ContentValues getBuildingDetail(int buildingID) {
-        ContentValues values = null;
-        Cursor cursor = getReadableDatabase().query(
+    public ArrayList<String> getBuildingList(SQLiteDatabase db) {
+        ArrayList<String> buildingList = new ArrayList<>();
+        Cursor cursor = db.query(
+                BuildingEntry.TABLE_NAME,
+                new String[]{
+                        BuildingEntry.COLUMN_NAME_NAME,
+                        BuildingEntry.COLUMN_NAME_NUMBER
+                },
+                null, null,
+                null, null,
+                BuildingEntry._ID + ORDER_BY_ASCENDING
+        );
+        while (cursor.moveToNext()) {
+            String name = cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME));
+            String number = cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NUMBER));
+            buildingList.add( name + "(" + number + ")");
+        }
+        cursor.close();
+        return buildingList;
+    }
+
+    public ArrayList<String> getFloorList(SQLiteDatabase db, int buildingID) {
+        ArrayList<String> floorList = new ArrayList<>();
+        Cursor cursor = db.query(
+                FloorEntry.TABLE_NAME,
+                new String[]{
+                        FloorEntry.COLUMN_NAME_NUMBER
+                },
+                FloorEntry.COLUMN_NAME_BUILDING_ID + " =?",
+                new String[]{String.valueOf(buildingID)},
+                null, null,
+                FloorEntry._ID + ORDER_BY_ASCENDING
+        );
+        while (cursor.moveToNext()) {
+            String number = cursor.getString(cursor.getColumnIndex(FloorEntry.COLUMN_NAME_NUMBER));
+            floorList.add( number + "층-" + buildingID );
+        }
+        cursor.close();
+        return floorList;
+    }
+
+    public ArrayList<String> getRoomList(SQLiteDatabase db, int buildingID, int floorID) {
+        ArrayList<String> roomList = new ArrayList<>();
+        Cursor cursor = db.query(
+                RoomEntry.TABLE_NAME,
+                new String[]{
+                        RoomEntry.COLUMN_NAME_NAME
+                },
+                RoomEntry.COLUMN_NAME_BUILDING_ID + "=? AND " + RoomEntry.COLUMN_NAME_FLOOR_ID + "=?",
+                new String[]{String.valueOf(buildingID), String.valueOf(floorID)},
+                null, null,
+                RoomEntry._ID + ORDER_BY_ASCENDING
+        );
+        while (cursor.moveToNext()) {
+            String name = cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME));
+            roomList.add( name + "-b" + buildingID + "-f" + floorID );
+        }
+        cursor.close();
+        return roomList;
+    }
+
+    public ContentValues getBuildingDetail(SQLiteDatabase db, int buildingID) {
+        ContentValues contentValues = null;
+        Cursor cursor = db.query(
                 BuildingEntry.TABLE_NAME,
                 new String[]{BuildingEntry.COLUMN_NAME_NAME, BuildingEntry.COLUMN_NAME_DESCRIPTION},
                 BuildingEntry._ID + "=?",
@@ -304,19 +382,23 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 null, null, null
         );
         if (cursor.moveToNext()) {
-            values = new ContentValues();
-            values.put(BuildingEntry.COLUMN_NAME_NAME,
-                    cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME)));
-            values.put(BuildingEntry.COLUMN_NAME_DESCRIPTION,
-                    cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_DESCRIPTION)));
+            contentValues = new ContentValues();
+            contentValues.put(
+                    BuildingEntry.COLUMN_NAME_NAME,
+                    cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME))
+            );
+            contentValues.put(
+                    BuildingEntry.COLUMN_NAME_DESCRIPTION,
+                    cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_DESCRIPTION))
+            );
         }
         cursor.close();
-        return values;
+        return contentValues;
     }
 
-    public ArrayList<Pair<String,Integer[]>> getMainRooms(int buildingID) {
+    public ArrayList<Pair<String,Integer[]>> getMainRooms(SQLiteDatabase db, int buildingID) {
         ArrayList<Pair<String,Integer[]>> mainRooms = new ArrayList<>();
-        Cursor cursor = getReadableDatabase().query(
+        Cursor cursor = db.query(
                 RoomEntry.TABLE_NAME,
                 new String[]{
                         RoomEntry.COLUMN_NAME_NAME,

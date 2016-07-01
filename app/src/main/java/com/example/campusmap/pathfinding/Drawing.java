@@ -16,7 +16,7 @@ import android.widget.Toast;
  */
 public class Drawing implements View.OnLongClickListener{
     private static final String TAG = "ADP_Drawing";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private Context mContext;
     private Paint paint;

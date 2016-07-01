@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -27,10 +29,7 @@ import java.util.LinkedList;
 public class CampusMapFragment extends Fragment implements AdapterView.OnItemClickListener {
     public static final int TAP_INDEX = 0;
     private static CampusMapFragment fragment = null;
-    private ArrayAdapter<Building> adapter;
-    private ListView listView;
     private Context context;
-    private BuildingInfoParser parser;
 
     /**
      * return only one CampusMapFragment.
@@ -56,7 +55,20 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         View rootView = inflater.inflate(R.layout.fragment_campus_map, container, false);
         context = rootView.getContext();
 
-        initListView(rootView);
+        BuildingInfoParser parser = BuildingInfoParser.getInstance(getResources().getXml(R.xml.building_info));
+
+//        if (parser.toBuildingList())
+        ArrayAdapter<Building> adapter = new ArrayAdapter<>(
+                context,
+                android.R.layout.simple_list_item_1,
+                parser.toBuildingList()
+        );
+
+        ListView listView = (ListView) rootView.findViewById(R.id.building_list);
+        ViewGroup imageHeader = (ViewGroup) inflater.inflate(R.layout.header_building, listView, false);
+        listView.addHeaderView(imageHeader, null, false);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(this);
 
         if (getArguments() != null) {
             int building = getArguments().getInt("building");
@@ -66,31 +78,15 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         return rootView;
     }
 
-    private void initListView(View rootView) {
-
-        parser = BuildingInfoParser.getInstance(getResources().getXml(R.xml.building_info));
-
-//        if (parser.toBuildingList())
-        adapter = new ArrayAdapter<>(
-                context,
-                android.R.layout.simple_list_item_1,
-                parser.toBuildingList()
-        );
-
-        listView = (ListView) rootView.findViewById(R.id.building_list);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(this);
-    }
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-        Intent intent = new Intent(context, ScrollingActivity.class);
-        intent.putExtra("building", Integer.valueOf(position));
+        Intent intent = new Intent(context, CampusMapActivity.class);
+        intent.putExtra("building_id", position);
         startActivity(intent);
     }
 
-    public void sendPath(Parent parent) {
+    /*public void sendPath(Parent parent) {
         LinkedList<Parent> parentArrayList = new LinkedList<>();
         ArrayList<Integer> path = new ArrayList<>();
         while (parent.getParent() != null) {
@@ -123,5 +119,5 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         Intent intent = new Intent(getContext(), CampusMapActivity.class);
         intent.putExtra("path", path);
         startActivity(intent);
-     }
+     }*/
 }

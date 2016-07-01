@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class Map {
     private static final String TAG = "ADP_Drawing";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     /**
      * Width Tile Count

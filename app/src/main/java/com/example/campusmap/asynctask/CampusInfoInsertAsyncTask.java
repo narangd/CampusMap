@@ -50,8 +50,9 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
         }
 
         int count=0;
-        int currentBuildingID=1, currentFloorID=1, currentRoomID=1;
+        int currentBuildingID=0, currentFloorID=0, currentRoomID=0;
 
+        // # Calculate Max #
         for (int ID : IDs) {
             count += getTotalCampusInfoTag(ID);
         }
@@ -62,8 +63,8 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
         for (int ID : IDs) {
             XmlResourceParser parser = mContext.getResources().getXml(ID);
             int number;
-            String name, text;
-            String main;
+            String buildingName="", floorName="", roomName;
+            String text, main;
 
             db.beginTransaction();
             try {
@@ -75,34 +76,37 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
                     switch (parser.getName()) {
                         case "building":  // ## <building num="1" name="100주년 기념관"> ##
                             number = Integer.parseInt(parser.getAttributeValue(ns, "num"));
-                            name = parser.getAttributeValue(ns, "name");
+                            buildingName = parser.getAttributeValue(ns, "name");
                             helper.insertBuilding(db,
-                                    currentBuildingID++,
-                                    number,
-                                    name,
-                                    ""
+                                    currentBuildingID++,             // # id #
+                                    number,                          // # number #
+                                    buildingName,                    // # name #
+                                    ""                               // # description #
                             );
                             break;
                         case "floor":     // ## <floor num="1"> ##
                             number = Integer.parseInt( parser.getAttributeValue(ns, "num") );
+                            floorName = String.valueOf(number)+"층";
                             helper.insertFloor(db,
-                                    currentFloorID++,
-                                    number,
-                                    currentBuildingID
+                                    currentFloorID++,                // # id #
+                                    number,                          // # number #
+                                    currentBuildingID                // # building id #
                             );
                             break;
                         case "room":      // ## <room name="방재센터"> ##
-                            name = parser.getAttributeValue(ns, "name");
+                            roomName = parser.getAttributeValue(ns, "name");
                             main = parser.getAttributeValue(ns, "main");
                             parser.require(XmlResourceParser.START_TAG, ns, "room");
                             parser.next();
                             text = parser.getText();
                             helper.insertRoom(db,
-                                    currentRoomID++,
-                                    name,
-                                    text,
-                                    currentFloorID,
-                                    main != null
+                                    currentRoomID++,                  // # id #
+                                    roomName,                         // # name
+                                    text,                             // # description #
+                                    buildingName + " / " + floorName, // # path string #
+                                    currentFloorID,                   // # floor id #
+                                    currentBuildingID,                // # building id #
+                                    main != null                      // # is main room? #
                             );
                             break;
                     }
@@ -162,11 +166,17 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
 
     public boolean isCompleted() {
         Boolean isCompleted = null;
-        try {
+
+        if (isCancelled()) {
+            return true;
+        }
+
+        try { // 여기서 cancellationexception이 일어난다.
             isCompleted = get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+
         if (isCompleted == null) {
             return true;
         } else {

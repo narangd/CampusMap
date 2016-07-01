@@ -4,22 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.campusapp.CampusMapActivity">
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
-
-        <com.example.campusmap.view.ViewTouchImage
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/campus_map"
-            android:adjustViewBounds="true"
-            android:id="@+id/campus_map_view"
-            android:layout_gravity="center" />
-
-    </FrameLayout>
+    tools:context="com.example.campusmap.fragment.CampusMapFragment">
 
     <ListView
         style="@style/SelectableListView"

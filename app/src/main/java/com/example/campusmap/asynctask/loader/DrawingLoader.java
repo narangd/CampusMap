@@ -18,7 +18,7 @@ import java.util.ArrayList;
  */
 public class DrawingLoader extends AsyncTaskLoader<Drawing> {
     private static final String TAG = "ADP_MapLoader";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private Context mContext;
     private ImageView mImageView;

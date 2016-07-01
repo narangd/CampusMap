@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity
 ////                        bundle.putInt(); // floor
 //                    fragment.setArguments(bundle); // send building to campusmap_fragment
                     Intent intent = new Intent(this, CampusMapActivity.class);
-                    intent.putExtra("building", searchResultItem);
+                    intent.putExtra("search_item", searchResultItem);
                     startActivity(intent);
                 }
             }

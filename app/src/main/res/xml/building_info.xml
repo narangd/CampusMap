@@ -8,14 +8,14 @@
             <room num="4" name="관리실"/>
             <room num="5" name="강사대기실"/>
             <room num="6" name="하역공간"/>
-            <room num="7-1" name="다목적강당(1000석)"/>
-            <room num="8" name="공연장"/>
+            <room num="7-1" name="다목적강당(1000석)" main=""/>
+            <room num="8" name="소극장" main=""/>
             <room num="5" name="강사대기실"/>
         </floor>
         <floor num="2">
             <room num="1" name="갤러리(기획전시실)"/>
             <room num="3" name="A/V 조명 조정실"/>
-            <room num="4" name="100주년 대학 역사관"/>
+            <room num="4" name="100주년 대학 역사관" main=""/>
             <room num="5" name="강사대기실"/>
         </floor>
         <floor num="3">
@@ -52,7 +52,7 @@
                 조윤진
             </room>
             <room num="10" name="니트디자인"/>
-            <room num="11" name="텍스타일디자인학과사무실"/>
+            <room num="11" name="텍스타일디자인학과사무실" main=""/>
             <room num="12" name="교수연구실">
                 이애자
             </room>
@@ -90,7 +90,7 @@
             <room num="10" name="교수연구실">
                 강재중
             </room>
-            <room num="11" name="건축학과사무실"/>
+            <room num="11" name="건축학과사무실" main=""/>
         </floor>
         <floor num="8">
             <room num="1" name="세미나실-2"/>
@@ -116,7 +116,7 @@
                 이봉환
             </room>
             <room num="11" name="준비실"/>
-            <room num="12" name="영어학과사무실"/>
+            <room num="12" name="영어학과사무실" main=""/>
         </floor>
         <floor num="9">
             <room num="1" name="아동실습실-1"/>
@@ -137,10 +137,10 @@
             <room num="10" name="교수연구실">
                 황경애
             </room>
-            <room num="11" name="아동가정복지학과사무실"/>
+            <room num="11" name="아동가정복지학과사무실" main=""/>
         </floor>
         <floor num="10">
-            <room num="1" name="국제교류원 행정실"/>
+            <room num="1" name="국제교류원 행정실" main=""/>
             <room num="2" name="국제교류원 8강의실"/>
             <room num="3" name="국제교류원 7강의실"/>
             <room num="4" name="국제교류원 6강의실"/>
@@ -167,7 +167,7 @@
             <room num="8" name="동영상강의실"/>
             <room num="9" name="창업실습실"/>
             <room num="10" name="창업비즈니스센터"/>
-            <room num="11" name="창업학과사무실"/>
+            <room num="11" name="창업학과사무실" main=""/>
         </floor>
         <floor num="12">
             <room num="1" name="강의실">
@@ -184,7 +184,7 @@
             <room num="6" name="교수연구실">
                 조혜정
             </room>
-            <room num="7" name="사회복지학과사무실"/>
+            <room num="7" name="사회복지학과사무실" main=""/>
             <room num="8" name="교수연구실">
                 강대선
             </room>
@@ -219,7 +219,7 @@
             <room num="10" name="교수연구실">
                 이웅호
             </room>
-            <room num="11" name="산업경제학과사무실"/>
+            <room num="11" name="산업경제학과사무실" main=""/>
         </floor>
         <floor num="14">
             <room num="1" name="접견실"/>
@@ -242,14 +242,11 @@
             <room num="2" name="주방"/>
             <room num="3" name="휴게실"/>
             <room num="4" name="식품창고"/>
-            <room num="5" name="음식물처리실"/>
-            <room num="6" name="화장실-4"/>
-            <room num="7" name="화장실-5"/>
-            <room num="8" name="공조실"/>
+            <room num="7" name="화장실"/>
+            <room name="스카이라운지"  main=""/>
         </floor>
     </building>
     <building num="2" name="학생회관(종실관)">
-
 
     </building>
     <building num="3" name="자연과학실험동">
@@ -569,10 +566,10 @@
     <building num="14" name="제1생활관(자각관)"/>
     <building num="15" name="구)본관">
         <floor num="1">
-            <room num="1" name="신협"/>
-            <room num="2" name="잡카페"/>
+            <room num="1" name="신협" main=""/>
+            <room num="2" name="잡카페" main=""/>
             <room num="3" name="102강의실"/>
-            <room num="4" name="주차관리실"/>
+            <room num="4" name="주차관리실" main=""/>
             <room num="5" name="교환 및 기기실"/>
             <room num="6" name="103강의실"/>
             <room num="7" name="내분비생리학실험실"/>
@@ -583,19 +580,19 @@
             <room num="1" name="CAP실(e-learning)"/>
             <room num="2" name="정독실"/>
             <room num="3" name="205강의실"/>
-            <room num="4" name="공학교육혁신센터"/>
+            <room num="4" name="공학교육혁신센터" main=""/>
             <room num="5" name="외래강사휴게실"/>
             <room num="6" name="201강의실"/>
             <room num="7" name="202강의실"/>
             <room num="8" name="203강의실"/>
             <room num="9" name="에너지공학과 신규 실험실"/>
-            <room num="10" name="청담사상연구소"/>
+            <room num="10" name="청담사상연구소" main=""/>
         </floor>
         <floor num="3">
             <room num="1" name="301강의실"/>
             <room num="2" name="302강의실"/>
             <room num="3" name="평생학습중심대학사업단"/>
-            <room num="4" name="자유전공학부사무실"/>
+            <room num="4" name="자유전공학부사무실" main=""/>
             <room num="5" name="평생학습대학 스터디룸"/>
             <room num="6" name="평생학습대학 스터디룸"/>
             <room num="7" name="회의실"/>
@@ -611,7 +608,7 @@
                 정현영
             </room>
             <room num="13" name="에너지공학과사무실"/>
-            <room num="14" name="산업협력역량개발원"/>
+            <room num="14" name="산업협력역량개발원" main=""/>
             <room num="15" name="창고"/>
         </floor>
     </building>
@@ -705,7 +702,7 @@
                 박치훈
             </room>
             <room num="9" name="캡스톤디자인실6"/>
-            <room num="10" name="컴퓨터정보센터">
+            <room num="10" name="컴퓨터정보센터" main="">
                 정현영
             </room>
             <room num="11" name="캡스톤디자인실1"/>
@@ -726,11 +723,11 @@
             <room num="5" name="강의실"/>
             <room num="7" name="프로그램실습실"/>
             <room num="8" name="IT융합연구회"/>
-            <room num="9" name="컴퓨터공학과사무실"/>
+            <room num="9" name="컴퓨터공학과사무실" main=""/>
             <room num="10" name="프로그래밍언어실습실"/>
         </floor>
         <floor num="3">
-            <room num="1" name="전자공학과사무실"/>
+            <room num="1" name="전자공학과사무실" main=""/>
             <room num="2" name="교수연구실">
                 이병로
             </room>

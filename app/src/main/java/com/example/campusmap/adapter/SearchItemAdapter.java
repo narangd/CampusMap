@@ -1,4 +1,4 @@
-package com.example.campusmap.database;
+package com.example.campusmap.adapter;
 
 import android.content.ContentUris;
 import android.content.Context;
@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.database.SearchResultItem;
 import com.example.campusmap.tree.branch.Parent;
 
 import java.util.LinkedList;
@@ -50,6 +52,7 @@ public class SearchItemAdapter extends ArrayAdapter<SearchResultItem> {
             SQLiteDatabase db = sqLiteHelperCampusInfo.getReadableDatabase();
             String path = sqLiteHelperCampusInfo.searchRoomHierarchy(db, currentItem.mParentId);
             db.close();
+
             text2.setText(path);
 
 //        text2.setText(TextUtils.join(" / ", path));

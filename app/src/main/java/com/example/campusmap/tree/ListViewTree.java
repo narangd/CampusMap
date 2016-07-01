@@ -1,6 +1,7 @@
 package com.example.campusmap.tree;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -13,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.campusmap.R;
+import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.tree.branch.Parent;
 import com.example.campusmap.xmlparser.BuildingInfoParser;
@@ -97,11 +99,29 @@ public class ListViewTree {
         //
         listViews.get(0).setVisibility(View.VISIBLE);
 
-        // 리스트에 파서결과 넣기
+        // ## 리스트에 파서결과 넣기 ##
         buildListView();
 
-        // 이벤트 추가
-        setEventListener();
+        // ## 이벤트 추가 ##
+//        setEventListener();
+    }
+
+    private void buildListView() {
+        /*ArrayList<Parent> list = new ArrayList<Parent>(parser.toBuildingList());
+        ArrayAdapter<Parent> arrayAdapter = new ArrayAdapter<>(
+                context,
+                SIMPLE_LIST_ITEM,
+                list
+        );
+        this.listViews.get(0).setAdapter(arrayAdapter);*/
+        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
+        SQLiteDatabase db = helper.getReadableDatabase();
+        listViews.get(0).setAdapter(new ArrayAdapter<>(
+                context,
+                SIMPLE_LIST_ITEM,
+                helper.getBuildingList(db)
+        ));
+        db.close();
     }
 
     /**
@@ -113,7 +133,7 @@ public class ListViewTree {
             final int currentIndex = treeIndex;
             ListView currentListView = listViews.get(currentIndex);
 
-            // 아이템클릭이벤트
+            // ## 아이템클릭이벤트 ##
             currentListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -121,24 +141,24 @@ public class ListViewTree {
                     if (currentIndex == 0) {
                         buildingClickedIndex = position;
                     }
-                    // 현재 리스트뷰에 맞는 데이터 삽입.
+                    // # 현재 리스트뷰에 맞는 데이터 삽입. #
                     pushBranchItem(currentIndex, position);
                     showChild(currentIndex);
 
-                    // 해당 리스트뷰의 부모들을 어둡게 한다.
+                    // # 해당 리스트뷰의 부모들을 어둡게 한다. #
                     highlightListView(currentIndex);
                 }
             });
-            // 스크롤이벤트
+            // ## 스크롤이벤트 ##
             currentListView.setOnScrollListener(new AbsListView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(AbsListView view, int scrollState) {
                     index = currentIndex;
-                    // 스크롤된 다음 ListView들을 모두 숨긴다.
+                    // # 스크롤된 다음 ListView들을 모두 숨긴다. #
                     listViews.get(currentIndex).setBackgroundColor(showColor);
                     hideChildren(currentIndex + 1);
 
-                    // 해당 리스트뷰의 부모들을 어둡게 한다.
+                    // # 해당 리스트뷰의 부모들을 어둡게 한다. #
                     highlightListView(currentIndex - 1);
                 }
 
@@ -149,16 +169,6 @@ public class ListViewTree {
                 }
             });
         }
-    }
-
-    private void buildListView() {
-        ArrayList<Parent> list = new ArrayList<Parent>(parser.toBuildingList());
-        ArrayAdapter<Parent> arrayAdapter = new ArrayAdapter<>(
-                context,
-                SIMPLE_LIST_ITEM,
-                list
-        );
-        this.listViews.get(0).setAdapter(arrayAdapter);
     }
 
     /**
@@ -200,19 +210,24 @@ public class ListViewTree {
     }
 
     private void pushBranchItem(int deeps, int position) {
+        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
+        SQLiteDatabase db = helper.getReadableDatabase();
+
         switch (deeps) {
             case 0:
-                listViews.get(1).setAdapter(new ArrayAdapter<Parent>(
+                listViews.get(1).setAdapter(new ArrayAdapter<>(
                         context,
                         SIMPLE_LIST_ITEM,
-                        new ArrayList<Parent>(parser.toFloorList(position))
+                        /*new ArrayList<Parent>(parser.toFloorList(position))*/
+                        SQLiteHelperCampusInfo.getInstance(context).getFloorList(db, position)
                 ));
                 break;
             case 1:
-                listViews.get(2).setAdapter(new ArrayAdapter<Parent>(
+                listViews.get(2).setAdapter(new ArrayAdapter<>(
                         context,
                         SIMPLE_LIST_ITEM,
-                        new ArrayList<Parent>(parser.toRoomList(buildingClickedIndex, position))
+                        /*new ArrayList<Parent>(parser.toRoomList(buildingClickedIndex, position))*/
+                        SQLiteHelperCampusInfo.getInstance(context).getRoomList(db, buildingClickedIndex, position)
                 ));
                 break;
         }
