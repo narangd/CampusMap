@@ -45,18 +45,19 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        // ## start IntroView... ##
-        AsyncTask.execute(new Runnable() { // Start Intro Splash...
+        // ## Start IntroActivity... ##
+        new AsyncTask<Void,Void,Void>() {
             @Override
-            public void run() {
+            protected Void doInBackground(Void... params) {
                 if (!isStart) {
                     startActivity(
                             new Intent(MainActivity.this, IntroActivity.class)
                     );
                     isStart = true;
                 }
+                return null;
             }
-        });
+        }.execute();
 
         // ## Layout ##
         super.onCreate(savedInstanceState);
@@ -73,13 +74,16 @@ public class MainActivity extends AppCompatActivity
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        if (mViewPager != null) {
+            mViewPager.setAdapter(mSectionsPagerAdapter);
+        }
 //        mViewPager.setOffscreenPageLimit(0);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
+        if (tabLayout != null) {
+            tabLayout.setupWithViewPager(mViewPager);
+        }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -101,21 +105,26 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-//            startActivity(new Intent(this, ParallaxActiviry.class));
-            SQLiteHelperCampusInfo sqLiteHelperCampusInfo = SQLiteHelperCampusInfo.getInstance(this);
-            SQLiteDatabase db = sqLiteHelperCampusInfo.getWritableDatabase();
+        switch (id) {
+            case  R.id.action_settings:
+//                startActivity(new Intent(this, ParallaxActiviry.class));
+                return true;
+            case R.id.action_reset_db:
+                SQLiteHelperCampusInfo sqLiteHelperCampusInfo = SQLiteHelperCampusInfo.getInstance(this);
+                SQLiteDatabase db = sqLiteHelperCampusInfo.getWritableDatabase();
 
-            sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME);
-            sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME);
-            sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME);
+                sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME);
+                sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME);
+                sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME);
 
-            Toast.makeText(getApplicationContext(), "데이터를 모두 삭제하였습니다.", Toast.LENGTH_SHORT).
-                    show();
+                Toast.makeText(getApplicationContext(), "데이터를 모두 삭제하였습니다.", Toast.LENGTH_SHORT).
+                        show();
 
-            Log.i("MainActivity", "onOptionsItemSelected: Delete Data (building, floor, room");
-
-            return true;
+                Log.i("MainActivity", "onOptionsItemSelected: Delete Data (building, floor, room");
+                return true;
+            case R.id.action_only_test:
+                startActivity(new Intent(this, DrawerTestActivity.class));
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -187,7 +196,7 @@ public class MainActivity extends AppCompatActivity
 //                    bundle.putInt("building", 18);
 ////                        bundle.putInt(); // floor
 //                    fragment.setArguments(bundle); // send building to campusmap_fragment
-                    Intent intent = new Intent(this, CampusMapActivity.class);
+                    Intent intent = new Intent(this, BuildingActivity.class);
                     intent.putExtra("search_item", searchResultItem);
                     startActivity(intent);
                 }
@@ -208,8 +217,9 @@ public class MainActivity extends AppCompatActivity
             switch (position) {
                 case CampusMapFragment.TAP_INDEX: return CampusMapFragment.newInstance();
                 case BuildingInfoFragment.TAP_INDEX: return BuildingInfoFragment.getInstance();
+                case PathFindingFragment.TAP_INDEX: return PathFindingFragment.newInstance();
             }
-            return PathFindingFragment.newInstance();
+            return Fragment.instantiate(getApplicationContext(),"out of index:" + position);
         }
 
         @Override

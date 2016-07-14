@@ -15,18 +15,14 @@ import android.widget.ListView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
-import com.example.campusmap.tree.branch.Building;
-import com.example.campusmap.tree.branch.Parent;
-import com.example.campusmap.xmlparser.BuildingInfoParser;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class ListViewTree {
     private static final int SIMPLE_LIST_ITEM = android.R.layout.simple_list_item_1;
     private Context context;
     final private ArrayList<ListView> listViews;
-    final BuildingInfoParser parser;
+//    final BuildingInfoParser parser;
     Animation appear;
     Animation darkking;
     private final int showColor;
@@ -43,7 +39,7 @@ public class ListViewTree {
     public ListViewTree(Context context) {
         this.context = context;
         listViews = new ArrayList<>();
-        parser = BuildingInfoParser.getInstance(context.getResources().getXml(R.xml.building_info));
+//        parser = BuildingInfoParser.getInstance(context.getResources().getXml(R.xml.building_info));
         appear = null;
         darkking = null;
 

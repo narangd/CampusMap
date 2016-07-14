@@ -5,6 +5,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
@@ -19,14 +22,19 @@ import java.util.concurrent.ExecutionException;
 public class IntroActivity extends Activity {
     private static final String TAG = "IntroActivity";
     private static final boolean DEBUG = true;
+    private TextView mTextStatus;
+    private ProgressBar mProgressLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (DEBUG) Log.i(TAG, "onCreate: =============================================");
 
-        // ## Laytout ##
+        // ## Layout ##
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
+
+        mTextStatus = (TextView) findViewById(R.id.text_status);
+        mProgressLoading = (ProgressBar) findViewById(R.id.progress_loading);
     }
 
     @Override
@@ -40,59 +48,68 @@ public class IntroActivity extends Activity {
         final String BUILDING = SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME;
         final String FLOOR = SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME;
         final String ROOM = SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME;
-        
-        // # check data #
+
+       // ## Check Database ##
+        mTextStatus.setText("데이터베이스 확인중...");
         if (sqLiteHelper.getTableSize(db, BUILDING) == getTagSize(BUILDING) &&
                 sqLiteHelper.getTableSize(db, FLOOR) == getTagSize(FLOOR) &&
                 sqLiteHelper.getTableSize(db, ROOM) == getTagSize(ROOM)) {
-            Log.i(TAG, "onCreate: data is already inserted...");
             db.close();
 
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    finish();
-                }
-            });
+            waitAsyncTask(null);
         } else {
             sqLiteHelper.deleteTable(db, BUILDING);
             sqLiteHelper.deleteTable(db, FLOOR);
             sqLiteHelper.deleteTable(db, ROOM);
             db.close();
 
-            final CampusInfoInsertAsyncTask asyncTask = new CampusInfoInsertAsyncTask(this);
-            asyncTask.execute(R.xml.building_info);
-
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        while (!asyncTask.isCompleted()) {
-                            Thread.sleep(500);
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    Log.i(TAG, "run: done wait..");
-
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    finish();
-
-//                handler.sendEmptyMessage(0);
-                }
-            });
-
+            waitAsyncTask(
+                    new CampusInfoInsertAsyncTask(this).execute(R.xml.building_info)
+            );
         }
+    }
+
+    private void waitAsyncTask(final AsyncTask task) {
+        new AsyncTask<Void,Void,Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                int sleep = 1000;
+
+                try {
+                    if (task != null) {
+                        sleep = 1500;
+                        task.get();
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+
+                publishProgress();
+
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                IntroActivity.this.finish();
+                return null;
+            }
+
+            @Override
+            protected void onProgressUpdate(Void... values) {
+                super.onProgressUpdate(values);
+
+                mTextStatus.setText("");
+                mProgressLoading.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                Log.i(TAG, "onPostExecute: data insert done, wait done.");
+            }
+        }.execute();
     }
 
     public int getTagSize(final String tagName) {

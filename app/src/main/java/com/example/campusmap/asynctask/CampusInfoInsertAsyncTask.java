@@ -78,7 +78,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
                             number = Integer.parseInt(parser.getAttributeValue(ns, "num"));
                             buildingName = parser.getAttributeValue(ns, "name");
                             helper.insertBuilding(db,
-                                    currentBuildingID++,             // # id #
+                                    ++currentBuildingID,             // # id #
                                     number,                          // # number #
                                     buildingName,                    // # name #
                                     ""                               // # description #
@@ -88,7 +88,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
                             number = Integer.parseInt( parser.getAttributeValue(ns, "num") );
                             floorName = String.valueOf(number)+"층";
                             helper.insertFloor(db,
-                                    currentFloorID++,                // # id #
+                                    ++currentFloorID,                // # id #
                                     number,                          // # number #
                                     currentBuildingID                // # building id #
                             );
@@ -100,7 +100,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
                             parser.next();
                             text = parser.getText();
                             helper.insertRoom(db,
-                                    currentRoomID++,                  // # id #
+                                    ++currentRoomID,                  // # id #
                                     roomName,                         // # name
                                     text,                             // # description #
                                     buildingName + " / " + floorName, // # path string #

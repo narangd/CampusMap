@@ -21,9 +21,10 @@
         </activity>
         <activity
             android:name=".activity.IntroActivity"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.NoActionBar" />
         <activity
-            android:name=".activity.BuildingActivity"
+            android:name=".activity.TestActivity"
             android:label="@string/title_activity_building"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -31,7 +32,7 @@
             android:label="@string/title_activity_search_result"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activity.CampusMapActivity"
+            android:name=".activity.BuildingActivity"
             android:label="@string/title_activity_campusmap"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -41,6 +42,10 @@
         <activity
             android:name=".activity.ScrollingActivity"
             android:label="@string/title_activity_scrolling"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.DrawerTestActivity"
+            android:label="@string/title_activity_drawer_test"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

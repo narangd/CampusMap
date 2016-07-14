@@ -9,7 +9,8 @@ import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.Pair;
 
-import java.lang.reflect.Array;
+import com.example.campusmap.tree.branch.Building;
+
 import java.util.ArrayList;
 
 /**
@@ -311,13 +312,13 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         return hierarchy;
     }
 
-    public ArrayList<String> getBuildingList(SQLiteDatabase db) {
-        ArrayList<String> buildingList = new ArrayList<>();
+    public ArrayList<Building> getBuildingList(SQLiteDatabase db) {
+        ArrayList<Building> buildingList = new ArrayList<>();
         Cursor cursor = db.query(
                 BuildingEntry.TABLE_NAME,
                 new String[]{
                         BuildingEntry.COLUMN_NAME_NAME,
-                        BuildingEntry.COLUMN_NAME_NUMBER
+                        BuildingEntry._ID
                 },
                 null, null,
                 null, null,
@@ -325,8 +326,8 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         );
         while (cursor.moveToNext()) {
             String name = cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME));
-            String number = cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NUMBER));
-            buildingList.add( name + "(" + number + ")");
+            int id = cursor.getInt(cursor.getColumnIndex(BuildingEntry._ID));
+            buildingList.add( new Building(id, name) );
         }
         cursor.close();
         return buildingList;

@@ -106,4 +106,12 @@
         "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
         "when a user tries to pick up one of cards.\n\n"
     </string>
+    <string name="action_reset_db">디비 초기화</string>
+    <string name="desc_building_image">앱 로고</string>
+    <string name="test_text">이 글은 테스트용입니다.</string>
+    <string name="title_activity_drawer_test">DrawerTestActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_only_test">for test</string>
 </resources>

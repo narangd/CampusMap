@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.tree.ListViewTree;
@@ -38,12 +37,6 @@ public class BuildingInfoFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_building_info, container, false);
         context = rootView.getContext();
-        initListViews(rootView);
-
-        return rootView;
-    }
-
-    private void initListViews(View rootview) {
 
         listViewTree = new ListViewTree(context);
 
@@ -53,17 +46,23 @@ public class BuildingInfoFragment extends Fragment {
         );
 
         listViewTree.setRoot(
-                (ListView) rootview.findViewById(R.id.buildinginfo_buildinglist)
+                (ListView) rootView.findViewById(R.id.buildinginfo_buildinglist)
         );
         listViewTree.addBranch(
-                (ListView) rootview.findViewById(R.id.buildinginfo_floorlist)
+                (ListView) rootView.findViewById(R.id.buildinginfo_floorlist)
         );
         listViewTree.addBranch(
-                (ListView) rootview.findViewById(R.id.buildinginfo_roomlist)
+                (ListView) rootView.findViewById(R.id.buildinginfo_roomlist)
         );
+
+        return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
 
         listViewTree.complete();
-
     }
 
     public void onBackPressed() {

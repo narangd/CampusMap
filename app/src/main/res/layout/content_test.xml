@@ -6,8 +6,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:showIn="@layout/activity_building"
-    tools:context="com.example.campusmap.activity.BuildingActivity">
+    tools:showIn="@layout/activity_test"
+    tools:context=".activity.TestActivity">
 
     <TextView
         android:layout_width="match_parent"

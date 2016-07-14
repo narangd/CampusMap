@@ -2,34 +2,49 @@ package com.example.campusmap.fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.campusmap.R;
-import com.example.campusmap.activity.CampusMapActivity;
-import com.example.campusmap.activity.ScrollingActivity;
+import com.example.campusmap.activity.BuildingActivity;
+import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.tree.branch.Building;
-import com.example.campusmap.tree.branch.Floor;
-import com.example.campusmap.tree.branch.Parent;
-import com.example.campusmap.xmlparser.BuildingInfoParser;
+import com.example.campusmap.tree.branch.BuildingLocation;
+import com.example.campusmap.view.TouchImageView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 
 public class CampusMapFragment extends Fragment implements AdapterView.OnItemClickListener {
+    private static final String TAG = "CampusMapFragment";
     public static final int TAP_INDEX = 0;
     private static CampusMapFragment fragment = null;
+
     private Context context;
+    private ListView mListView;
+    private ArrayAdapter<Building> mAdapter;
+    private Toast mToast;
+    private ViewGroup mImageHeader;
+    private TouchImageView mTouchImageView;
+    private ArrayList<BuildingLocation> mTrigerBoxes = new ArrayList<>();
 
     /**
      * return only one CampusMapFragment.
@@ -39,9 +54,6 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         if (fragment == null) {
             fragment = new CampusMapFragment();
         }
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        fragment.setArguments(args);
         return fragment;
     }
 
@@ -55,69 +67,99 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         View rootView = inflater.inflate(R.layout.fragment_campus_map, container, false);
         context = rootView.getContext();
 
-        BuildingInfoParser parser = BuildingInfoParser.getInstance(getResources().getXml(R.xml.building_info));
+        mToast = Toast.makeText(context, "", Toast.LENGTH_SHORT);
 
-//        if (parser.toBuildingList())
-        ArrayAdapter<Building> adapter = new ArrayAdapter<>(
-                context,
-                android.R.layout.simple_list_item_1,
-                parser.toBuildingList()
-        );
-
-        ListView listView = (ListView) rootView.findViewById(R.id.building_list);
-        ViewGroup imageHeader = (ViewGroup) inflater.inflate(R.layout.header_building, listView, false);
-        listView.addHeaderView(imageHeader, null, false);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(this);
+        mListView = (ListView) rootView.findViewById(R.id.building_list);
+        mImageHeader = (ViewGroup) inflater.inflate(R.layout.header_building, mListView, false);
+        if (mImageHeader != null) {
+            mTouchImageView = (TouchImageView) mImageHeader.findViewById(R.id.campus_map_view);
+        }
+        if (mListView != null) {
+            mListView.addHeaderView(mImageHeader, null, false);
+        }
 
         if (getArguments() != null) {
             int building = getArguments().getInt("building");
             onItemClick(null, null, building, 0);
         }
 
+        InputStream inputStream = context.getResources().openRawResource(R.raw.building_location);
+        InputStreamReader isReader = new InputStreamReader(inputStream);
+        BufferedReader reader = new BufferedReader(isReader);
+//        JsonReader jsonReader  = new JsonReader(stream.toString());
+
+        try {
+            String in = "";
+            String buffer;
+            while ((buffer=reader.readLine())!=null) {
+                in += buffer;
+            }
+            Log.i(TAG, "onCreateView: JsonReader->" + in);
+            JSONArray jsonArray = new JSONArray(in);
+            for (int i=0; i<jsonArray.length(); i++) {
+                JSONObject object = jsonArray.getJSONObject(i);
+                mTrigerBoxes.add(new BuildingLocation(
+                        object.getInt("id"),
+                        new Rect(
+                                object.getInt("left"),
+                                object.getInt("top"),
+                                object.getInt("right"),
+                                object.getInt("bottom")
+                        )
+                ));
+            }
+            Log.i(TAG, "onCreateView: TrigerBoes->" + mTrigerBoxes.size());
+            reader.close();
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+
         return rootView;
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onStart() {
+        super.onStart();
 
-        Intent intent = new Intent(context, CampusMapActivity.class);
-        intent.putExtra("building_id", position);
-        startActivity(intent);
+        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
+        SQLiteDatabase db = helper.getReadableDatabase();
+
+        if (mTouchImageView != null) {
+            mTouchImageView.setMaxZoom(4.0f);
+            mTouchImageView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    int perX = (int) (event.getX() / v.getWidth() * 100);
+                    int perY = (int) (event.getY() / v.getHeight() * 100);
+//                    for (BuildingLocation bLoc : mTrigerBoxes) {
+//                        if (bLoc.contains(perX, perY)) {
+//                            mToast.setText(bLoc.getID()+"-건물로 떠납니다.");
+//                            mToast.show();
+//                            break;
+//                        }
+//                    }
+                    // view 기준으로 검색하므로 확대를 하였을 때 적용되지 않는다.
+                    return true;
+                }
+            });
+        }
+
+        if (mListView != null) {
+            mAdapter = new ArrayAdapter<>(
+                    context,
+                    android.R.layout.simple_list_item_1,
+                    helper.getBuildingList(db)
+            );
+            mListView.setAdapter(mAdapter);
+            mListView.setOnItemClickListener(this);
+        }
     }
 
-    /*public void sendPath(Parent parent) {
-        LinkedList<Parent> parentArrayList = new LinkedList<>();
-        ArrayList<Integer> path = new ArrayList<>();
-        while (parent.getParent() != null) {
-            parentArrayList.addFirst(parent.getParent());
-            parent = parent.getParent();
-        }
-        if (parentArrayList.size() <= 0) {
-            return;
-        }
-
-        if (parentArrayList.size() > 0) {
-            for (Building building : parser.toBuildingList()) {
-                if (building.toString().equals(parentArrayList.get(0).toString())) {
-                    path.add(parser.toBuildingList().indexOf(building));
-                    break;
-                }
-            }
-        }
-        if (parentArrayList.size() > 1) {
-            for (Floor floor : parser.toFloorList(path.get(0))) {
-                if (floor.toString().equals(parentArrayList.get(1).toString())) {
-                    path.add(parser.toFloorList(path.get(0)).indexOf(floor));
-                    break;
-                }
-            }
-        }
-
-        Toast.makeText(context, Arrays.toString(parentArrayList.toArray()) + "를 찾습니다.(" + Arrays.toString(path.toArray()) + ")", Toast.LENGTH_LONG)
-                .show();
-        Intent intent = new Intent(getContext(), CampusMapActivity.class);
-        intent.putExtra("path", path);
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Intent intent = new Intent(context, BuildingActivity.class);
+        intent.putExtra(BuildingActivity.BUILDING_TAG, mAdapter.getItem(position-1)); // id to index
         startActivity(intent);
-     }*/
+    }
 }

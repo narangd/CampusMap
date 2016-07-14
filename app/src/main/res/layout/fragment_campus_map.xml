@@ -7,9 +7,10 @@
     tools:context="com.example.campusmap.fragment.CampusMapFragment">
 
     <ListView
-        style="@style/SelectableListView"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:id="@+id/building_list" />
+        android:id="@+id/building_list"
+        android:choiceMode="singleChoice"
+        android:background="?android:attr/activatedBackgroundIndicator" />
 
 </LinearLayout>
