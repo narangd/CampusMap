@@ -70,7 +70,7 @@ public class BuildingInfoFragment extends Fragment {
     }
 
     public int getIndex() {
-        return listViewTree.getIndex();
+        return listViewTree.getFocusedIndex();
     }
 
 }

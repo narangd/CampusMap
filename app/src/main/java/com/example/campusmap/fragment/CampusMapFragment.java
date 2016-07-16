@@ -3,12 +3,9 @@ package com.example.campusmap.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -23,14 +20,6 @@ import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.tree.branch.BuildingLocation;
 import com.example.campusmap.view.TouchImageView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class CampusMapFragment extends Fragment implements AdapterView.OnItemClickListener {
@@ -82,39 +71,6 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
             int building = getArguments().getInt("building");
             onItemClick(null, null, building, 0);
         }
-
-        InputStream inputStream = context.getResources().openRawResource(R.raw.building_location);
-        InputStreamReader isReader = new InputStreamReader(inputStream);
-        BufferedReader reader = new BufferedReader(isReader);
-//        JsonReader jsonReader  = new JsonReader(stream.toString());
-
-        try {
-            String in = "";
-            String buffer;
-            while ((buffer=reader.readLine())!=null) {
-                in += buffer;
-            }
-            Log.i(TAG, "onCreateView: JsonReader->" + in);
-            JSONArray jsonArray = new JSONArray(in);
-            for (int i=0; i<jsonArray.length(); i++) {
-                JSONObject object = jsonArray.getJSONObject(i);
-                mTrigerBoxes.add(new BuildingLocation(
-                        object.getInt("id"),
-                        new Rect(
-                                object.getInt("left"),
-                                object.getInt("top"),
-                                object.getInt("right"),
-                                object.getInt("bottom")
-                        )
-                ));
-            }
-            Log.i(TAG, "onCreateView: TrigerBoes->" + mTrigerBoxes.size());
-            reader.close();
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
-
-
         return rootView;
     }
 
@@ -127,22 +83,6 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
 
         if (mTouchImageView != null) {
             mTouchImageView.setMaxZoom(4.0f);
-            mTouchImageView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    int perX = (int) (event.getX() / v.getWidth() * 100);
-                    int perY = (int) (event.getY() / v.getHeight() * 100);
-//                    for (BuildingLocation bLoc : mTrigerBoxes) {
-//                        if (bLoc.contains(perX, perY)) {
-//                            mToast.setText(bLoc.getID()+"-건물로 떠납니다.");
-//                            mToast.show();
-//                            break;
-//                        }
-//                    }
-                    // view 기준으로 검색하므로 확대를 하였을 때 적용되지 않는다.
-                    return true;
-                }
-            });
         }
 
         if (mListView != null) {

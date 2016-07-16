@@ -1,34 +1,28 @@
 package com.example.campusmap.tree.branch;
 
-import android.support.annotation.NonNull;
+import java.io.Serializable;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
+public class Floor implements Serializable {
+    private int mID;
+    private final int mFloor;
+    private int mBuildingID;
 
-public class Floor extends LinkedList<Room> implements Parent{
-    private int num;
-    private Parent parent;
-
-    public Floor(int num, Parent parent) {
-        this.num = num;
-        this.parent = parent;
+    public Floor(int id, int floor, int buildingID) {
+        mID = id;
+        mFloor = floor;
+        mBuildingID = buildingID;
     }
 
-    public int getNum() {
-        return num;
+    public int getID() {
+        return mID;
+    }
+
+    public int getBuildingID() {
+        return mBuildingID;
     }
 
     @Override
     public String toString() {
-        return String.format("%2d층", num);
-    }
-
-    @Override
-    public Parent getParent() {
-        return parent;
-    }
-    @Override
-    public int compareTo(@NonNull Parent another) {
-        return toString().compareTo(another.toString());
+        return mFloor + "층";
     }
 }

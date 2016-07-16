@@ -15,20 +15,25 @@ import android.widget.ListView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.tree.branch.Building;
+import com.example.campusmap.tree.branch.Floor;
+import com.example.campusmap.tree.branch.Room;
 
 import java.util.ArrayList;
 
 public class ListViewTree {
     private static final int SIMPLE_LIST_ITEM = android.R.layout.simple_list_item_1;
     private Context context;
-    final private ArrayList<ListView> listViews;
-//    final BuildingInfoParser parser;
-    Animation appear;
-    Animation darkking;
+    final private ArrayList<ListView> mListViews;
+    private ArrayAdapter<Building> mBuildingAdapter;
+    private ArrayAdapter<Floor> mFloorAdapter;
+    private ArrayAdapter<Room> mRoomAdapter;
+    private Animation appear;
+    private Animation darkking;
     private final int showColor;
     private final int hideColor;
     private int buildingClickedIndex;
-    private int index = 0;
+    private int mFocusedIndex = 0;
 
 
     /**
@@ -38,8 +43,7 @@ public class ListViewTree {
      */
     public ListViewTree(Context context) {
         this.context = context;
-        listViews = new ArrayList<>();
-//        parser = BuildingInfoParser.getInstance(context.getResources().getXml(R.xml.building_info));
+        mListViews = new ArrayList<>();
         appear = null;
         darkking = null;
 
@@ -63,15 +67,15 @@ public class ListViewTree {
      */
     public void setRoot(@NonNull ListView listView) {
         try {
-            if (listViews.size() > 0)
+            if (mListViews.size() > 0)
                 throw  new Exception("루트를 지정하기 전에 생성된 가지(Branch)가 있습니다.");
         } catch (Exception e) {
             e.printStackTrace();
-            listViews.clear();
+            mListViews.clear();
             Log.w("Exception", "listPartners를 비웠습니다..");
         } finally {
             listView.setVisibility(View.INVISIBLE);
-            listViews.add(listView);
+            mListViews.add(listView);
         }
     }
 
@@ -81,7 +85,7 @@ public class ListViewTree {
      */
     public void addBranch(@NonNull ListView listView) {
         listView.setVisibility(View.INVISIBLE);
-        listViews.add(listView);
+        mListViews.add(listView);
     }
 
     /**
@@ -93,52 +97,54 @@ public class ListViewTree {
         if (appear==null || darkking==null)
             throw  new NullPointerException("appear Animation or darking Animation is null");
         //
-        listViews.get(0).setVisibility(View.VISIBLE);
+        mListViews.get(0).setVisibility(View.VISIBLE);
 
         // ## 리스트에 파서결과 넣기 ##
         buildListView();
 
         // ## 이벤트 추가 ##
-//        setEventListener();
+        setEventListener();
     }
 
     private void buildListView() {
-        /*ArrayList<Parent> list = new ArrayList<Parent>(parser.toBuildingList());
-        ArrayAdapter<Parent> arrayAdapter = new ArrayAdapter<>(
-                context,
-                SIMPLE_LIST_ITEM,
-                list
-        );
-        this.listViews.get(0).setAdapter(arrayAdapter);*/
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
         SQLiteDatabase db = helper.getReadableDatabase();
-        listViews.get(0).setAdapter(new ArrayAdapter<>(
-                context,
-                SIMPLE_LIST_ITEM,
-                helper.getBuildingList(db)
-        ));
+
+        if (mBuildingAdapter == null) {
+            mBuildingAdapter = new ArrayAdapter<>(
+                    context,
+                    SIMPLE_LIST_ITEM
+            );
+        }
+        mBuildingAdapter.clear();
+        mBuildingAdapter.addAll(helper.getBuildingList(db));
+
+        mListViews.get(0).setAdapter(mBuildingAdapter);
         db.close();
     }
 
     /**
      * 이벤트리스너를 추가한다.
+     * 0:층리스트를 불러옴.
+     * 1:룸리스트를 불러옴.
+     * 2:층상세로 이동.
      */
     private void setEventListener() {
-        final int lastIndex = listViews.size() - 1;
+        final int lastIndex = mListViews.size() - 1;
         for (int treeIndex=0; treeIndex<lastIndex; treeIndex++) {
             final int currentIndex = treeIndex;
-            ListView currentListView = listViews.get(currentIndex);
+            ListView currentListView = mListViews.get(currentIndex);
 
             // ## 아이템클릭이벤트 ##
             currentListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    index = currentIndex+1;
+                    mFocusedIndex = currentIndex+1;
                     if (currentIndex == 0) {
                         buildingClickedIndex = position;
                     }
                     // # 현재 리스트뷰에 맞는 데이터 삽입. #
-                    pushBranchItem(currentIndex, position);
+                    pushBranchItem(currentIndex+1, position);
                     showChild(currentIndex);
 
                     // # 해당 리스트뷰의 부모들을 어둡게 한다. #
@@ -149,9 +155,9 @@ public class ListViewTree {
             currentListView.setOnScrollListener(new AbsListView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(AbsListView view, int scrollState) {
-                    index = currentIndex;
+                    mFocusedIndex = currentIndex;
                     // # 스크롤된 다음 ListView들을 모두 숨긴다. #
-                    listViews.get(currentIndex).setBackgroundColor(showColor);
+                    mListViews.get(currentIndex).setBackgroundColor(showColor);
                     hideChildren(currentIndex + 1);
 
                     // # 해당 리스트뷰의 부모들을 어둡게 한다. #
@@ -169,17 +175,17 @@ public class ListViewTree {
 
     /**
      * 클릭된 리스트뷰의 자식의 레이아웃이 나타난다.
-     * @param index : 현재 listViews 의 위치
+     * @param index : 현재 mListViews 의 위치
      */
     private void showChild(int index) {
-        int lastIndex = listViews.size() - 1;
+        int lastIndex = mListViews.size() - 1;
 
         // 모든 자식을 숨긴다.
         hideChildren(index + 1);
 
+        // 리스트뷰를 나타나게 한다.
         if (index < lastIndex) {
-            // 리스트뷰를 나타나게 한다.
-            ListView currentListView = listViews.get(index+ 1);
+            ListView currentListView = mListViews.get(index+ 1);
             currentListView.setVisibility(View.VISIBLE);
             currentListView.startAnimation(appear);
             currentListView.setBackgroundColor(showColor);
@@ -187,9 +193,9 @@ public class ListViewTree {
     }
 
     private void highlightListView(int index) {
-        for (int i=0; index-i>=0; i++) {
+        for (int i=0; i<=index; i++) {
             float rate = (float)Math.pow(0.7, (i)+1);
-            listViews.get(index - i).setBackgroundColor(darker(hideColor, rate));
+            mListViews.get(index - i).setBackgroundColor(darker(hideColor, rate));
         }
     }
 
@@ -198,8 +204,8 @@ public class ListViewTree {
      * @param index : 현재 listpartners 의 위치
      */
     private void hideChildren(int index) {
-        for (int i=index; i< listViews.size(); i++) {
-            ListView currentListView = listViews.get(i);
+        for (int i = index; i< mListViews.size(); i++) {
+            ListView currentListView = mListViews.get(i);
             currentListView.clearAnimation();
             currentListView.setVisibility(View.INVISIBLE);
         }
@@ -209,24 +215,44 @@ public class ListViewTree {
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
         SQLiteDatabase db = helper.getReadableDatabase();
 
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(
+                context,
+                SIMPLE_LIST_ITEM
+        );
+
         switch (deeps) {
-            case 0:
-                listViews.get(1).setAdapter(new ArrayAdapter<>(
-                        context,
-                        SIMPLE_LIST_ITEM,
-                        /*new ArrayList<Parent>(parser.toFloorList(position))*/
-                        SQLiteHelperCampusInfo.getInstance(context).getFloorList(db, position)
-                ));
+            case 1: // get floor list
+                if (mFloorAdapter == null) {
+                    mFloorAdapter = new ArrayAdapter<>(
+                            context,
+                            SIMPLE_LIST_ITEM
+                    );
+                }
+                mFloorAdapter.clear();
+                Building currentBuilding = mBuildingAdapter.getItem(position);
+                mFloorAdapter.addAll(helper.getFloorList(db, currentBuilding.getID()));
+                for (int i=0; i<mFloorAdapter.getCount(); i++) {
+                    Floor floor = mFloorAdapter.getItem(i);
+                    dataAdapter.add(floor.toString());
+                }
                 break;
-            case 1:
-                listViews.get(2).setAdapter(new ArrayAdapter<>(
-                        context,
-                        SIMPLE_LIST_ITEM,
-                        /*new ArrayList<Parent>(parser.toRoomList(buildingClickedIndex, position))*/
-                        SQLiteHelperCampusInfo.getInstance(context).getRoomList(db, buildingClickedIndex, position)
-                ));
+            case 2: // get room list
+                if (mRoomAdapter == null) {
+                    mRoomAdapter = new ArrayAdapter<>(
+                            context,
+                            SIMPLE_LIST_ITEM
+                    );
+                }
+                mRoomAdapter.clear();
+                Floor currentFloor = mFloorAdapter.getItem(position);
+                mRoomAdapter.addAll( helper.getRoomList(db, currentFloor.getBuildingID(), currentFloor.getID()) );
+                for (int i=0; i<mRoomAdapter.getCount(); i++) {
+                    Room room = mRoomAdapter.getItem(i);
+                    dataAdapter.add(room.toString());
+                }
                 break;
         }
+        mListViews.get(deeps).setAdapter(dataAdapter);
     }
 
 
@@ -237,16 +263,16 @@ public class ListViewTree {
         return Color.HSVToColor(hsv);
     }
 
-    public int getIndex() {
-        return index;
+    public int getFocusedIndex() {
+        return mFocusedIndex;
     }
 
 
     public void hideLastListView() {
         //Log.i("Index", "current index : " + index);
-        listViews.get(index).setVisibility(View.INVISIBLE);
-        listViews.get(index-1).setBackgroundColor(showColor);
-        highlightListView(index - 2);
-        index--;
+        mListViews.get(mFocusedIndex).setVisibility(View.INVISIBLE);
+        mListViews.get(mFocusedIndex -1).setBackgroundColor(showColor);
+        highlightListView(mFocusedIndex - 2);
+        mFocusedIndex--;
     }
 }

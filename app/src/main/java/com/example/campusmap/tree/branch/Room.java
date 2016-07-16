@@ -1,37 +1,38 @@
 package com.example.campusmap.tree.branch;
 
-import android.support.annotation.NonNull;
+import java.io.Serializable;
 
-import java.util.Iterator;
+public class Room implements Serializable {
+    private int mID;
+    private String mName;
+    private String mText;
+    private int mBuildingID;
+    private int mFloorID;
 
-public class Room implements Parent {
-    private String name;
-    private String text;
-    private Parent parent;
-
-    public Room(String name, String text, Parent parent) {
-        this.name = name;
-        this.text = text;
-        this.parent = parent;
+    public Room(int id, String name, String text, int buildingID, int floorID) {
+        mID = id;
+        mName = name;
+        mText = text;
+        mBuildingID = buildingID;
+        mFloorID = floorID;
     }
+
+    public int getID() { return mID; }
 
     public String getName() {
-        return name;
+        return mName;
     }
 
-    public String getText() { return text; }
+    public String getText() {
+        return mText;
+    }
+
+    public int getBuildingID() { return mBuildingID; }
+
+    public int getFloorID() { return mFloorID; }
 
     @Override
     public String toString() {
-        return String.format("%s", name) + (text==null ? "" : "\n\t"+text.trim());
-    }
-
-    @Override
-    public Parent getParent() {
-        return parent;
-    }
-    @Override
-    public int compareTo(@NonNull Parent another) {
-        return toString().compareTo(another.toString());
+        return mName + (mText==null ? "" : "\n\t"+ mText.trim());
     }
 }

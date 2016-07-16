@@ -10,6 +10,8 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.example.campusmap.tree.branch.Building;
+import com.example.campusmap.tree.branch.Floor;
+import com.example.campusmap.tree.branch.Room;
 
 import java.util.ArrayList;
 
@@ -333,11 +335,12 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         return buildingList;
     }
 
-    public ArrayList<String> getFloorList(SQLiteDatabase db, int buildingID) {
-        ArrayList<String> floorList = new ArrayList<>();
+    public ArrayList<Floor> getFloorList(SQLiteDatabase db, int buildingID) {
+        ArrayList<Floor> floorList = new ArrayList<>();
         Cursor cursor = db.query(
                 FloorEntry.TABLE_NAME,
                 new String[]{
+                        FloorEntry._ID,
                         FloorEntry.COLUMN_NAME_NUMBER
                 },
                 FloorEntry.COLUMN_NAME_BUILDING_ID + " =?",
@@ -346,19 +349,22 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 FloorEntry._ID + ORDER_BY_ASCENDING
         );
         while (cursor.moveToNext()) {
-            String number = cursor.getString(cursor.getColumnIndex(FloorEntry.COLUMN_NAME_NUMBER));
-            floorList.add( number + "층-" + buildingID );
+            int id = cursor.getInt(cursor.getColumnIndex(FloorEntry._ID));
+            int number = cursor.getInt(cursor.getColumnIndex(FloorEntry.COLUMN_NAME_NUMBER));
+            floorList.add( new Floor(id, number, buildingID) );
         }
         cursor.close();
         return floorList;
     }
 
-    public ArrayList<String> getRoomList(SQLiteDatabase db, int buildingID, int floorID) {
-        ArrayList<String> roomList = new ArrayList<>();
+    public ArrayList<Room> getRoomList(SQLiteDatabase db, int buildingID, int floorID) {
+        ArrayList<Room> roomList = new ArrayList<>();
         Cursor cursor = db.query(
                 RoomEntry.TABLE_NAME,
                 new String[]{
-                        RoomEntry.COLUMN_NAME_NAME
+                        RoomEntry._ID,
+                        RoomEntry.COLUMN_NAME_NAME,
+                        RoomEntry.COLUMN_NAME_DESCRIPTION
                 },
                 RoomEntry.COLUMN_NAME_BUILDING_ID + "=? AND " + RoomEntry.COLUMN_NAME_FLOOR_ID + "=?",
                 new String[]{String.valueOf(buildingID), String.valueOf(floorID)},
@@ -366,8 +372,10 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 RoomEntry._ID + ORDER_BY_ASCENDING
         );
         while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex(RoomEntry._ID));
             String name = cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME));
-            roomList.add( name + "-b" + buildingID + "-f" + floorID );
+            String text = cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_DESCRIPTION));
+            roomList.add( new Room(id, name, text, buildingID, floorID) );
         }
         cursor.close();
         return roomList;
