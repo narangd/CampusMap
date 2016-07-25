@@ -99,7 +99,7 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent = new Intent(context, BuildingActivity.class);
-        intent.putExtra(BuildingActivity.BUILDING_TAG, mAdapter.getItem(position-1)); // id to index
+        intent.putExtra(BuildingActivity.KEY_BUILDING, mAdapter.getItem(position-1)); // id to index
         startActivity(intent);
     }
 }

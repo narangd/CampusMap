@@ -12,8 +12,8 @@ import com.example.campusmap.tree.branch.Room;
 
 public class BuildingActivity extends AppCompatActivity {
     private static final String TAG = "BuildingActivity";
-    public static final String BUILDING_TAG = "building";
-    public static final String ROOM_TAG = "room";
+    public static final String KEY_BUILDING = "building";
+    public static final String KEY_ROOM = "room";
 
     private ViewPager mViewPager;
     private Building mBuilding;
@@ -27,8 +27,8 @@ public class BuildingActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
 
         Intent intent = getIntent();
-        mBuilding = (Building)intent.getSerializableExtra(BUILDING_TAG);
-        mRoom = (Room) intent.getSerializableExtra(ROOM_TAG);
+        mBuilding = (Building)intent.getSerializableExtra(KEY_BUILDING);
+        mRoom = (Room) intent.getSerializableExtra(KEY_ROOM);
 
 //        Serializable serializableExtra = getIntent().getSerializableExtra("search_item");
 //        SearchResultItem resultItem = (SearchResultItem) serializableExtra;

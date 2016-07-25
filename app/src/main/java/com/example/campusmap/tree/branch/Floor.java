@@ -17,6 +17,10 @@ public class Floor implements Serializable {
         return mID;
     }
 
+    public int getFloor() {
+        return mFloor;
+    }
+
     public int getBuildingID() {
         return mBuildingID;
     }

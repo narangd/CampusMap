@@ -2,12 +2,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.campusmap.fragment.FloorListFragment">
+    tools:context="com.example.campusmap.fragment.RoomListFragment">
 
     <ListView
-        android:id="@+id/list_room"
+        android:id="@+id/room_listview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?android:attr/activatedBackgroundIndicator" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>

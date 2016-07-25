@@ -1,103 +1,141 @@
 package com.example.campusmap.activity;
 
+import android.content.ContentValues;
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.view.SubMenu;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import com.example.campusmap.R;
+import com.example.campusmap.adapter.MainRoomArrayAdapter;
+import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.fragment.pager.FloorPagerAdapter;
 
 public class DrawerTestActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final String TAG = "DrawerTestActivity";
+    public static final String KEY_BUILDING = "building";
+
+    private DrawerLayout mDrawer;
+    private ArrayAdapter<Pair<String,Integer[]>> mAdapter;
+    private ViewPager mFloorPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drawer_test);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        // ## Toolbar ##
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        // ## Drawer ##
+        mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-//        drawer.setDrawerListener(toggle);
+                this, mDrawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+//        mDrawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        Intent intent = getIntent();
+        int buildingID = intent.getIntExtra(BuildingActivity.KEY_BUILDING, -1);
+        if (buildingID == -1) {
+            finish();
+        }
+
+        // ## Get DataBase ##
+        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
+        SQLiteDatabase db = helper.getReadableDatabase();
+
+        // ## Get Building Detail ##
+        ContentValues buildingDetailValues = helper.getBuildingDetail(db, buildingID /* 100주년기념관 */);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(
+                    buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_NAME)
+            );
+            Log.i(TAG, "onStart: ToolBar Title : " + getSupportActionBar().getTitle());
+        }
+
+        // ## Building Description ##
+        TextView mDescTextView = (TextView) findViewById(R.id.description);
+        if (mDescTextView != null) {
+            mDescTextView.setText(
+                    buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_DESCRIPTION)
+            );
+        }
+
+        // ## Main Rooms ##
+        mAdapter = new MainRoomArrayAdapter(
+                this,
+                android.R.layout.simple_list_item_1,
+                helper.getMainRooms(db, buildingID /* 100주년기념관 */)
+        );
+
+        // ## Insert SubMenu Into NavigationView ##
+        NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (mNavigationView != null) {
+            mNavigationView.setNavigationItemSelectedListener(this);
+            Menu menu = mNavigationView.getMenu();
+            SubMenu subMenu = menu.addSubMenu(this.getResources().getString(R.string.sub_title_main_rooms));
+
+            for (int i=0; i<mAdapter.getCount(); i++) {
+                Pair<String, Integer[]> item = mAdapter.getItem(i);
+                subMenu.add(Menu.FIRST, i, 0, item.first);
+            }
+        }
+
+        // ## FloorPager ##
+        mFloorPager = (ViewPager) findViewById(R.id.floor_pager);
+        if (mFloorPager != null) {
+            mFloorPager.setAdapter(new FloorPagerAdapter(getSupportFragmentManager(), this, buildingID));
+        }
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        if (tabLayout != null) {
+            tabLayout.setupWithViewPager(mFloorPager);
+        }
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (mDrawer != null && mDrawer.isDrawerOpen(GravityCompat.START)) {
+            mDrawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.drawer_test, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(MenuItem menuItem) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
+        int id = menuItem.getItemId();
+        int groupID = menuItem.getGroupId();
+        Log.i(TAG, "onNavigationItemSelected: item id : " + id);
+        Log.i(TAG, "onNavigationItemSelected: item group id : " + groupID);
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (groupID == Menu.FIRST) {
+            Log.i(TAG, "onNavigationItemSelected: index : " + id);
 
-        } else if (id == R.id.nav_slideshow) {
+            Pair<String, Integer[]> item = mAdapter.getItem(id);
+            Log.i(TAG, "onNavigationItemSelected: Building : " + item.first + ", [" + item.second[0] + "," + item.second[1] + "," + item.second[2] + "]");
 
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+//            mFloorPager.focusRoom(id, item.second[2]);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        mDrawer.closeDrawer(GravityCompat.START);
         return true;
     }
 }

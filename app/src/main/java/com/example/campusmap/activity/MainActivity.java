@@ -123,7 +123,9 @@ public class MainActivity extends AppCompatActivity
                 Log.i("MainActivity", "onOptionsItemSelected: Delete Data (building, floor, room");
                 return true;
             case R.id.action_only_test:
-                startActivity(new Intent(this, DrawerTestActivity.class));
+                Intent intent = new Intent(this, DrawerTestActivity.class);
+                intent.putExtra(DrawerTestActivity.KEY_BUILDING, 1);
+                startActivity(intent);
                 return true;
         }
 
