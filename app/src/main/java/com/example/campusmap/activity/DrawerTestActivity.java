@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -23,7 +24,9 @@ import android.widget.TextView;
 import com.example.campusmap.R;
 import com.example.campusmap.adapter.MainRoomArrayAdapter;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.fragment.RoomListFragment;
 import com.example.campusmap.fragment.pager.FloorPagerAdapter;
+import com.example.campusmap.tree.branch.Floor;
 
 public class DrawerTestActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -34,6 +37,7 @@ public class DrawerTestActivity extends AppCompatActivity
     private DrawerLayout mDrawer;
     private ArrayAdapter<Pair<String,Integer[]>> mAdapter;
     private ViewPager mFloorPager;
+    private FloorPagerAdapter mFloorAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +105,8 @@ public class DrawerTestActivity extends AppCompatActivity
         // ## FloorPager ##
         mFloorPager = (ViewPager) findViewById(R.id.floor_pager);
         if (mFloorPager != null) {
-            mFloorPager.setAdapter(new FloorPagerAdapter(getSupportFragmentManager(), this, buildingID));
+            mFloorAdapter = new FloorPagerAdapter(getSupportFragmentManager(), this, buildingID);
+            mFloorPager.setAdapter(mFloorAdapter);
         }
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         if (tabLayout != null) {
@@ -123,19 +128,32 @@ public class DrawerTestActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = menuItem.getItemId();
         int groupID = menuItem.getGroupId();
-        Log.i(TAG, "onNavigationItemSelected: item id : " + id);
-        Log.i(TAG, "onNavigationItemSelected: item group id : " + groupID);
 
         if (groupID == Menu.FIRST) {
-            Log.i(TAG, "onNavigationItemSelected: index : " + id);
-
             Pair<String, Integer[]> item = mAdapter.getItem(id);
             Log.i(TAG, "onNavigationItemSelected: Building : " + item.first + ", [" + item.second[0] + "," + item.second[1] + "," + item.second[2] + "]");
 
-//            mFloorPager.focusRoom(id, item.second[2]);
+            for (int floorIndex=0; floorIndex<mFloorAdapter.getCount(); floorIndex++) {
+                Floor floor = mFloorAdapter.getFloor(floorIndex);
+                if (item.second[1] == floor.getID()) {
+                    Log.i(TAG, "onNavigationItemSelected: floor index : " + floorIndex);
+                    mFloorPager.setCurrentItem(floorIndex);
+                    focusRoom(floorIndex, item.second[2]);
+                    break;
+                }
+            }
         }
 
         mDrawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void focusRoom(int floorIndex, int roomID) {
+        FloorPagerAdapter floorPagerAdapter = (FloorPagerAdapter) mFloorPager.getAdapter();
+        Fragment fragment = floorPagerAdapter.getRegisteredFragment(floorIndex);
+        if (fragment instanceof RoomListFragment) {
+            RoomListFragment roomListFragment = (RoomListFragment) fragment;
+            roomListFragment.focusItem(roomID);
+        }
     }
 }

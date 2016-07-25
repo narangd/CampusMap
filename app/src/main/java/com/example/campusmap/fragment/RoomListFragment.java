@@ -4,6 +4,7 @@ package com.example.campusmap.fragment;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +16,13 @@ import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.tree.branch.Floor;
 import com.example.campusmap.tree.branch.Room;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+import java.util.ArrayList;
+
 public class RoomListFragment extends Fragment {
     private static final String KEY_FLOOR = "floor";
+    private static final String TAG = "RoomListFragment";
     private ListView mListView;
+    private ArrayList<Room> mRoomList;
 
     public RoomListFragment() {
         // Required empty public constructor
@@ -52,7 +54,8 @@ public class RoomListFragment extends Fragment {
                         getContext(),
                         android.R.layout.simple_list_item_1
                 );
-                for (Room room : helper.getRoomList(db, mFloor.getBuildingID(), mFloor.getID())){
+                mRoomList = helper.getRoomList(db, mFloor.getBuildingID(), mFloor.getID());
+                for (Room room : mRoomList){
                     roomArrayAdapter.add(room.toString());
                 }
 
@@ -63,8 +66,16 @@ public class RoomListFragment extends Fragment {
         return view;
     }
 
-    public void focusItem(int position) {
-
+    public void focusItem(int roomID) {
+        if (mRoomList != null) {
+            for (int roomIndex=0; roomIndex<mRoomList.size(); roomIndex++) {
+                if (roomID == mRoomList.get(roomIndex).getID()) {
+                    Log.i(TAG, "focusItem: room index : " + roomIndex);
+                    mListView.setSelection(roomIndex);
+                    break;
+                }
+            }
+        }
     }
 
 }

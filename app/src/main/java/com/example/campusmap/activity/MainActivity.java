@@ -127,6 +127,9 @@ public class MainActivity extends AppCompatActivity
                 intent.putExtra(DrawerTestActivity.KEY_BUILDING, 1);
                 startActivity(intent);
                 return true;
+            case R.id.action_parallax:
+                startActivity(new Intent(this, ScrollingActivity.class));
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

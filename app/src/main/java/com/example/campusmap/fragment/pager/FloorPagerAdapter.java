@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.util.SparseArray;
+import android.view.ViewGroup;
 
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.fragment.RoomListFragment;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 public class FloorPagerAdapter extends FragmentPagerAdapter {
 
     private final ArrayList<Floor> mFloorList;
+    private SparseArray<Fragment> registeredFragments = new SparseArray<Fragment>();
 
     public FloorPagerAdapter(FragmentManager fm, Context context, int buildingID) {
         super(fm);
@@ -40,5 +43,24 @@ public class FloorPagerAdapter extends FragmentPagerAdapter {
         return mFloorList.size();
     }
 
+    public Floor getFloor(int position) {
+        return mFloorList.get(position);
+    }
 
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        Fragment fragment = (Fragment) super.instantiateItem(container, position);
+        registeredFragments.put(position, fragment);
+        return fragment;
+    }
+
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        registeredFragments.remove(position);
+        super.destroyItem(container, position, object);
+    }
+
+    public Fragment getRegisteredFragment(int position) {
+        return registeredFragments.get(position);
+    }
 }

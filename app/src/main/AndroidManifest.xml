@@ -22,7 +22,7 @@
         <activity
             android:name=".activity.IntroActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activity.TestActivity"
             android:label="@string/title_activity_building"
@@ -46,7 +46,7 @@
         <activity
             android:name=".activity.DrawerTestActivity"
             android:label="@string/title_activity_drawer_test"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
