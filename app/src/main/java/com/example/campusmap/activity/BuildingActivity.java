@@ -6,7 +6,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.example.campusmap.R;
-import com.example.campusmap.fragment.pager.CampusMapPagerAdapter;
 import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.tree.branch.Room;
 
@@ -41,16 +40,5 @@ public class BuildingActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        if (mViewPager != null) {
-            if (mBuilding != null) {
-                CampusMapPagerAdapter adapter = new CampusMapPagerAdapter(getSupportFragmentManager(), mBuilding);
-                mViewPager.setAdapter(adapter);
-            } else if (mRoom != null) {
-//                CampusMapPagerAdapter adapter = new CampusMapPagerAdapter(getSupportFragmentManager(), mBuilding.getID());
-//                mViewPager.setAdapter(adapter);
-
-            }
-        }
     }
 }

@@ -13,8 +13,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.campusmap.R;
-import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.adapter.SearchItemAdapter;
+import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.database.SearchResultItem;
 
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class SearchResultActivity extends AppCompatActivity
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(destination + "(으)로 이동하시겠습니까?")
                 .setPositiveButton("예", this)
-                .setNegativeButton("취소", this)
+                .setNegativeButton("취소", null)
                 .show();
     }
 

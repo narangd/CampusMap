@@ -13,11 +13,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
-/**
- * Created by DBLAB on 2016-06-27.
- */
 public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boolean> {
     private static final String TAG = "CampusInfoInsertAsync";
     private static final boolean DEBUG = true;
@@ -162,26 +158,6 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
 
         if (mDlg != null)
             mDlg.dismiss();
-    }
-
-    public boolean isCompleted() {
-        Boolean isCompleted = null;
-
-        if (isCancelled()) {
-            return true;
-        }
-
-        try { // 여기서 cancellationexception이 일어난다.
-            isCompleted = get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        if (isCompleted == null) {
-            return true;
-        } else {
-            return isCompleted;
-        }
     }
 
     private int getTotalCampusInfoTag(int xml_ID) {

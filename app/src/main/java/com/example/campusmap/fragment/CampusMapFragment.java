@@ -14,7 +14,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.campusmap.R;
-import com.example.campusmap.activity.BuildingActivity;
+import com.example.campusmap.activity.DrawerTestActivity;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.tree.branch.BuildingLocation;
@@ -98,8 +98,9 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(context, BuildingActivity.class);
-        intent.putExtra(BuildingActivity.KEY_BUILDING, mAdapter.getItem(position-1)); // id to index
+        Intent intent = new Intent(context, DrawerTestActivity.class);
+        Building building = mAdapter.getItem(position-1);
+        intent.putExtra(DrawerTestActivity.KEY_BUILDING_ID, building.getID()); // id to index
         startActivity(intent);
     }
 }

@@ -21,8 +21,10 @@ import java.util.ArrayList;
 public class RoomListFragment extends Fragment {
     private static final String KEY_FLOOR = "floor";
     private static final String TAG = "RoomListFragment";
+    private static final boolean DEBUG = false;
     private ListView mListView;
     private ArrayList<Room> mRoomList;
+    private int mReservRoomID = -1;
 
     public RoomListFragment() {
         // Required empty public constructor
@@ -39,8 +41,8 @@ public class RoomListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_floor_list, container, false);
-        mListView = (ListView) view.findViewById(R.id.list_room);
+        View view = inflater.inflate(R.layout.fragment_room_list, container, false);
+        mListView = (ListView) view.findViewById(R.id.room_listview);
 
         if (getArguments() != null) {
             Floor mFloor = (Floor) getArguments().getSerializable(KEY_FLOOR);
@@ -66,14 +68,33 @@ public class RoomListFragment extends Fragment {
         return view;
     }
 
-    public void focusItem(int roomID) {
-        if (mRoomList != null) {
-            for (int roomIndex=0; roomIndex<mRoomList.size(); roomIndex++) {
-                if (roomID == mRoomList.get(roomIndex).getID()) {
-                    Log.i(TAG, "focusItem: room index : " + roomIndex);
-                    mListView.setSelection(roomIndex);
-                    break;
-                }
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (DEBUG) {
+            Log.i(TAG, "onStart: called!!");
+            Log.i(TAG, "onStart: reservRoomID " + mReservRoomID);
+        }
+        if (mReservRoomID != -1) {
+            focusRoom(mReservRoomID);
+        }
+    }
+
+    public void reserveRoom(int roomID) {
+        if (mRoomList == null) { // not yet create RoomList
+            mReservRoomID = roomID;
+            return;
+        }
+        focusRoom(roomID);
+    }
+
+    private void focusRoom(int roomID) {
+        for (int roomIndex=0; roomIndex<mRoomList.size(); roomIndex++) {
+            if (roomID == mRoomList.get(roomIndex).getID()) {
+                if (DEBUG) Log.i(TAG, "focusRoom: room index : " + roomIndex);
+                mListView.setSelection(roomIndex);
+                // focus selection
+                break;
             }
         }
     }

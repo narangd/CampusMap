@@ -1,9 +1,7 @@
 package com.example.campusmap.adapter;
 
-import android.content.ContentUris;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +10,9 @@ import android.widget.TextView;
 
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.database.SearchResultItem;
-import com.example.campusmap.tree.branch.Parent;
 
-import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Created by 성용 on 2016-06-28.
- */
 public class SearchItemAdapter extends ArrayAdapter<SearchResultItem> {
 
     private List<SearchResultItem> mList;
@@ -47,15 +40,14 @@ public class SearchItemAdapter extends ArrayAdapter<SearchResultItem> {
         text1.setText(currentItem.toString());
 
         // ## Search Database ##
-        if (currentItem.mTag == SearchResultItem.Tag.ROOM) {
+        if (currentItem.mRoomID != SearchResultItem.NONE) { // room
             SQLiteHelperCampusInfo sqLiteHelperCampusInfo = SQLiteHelperCampusInfo.getInstance(getContext());
             SQLiteDatabase db = sqLiteHelperCampusInfo.getReadableDatabase();
-            String path = sqLiteHelperCampusInfo.searchRoomHierarchy(db, currentItem.mParentId);
+            String path = sqLiteHelperCampusInfo.getRoomPath(db, currentItem.mRoomID);
             db.close();
 
             text2.setText(path);
 
-//        text2.setText(TextUtils.join(" / ", path));
         } else { // tag == building .. do noting..
             text2.setText(" - ");
         }

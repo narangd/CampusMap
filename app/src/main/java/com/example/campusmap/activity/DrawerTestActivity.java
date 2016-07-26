@@ -19,11 +19,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.adapter.MainRoomArrayAdapter;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.database.SearchResultItem;
 import com.example.campusmap.fragment.RoomListFragment;
 import com.example.campusmap.fragment.pager.FloorPagerAdapter;
 import com.example.campusmap.tree.branch.Floor;
@@ -32,12 +34,16 @@ public class DrawerTestActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "DrawerTestActivity";
-    public static final String KEY_BUILDING = "building";
+    public static final String KEY_BUILDING_ID = "building_id";
+    public static final String KEY_SEACH_ITEM = "search_item";
+    private static final boolean DEBUG = false;
 
     private DrawerLayout mDrawer;
     private ArrayAdapter<Pair<String,Integer[]>> mAdapter;
     private ViewPager mFloorPager;
     private FloorPagerAdapter mFloorAdapter;
+    private boolean isTried = false;
+    private SearchResultItem mResultItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +62,29 @@ public class DrawerTestActivity extends AppCompatActivity
         toggle.syncState();
 
         Intent intent = getIntent();
-        int buildingID = intent.getIntExtra(BuildingActivity.KEY_BUILDING, -1);
-        if (buildingID == -1) {
+        int buildingID = intent.getIntExtra(KEY_BUILDING_ID, -1);
+        mResultItem = (SearchResultItem)intent.getSerializableExtra(KEY_SEACH_ITEM);
+
+        if (buildingID == -1 && mResultItem == null) {
             finish();
+            Log.e(TAG, "onCreate: 입력한 값이 없습니다. (ex Building ID or SearchItem");
+            return;
+        }
+        if (buildingID == -1) {
+            Log.i(TAG, "onCreate: getResultItem" + mResultItem.mBuildingID + "," + mResultItem.mFloorID + "," + mResultItem.mRoomID);
+            buildingID = mResultItem.mBuildingID;
+        }
+
+        // ## Set Building Image ##
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        if (imageView != null) {
+            String name = "building_" + buildingID;
+            int resourceID = getResources().getIdentifier(name, "drawable", getPackageName());
+            if (resourceID != 0) {
+                imageView.setImageResource(resourceID);
+            } else {
+                imageView.setImageResource(R.drawable.image_not_found);
+            }
         }
 
         // ## Get DataBase ##
@@ -71,15 +97,18 @@ public class DrawerTestActivity extends AppCompatActivity
             getSupportActionBar().setTitle(
                     buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_NAME)
             );
-            Log.i(TAG, "onStart: ToolBar Title : " + getSupportActionBar().getTitle());
+            if (DEBUG) Log.i(TAG, "onCreate: ToolBar Title : " + getSupportActionBar().getTitle());
         }
 
         // ## Building Description ##
         TextView mDescTextView = (TextView) findViewById(R.id.description);
         if (mDescTextView != null) {
-            mDescTextView.setText(
-                    buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_DESCRIPTION)
-            );
+            String desc = buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_DESCRIPTION);
+            desc += "\n여분으로 보여질 텍스트1";
+            desc += "\n여분으로 보여질 텍스트2";
+            desc += "\n여분으로 보여질 텍스트3";
+            desc += "\n여분으로 보여질 텍스트4";
+            mDescTextView.setText(desc);
         }
 
         // ## Main Rooms ##
@@ -112,6 +141,19 @@ public class DrawerTestActivity extends AppCompatActivity
         if (tabLayout != null) {
             tabLayout.setupWithViewPager(mFloorPager);
         }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (DEBUG) Log.i(TAG, "onStart: called!!");
+
+        if (mResultItem != null && !isTried) {
+            if (DEBUG) Log.i(TAG, "onStart: focus! : " + mResultItem.mFloorID + ", " + mResultItem.mRoomID);
+            focusRoom(mResultItem.mFloorID, mResultItem.mRoomID);
+            isTried = true;
+        }
     }
 
     @Override
@@ -131,29 +173,51 @@ public class DrawerTestActivity extends AppCompatActivity
 
         if (groupID == Menu.FIRST) {
             Pair<String, Integer[]> item = mAdapter.getItem(id);
-            Log.i(TAG, "onNavigationItemSelected: Building : " + item.first + ", [" + item.second[0] + "," + item.second[1] + "," + item.second[2] + "]");
+            if (DEBUG) Log.i(TAG, "onNavigationItemSelected: Building : " + item.first + ", [" + item.second[0] + "," + item.second[1] + "," + item.second[2] + "]");
 
-            for (int floorIndex=0; floorIndex<mFloorAdapter.getCount(); floorIndex++) {
-                Floor floor = mFloorAdapter.getFloor(floorIndex);
-                if (item.second[1] == floor.getID()) {
-                    Log.i(TAG, "onNavigationItemSelected: floor index : " + floorIndex);
-                    mFloorPager.setCurrentItem(floorIndex);
-                    focusRoom(floorIndex, item.second[2]);
-                    break;
-                }
-            }
+            int floorID = item.second[1];
+            int roomID = item.second[2];
+
+            focusRoom(floorID, roomID);
         }
 
         mDrawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    private void focusRoom(int floorIndex, int roomID) {
-        FloorPagerAdapter floorPagerAdapter = (FloorPagerAdapter) mFloorPager.getAdapter();
-        Fragment fragment = floorPagerAdapter.getRegisteredFragment(floorIndex);
-        if (fragment instanceof RoomListFragment) {
-            RoomListFragment roomListFragment = (RoomListFragment) fragment;
-            roomListFragment.focusItem(roomID);
+    private void focusRoom(final int floorID, final int roomID) {
+        if (DEBUG) Log.i(TAG, "focusRoom: called");
+
+        int floorIndex = -1;
+
+        for (int i=0; i<mFloorAdapter.getCount(); i++) {
+            Floor floor = mFloorAdapter.getFloor(i);
+            if (floorID == floor.getID()) {
+                if (DEBUG) Log.i(TAG, "focusRoom: floor index : " + i);
+                floorIndex = i;
+                break;
+            }
+        }
+
+        if (floorIndex >= 0) {
+            mFloorPager.setCurrentItem(floorIndex);
+
+            final int findFloorIndex = floorIndex;
+            mFloorAdapter.setOnFragmentListener(new FloorPagerAdapter.OnFragmentListener() {
+                boolean mTryOnce = false;
+
+                @Override
+                public void OnFragmentInstantiate(Fragment fragment, int position) {
+                    if (!mTryOnce && position == findFloorIndex && fragment instanceof RoomListFragment) {
+                        mTryOnce = true;
+                        RoomListFragment roomListFragment = (RoomListFragment) fragment;
+                        roomListFragment.reserveRoom(roomID);
+
+                    }
+                }
+                @Override
+                public void OnFragmentDestroy(int position) {}
+            });
         }
     }
 }

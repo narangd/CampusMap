@@ -2,21 +2,19 @@ package com.example.campusmap.database;
 
 import java.io.Serializable;
 
-/**
- * Created by 성용 on 2016-06-28.
- */
 public class SearchResultItem implements Serializable {
-    public enum Tag {
-        BUILDING, ROOM
-    }
-    public int mParentId;
-    public String mName;
-    public Tag mTag;
+    public static final int NONE = -1;
 
-    public SearchResultItem (String name, Tag tag, int parentId) {
+    private final String mName;
+    public final int mBuildingID;
+    public final int mFloorID;
+    public final int mRoomID;
+
+    public SearchResultItem (String name, int buildingID, int floorID, int roomID) {
         mName = name;
-        mTag = tag;
-        mParentId = parentId;
+        mBuildingID = buildingID;
+        mFloorID = floorID;
+        mRoomID = roomID;
     }
 
     @Override

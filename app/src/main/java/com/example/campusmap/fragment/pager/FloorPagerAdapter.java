@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.util.SparseArray;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
@@ -15,9 +15,10 @@ import com.example.campusmap.tree.branch.Floor;
 import java.util.ArrayList;
 
 public class FloorPagerAdapter extends FragmentPagerAdapter {
+    private static final String TAG = "FloorPagerAdapter";
 
     private final ArrayList<Floor> mFloorList;
-    private SparseArray<Fragment> registeredFragments = new SparseArray<Fragment>();
+    private OnFragmentListener mOnFragmentListener;
 
     public FloorPagerAdapter(FragmentManager fm, Context context, int buildingID) {
         super(fm);
@@ -49,18 +50,30 @@ public class FloorPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
+        Log.i(TAG, "instantiateItem: called!! " + position);
         Fragment fragment = (Fragment) super.instantiateItem(container, position);
-        registeredFragments.put(position, fragment);
+
+        if (mOnFragmentListener != null) {
+            mOnFragmentListener.OnFragmentInstantiate(fragment, position);
+        }
         return fragment;
     }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        registeredFragments.remove(position);
         super.destroyItem(container, position, object);
+
+        if (mOnFragmentListener != null) {
+            mOnFragmentListener.OnFragmentDestroy(position);
+        }
     }
 
-    public Fragment getRegisteredFragment(int position) {
-        return registeredFragments.get(position);
+    public void setOnFragmentListener(OnFragmentListener onFragmentListener) {
+        mOnFragmentListener = onFragmentListener;
+    }
+
+    public interface OnFragmentListener {
+        void OnFragmentInstantiate(Fragment fragment, int position);
+        void OnFragmentDestroy(int position);
     }
 }

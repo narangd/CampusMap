@@ -15,9 +15,6 @@ import com.example.campusmap.tree.branch.Room;
 
 import java.util.ArrayList;
 
-/**
- * Created by DBLAB on 2016-06-20.
- */
 public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
     private static final String TAG = "SQLiteHelperCampusInfo";
     private static final boolean DEBUG = true;
@@ -239,7 +236,10 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         // ## Search Building ##
         Cursor buildingCursor = db.query(
                 BuildingEntry.TABLE_NAME,
-                new String[]{BuildingEntry.COLUMN_NAME_NAME},
+                new String[]{
+                        BuildingEntry.COLUMN_NAME_NAME,
+                        BuildingEntry._ID
+                },
                 BuildingEntry.COLUMN_NAME_NAME + " LIKE ?",
                 new String[]{query},
                 null, null,
@@ -247,8 +247,9 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         while (buildingCursor.moveToNext()) {
             resultList.add(new SearchResultItem(
                     buildingCursor.getString(buildingCursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME)),
-                    SearchResultItem.Tag.BUILDING,
-                    -1
+                    buildingCursor.getInt(buildingCursor.getColumnIndex(BuildingEntry._ID)),
+                    SearchResultItem.NONE,
+                    SearchResultItem.NONE
             ));
         }
         buildingCursor.close();
@@ -256,16 +257,22 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         // ## Search Room ##
         Cursor roomCursor = db.query(
                 RoomEntry.TABLE_NAME,
-                new String[]{RoomEntry.COLUMN_NAME_NAME, RoomEntry.COLUMN_NAME_FLOOR_ID},
-                BuildingEntry.COLUMN_NAME_NAME + " LIKE ?",
+                new String[]{
+                        RoomEntry.COLUMN_NAME_NAME,
+                        RoomEntry._ID,
+                        RoomEntry.COLUMN_NAME_FLOOR_ID,
+                        RoomEntry.COLUMN_NAME_BUILDING_ID
+                },
+                RoomEntry.COLUMN_NAME_NAME + " LIKE ?",
                 new String[]{query},
                 null, null,
                 RoomEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING);
         while (roomCursor.moveToNext()) {
             resultList.add(new SearchResultItem(
                     roomCursor.getString(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME)),
-                    SearchResultItem.Tag.ROOM,
-                    roomCursor.getInt(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_FLOOR_ID))
+                    roomCursor.getInt(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_BUILDING_ID)),
+                    roomCursor.getInt(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_FLOOR_ID)),
+                    roomCursor.getInt(roomCursor.getColumnIndex(RoomEntry._ID))
             ));
         }
         roomCursor.close();
@@ -273,44 +280,23 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         return resultList;
     }
 
-    public String searchRoomHierarchy(SQLiteDatabase db, int floorId) {
+    public String getRoomPath(SQLiteDatabase db, int roomID) {
         String hierarchy = "";
 
         // ## Search floor ID from Database ##
-        Cursor floorCursor = db.query(
-                FloorEntry.TABLE_NAME,
-                new String[]{FloorEntry.COLUMN_NAME_NUMBER, FloorEntry.COLUMN_NAME_BUILDING_ID},
-                FloorEntry._ID + "=?",
-                new String[]{String.valueOf(floorId)},
+        Cursor cursor = db.query(
+                RoomEntry.TABLE_NAME,
+                new String[]{RoomEntry.COLUMN_NAME_PATH},
+                RoomEntry._ID + "=?",
+                new String[]{String.valueOf(roomID)},
                 null, null, null
         );
 
         // ## Found floor ID ##
-        if (floorCursor.moveToNext()) {
-            int floorNumber = floorCursor.getInt(floorCursor.getColumnIndex(FloorEntry.COLUMN_NAME_NUMBER));
-            int buildingId = floorCursor.getInt(floorCursor.getColumnIndex(FloorEntry.COLUMN_NAME_BUILDING_ID));
-            hierarchy = floorNumber +"층";
-
-            // ## Search building ID from Database ##
-            Cursor buildingCursor = db.query(
-                    BuildingEntry.TABLE_NAME,
-                    new String[]{BuildingEntry.COLUMN_NAME_NAME},
-                    BuildingEntry._ID + "=?",
-                    new String[]{String.valueOf(buildingId)},
-                    null, null, null
-            );
-
-            // ## Found building ID ##
-            if (buildingCursor.moveToNext()) {
-                hierarchy = buildingCursor.getString(buildingCursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME))+" / " + hierarchy;
-            }  else {
-                Log.e(TAG, "searchRoomHierarchy: not found building ID:" + buildingId);
-            }
-            buildingCursor.close();
-        } else {
-            Log.e(TAG, "searchRoomHierarchy: not found floor ID:" + floorId);
+        if (cursor.moveToNext()) {
+            hierarchy = cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_PATH));
         }
-        floorCursor.close();
+        cursor.close();
         return hierarchy;
     }
 

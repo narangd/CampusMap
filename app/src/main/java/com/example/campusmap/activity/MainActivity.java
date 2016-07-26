@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.action_only_test:
                 Intent intent = new Intent(this, DrawerTestActivity.class);
-                intent.putExtra(DrawerTestActivity.KEY_BUILDING, 1);
+                intent.putExtra(DrawerTestActivity.KEY_BUILDING_ID, 1);
                 startActivity(intent);
                 return true;
             case R.id.action_parallax:
@@ -187,24 +187,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SEARCH_RESULT_ACTIVITY_REQUEST_CODE ) {
-            if (resultCode == SearchResultActivity.RESULT_OK) {
-                Bundle extras = data.getExtras();
-                SearchResultItem searchResultItem = (SearchResultItem) extras.get("SearchResultItem");
+        if (requestCode == SEARCH_RESULT_ACTIVITY_REQUEST_CODE && resultCode == SearchResultActivity.RESULT_OK) {
+            Bundle extras = data.getExtras();
+            SearchResultItem searchResultItem = (SearchResultItem) extras.get("SearchResultItem");
 
-                Log.d(TAG, "Serializeable SearchResultItem Data : " + searchResultItem);
-                if (searchResultItem != null) {
+            Log.d(TAG, "Serializable SearchResultItem Data : " + searchResultItem);
+            if (searchResultItem != null) {
 
-//                    FragmentPagerAdapter fragmentPagerAdapter = (FragmentPagerAdapter)mViewPager.getAdapter();
-//                    Fragment fragment = fragmentPagerAdapter.getItem(CampusMapFragment.TAP_INDEX);
-//                    Bundle bundle = new Bundle();
-//                    bundle.putInt("building", 18);
-////                        bundle.putInt(); // floor
-//                    fragment.setArguments(bundle); // send building to campusmap_fragment
-                    Intent intent = new Intent(this, BuildingActivity.class);
-                    intent.putExtra("search_item", searchResultItem);
-                    startActivity(intent);
-                }
+                Intent intent = new Intent(this, DrawerTestActivity.class);
+                intent.putExtra(DrawerTestActivity.KEY_SEACH_ITEM, searchResultItem);
+                startActivity(intent);
             }
         }
     }

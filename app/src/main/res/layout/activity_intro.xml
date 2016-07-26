@@ -12,7 +12,7 @@
         android:src="@drawable/app_logo"
         android:id="@+id/app_logo"
         android:background="#fdfdfd"
-        android:contentDescription="@string/desc_building_image" />
+        android:contentDescription="@string/desc_app_logo" />
 
     <TextView
         android:id="@+id/text_status"
