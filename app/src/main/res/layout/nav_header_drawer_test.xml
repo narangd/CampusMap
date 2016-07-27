@@ -5,25 +5,60 @@
     android:background="@drawable/side_nav_bar"
     android:gravity="start"
     android:orientation="vertical"
+    android:paddingTop="24dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
         android:src="@drawable/building_4"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/desc_building_image"/>
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/desc_building_image"
+        android:layout_marginTop="@dimen/nav_header_vertical_spacing"
+        android:layout_marginBottom="@dimen/nav_header_vertical_spacing"
+        android:layout_marginLeft="@dimen/nav_header_vertical_spacing"
+        android:layout_marginRight="@dimen/nav_header_vertical_spacing"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/header"
+        android:layout_marginTop="@dimen/nav_header_vertical_spacing"
+        android:layout_marginBottom="@dimen/nav_header_vertical_spacing"
+        android:layout_marginLeft="@dimen/nav_header_vertical_spacing"
+        android:layout_marginRight="@dimen/nav_header_vertical_spacing"
+        android:gravity="start">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sub_title_description"
+            android:layout_centerVertical="true"
+            style="@style/TextAppearance.AppCompat.Light.SearchResult.Title"/>
+
+
+        <ImageButton
+            android:id="@+id/toggle_description"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/arrow_down_drop_circle"
+            android:background="@android:color/transparent"/>
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/test_text"
-        android:layout_marginTop="@dimen/nav_header_vertical_spacing"
         android:layout_marginBottom="@dimen/nav_header_vertical_spacing"
         android:layout_marginLeft="@dimen/nav_header_vertical_spacing"
         android:layout_marginRight="@dimen/nav_header_vertical_spacing"
+        android:visibility="gone"
         style="@style/TextAppearance.AppCompat.Body1"/>
 
 </LinearLayout>

@@ -18,6 +18,10 @@ import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,8 +34,10 @@ import com.example.campusmap.fragment.RoomListFragment;
 import com.example.campusmap.fragment.pager.FloorPagerAdapter;
 import com.example.campusmap.tree.branch.Floor;
 
+import nl.codesoup.cubicbezier.CubicBezierInterpolator;
+
 public class DrawerTestActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private static final String TAG = "DrawerTestActivity";
     public static final String KEY_BUILDING_ID = "building_id";
@@ -44,6 +50,9 @@ public class DrawerTestActivity extends AppCompatActivity
     private FloorPagerAdapter mFloorAdapter;
     private boolean isTried = false;
     private SearchResultItem mResultItem;
+    private TextView mDescTextView;
+//    private Animation mShowAnimation;
+//    private Animation mHideAnimation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,17 +84,24 @@ public class DrawerTestActivity extends AppCompatActivity
             buildingID = mResultItem.mBuildingID;
         }
 
-        // ## Set Building Image ##
-        ImageView imageView = (ImageView) findViewById(R.id.imageView);
-        if (imageView != null) {
-            String name = "building_" + buildingID;
-            int resourceID = getResources().getIdentifier(name, "drawable", getPackageName());
-            if (resourceID != 0) {
-                imageView.setImageResource(resourceID);
-            } else {
-                imageView.setImageResource(R.drawable.image_not_found);
-            }
-        }
+//        mShowAnimation = new ScaleAnimation(1.0f, 1.0f, 0.0f, 1.0f);
+//        mShowAnimation.setInterpolator(new DecelerateInterpolator());
+//        mShowAnimation.setDuration(1000);
+//        mHideAnimation = new ScaleAnimation(1.0f, 1.0f, 1.0f, 0.0f);
+//        mHideAnimation.setInterpolator(new AccelerateInterpolator());
+//        mHideAnimation.setDuration(1000);
+//        mHideAnimation.setAnimationListener(new Animation.AnimationListener() {
+//            @Override
+//            public void onAnimationStart(Animation animation) {}
+//            @Override
+//            public void onAnimationEnd(Animation animation) {
+//                if (mDescTextView != null) {
+//                    mDescTextView.setVisibility(View.GONE);
+//                }
+//            }
+//            @Override
+//            public void onAnimationRepeat(Animation animation) {}
+//        });
 
         // ## Get DataBase ##
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
@@ -100,17 +116,6 @@ public class DrawerTestActivity extends AppCompatActivity
             if (DEBUG) Log.i(TAG, "onCreate: ToolBar Title : " + getSupportActionBar().getTitle());
         }
 
-        // ## Building Description ##
-        TextView mDescTextView = (TextView) findViewById(R.id.description);
-        if (mDescTextView != null) {
-            String desc = buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_DESCRIPTION);
-            desc += "\n여분으로 보여질 텍스트1";
-            desc += "\n여분으로 보여질 텍스트2";
-            desc += "\n여분으로 보여질 텍스트3";
-            desc += "\n여분으로 보여질 텍스트4";
-            mDescTextView.setText(desc);
-        }
-
         // ## Main Rooms ##
         mAdapter = new MainRoomArrayAdapter(
                 this,
@@ -122,6 +127,37 @@ public class DrawerTestActivity extends AppCompatActivity
         NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         if (mNavigationView != null) {
             mNavigationView.setNavigationItemSelectedListener(this);
+            View headerLayout = mNavigationView.getHeaderView(0);
+
+            // ## Building Description ##
+            mDescTextView = (TextView) headerLayout.findViewById(R.id.description);
+            if (mDescTextView != null) {
+                String desc = buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_DESCRIPTION);
+                desc += "\n여분으로 보여질 텍스트1";
+                desc += "\n여분으로 보여질 텍스트2";
+                desc += "\n여분으로 보여질 텍스트3";
+                desc += "\n여분으로 보여질 텍스트4";
+                mDescTextView.setText(desc);
+            }
+
+            // ## Set Building Image ##
+            ImageView imageView = (ImageView) headerLayout.findViewById(R.id.imageView);
+            if (imageView != null) {
+                String name = "building_" + buildingID;
+                int resourceID = getResources().getIdentifier(name, "drawable", getPackageName());
+                if (resourceID != 0) {
+                    imageView.setImageResource(resourceID);
+                } else {
+                    imageView.setImageResource(R.drawable.image_not_found);
+                }
+            }
+
+            // ## Description Toogle Button ##
+            ImageView toggleButton = (ImageView) headerLayout.findViewById(R.id.toggle_description);
+            if (toggleButton !=null){
+                toggleButton.setOnClickListener(this);
+            }
+
             Menu menu = mNavigationView.getMenu();
             SubMenu subMenu = menu.addSubMenu(this.getResources().getString(R.string.sub_title_main_rooms));
 
@@ -141,7 +177,61 @@ public class DrawerTestActivity extends AppCompatActivity
         if (tabLayout != null) {
             tabLayout.setupWithViewPager(mFloorPager);
         }
+    }
+    public void expand(final View v) {
+        v.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
 
+        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
+        v.getLayoutParams().height = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? ViewGroup.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        a.setInterpolator(new CubicBezierInterpolator(0.4, 0, 0.2, 1));
+        v.startAnimation(a);
+    }
+
+    public void collapse(final View v) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                }else{
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        a.setInterpolator(new CubicBezierInterpolator(0.4, 0, 0.2, 1));
+        v.startAnimation(a);
     }
 
     @Override
@@ -170,6 +260,8 @@ public class DrawerTestActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = menuItem.getItemId();
         int groupID = menuItem.getGroupId();
+
+        menuItem.setChecked(true);
 
         if (groupID == Menu.FIRST) {
             Pair<String, Integer[]> item = mAdapter.getItem(id);
@@ -218,6 +310,19 @@ public class DrawerTestActivity extends AppCompatActivity
                 @Override
                 public void OnFragmentDestroy(int position) {}
             });
+        }
+    }
+
+    // ## Description Text ToggleButton ##
+    @Override
+    public void onClick(View v) {
+        if (mDescTextView != null) {
+            if (mDescTextView.getVisibility() == View.VISIBLE) {
+                collapse(mDescTextView);
+            } else {
+                mDescTextView.setVisibility(View.VISIBLE);
+                expand(mDescTextView);
+            }
         }
     }
 }
