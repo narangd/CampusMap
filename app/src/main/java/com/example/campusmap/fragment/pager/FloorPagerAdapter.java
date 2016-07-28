@@ -36,7 +36,13 @@ public class FloorPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return mFloorList.get(position).getFloor() + "층";
+        int floor = mFloorList.get(position).getFloor();
+        String title = "";
+        if (floor < 0) {
+            floor = -floor;
+            title += "지하 ";
+        }
+        return title + floor + "층";
     }
 
     @Override

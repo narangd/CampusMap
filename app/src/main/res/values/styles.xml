@@ -24,12 +24,4 @@
         <item name="android:textColor">@color/colorPrimary</item>
     </style>
 
-    <!-- ListView selected theme. -->
-    <style name="SelectableListView">
-        <item name="android:listSelector">#ffffff</item>
-        <item name="android:choiceMode">singleChoice</item>
-        <item name="android:smoothScrollbar">true</item>
-        <!--<item name="android:background">@android:color/transparent</item>-->
-    </style>
-
 </resources>

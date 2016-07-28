@@ -37,7 +37,7 @@ import com.example.campusmap.tree.branch.Floor;
 import nl.codesoup.cubicbezier.CubicBezierInterpolator;
 
 public class DrawerTestActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener, DrawerLayout.DrawerListener {
 
     private static final String TAG = "DrawerTestActivity";
     public static final String KEY_BUILDING_ID = "building_id";
@@ -45,14 +45,12 @@ public class DrawerTestActivity extends AppCompatActivity
     private static final boolean DEBUG = false;
 
     private DrawerLayout mDrawer;
-    private ArrayAdapter<Pair<String,Integer[]>> mAdapter;
+    private ArrayAdapter<Pair<String,Integer[]>> mMainRoomAdapter;
     private ViewPager mFloorPager;
     private FloorPagerAdapter mFloorAdapter;
     private boolean isTried = false;
     private SearchResultItem mResultItem;
     private TextView mDescTextView;
-//    private Animation mShowAnimation;
-//    private Animation mHideAnimation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +63,9 @@ public class DrawerTestActivity extends AppCompatActivity
 
         // ## Drawer ##
         mDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (mDrawer != null) {
+            mDrawer.addDrawerListener(this);
+        }
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 //        mDrawer.setDrawerListener(toggle);
@@ -84,25 +85,6 @@ public class DrawerTestActivity extends AppCompatActivity
             buildingID = mResultItem.mBuildingID;
         }
 
-//        mShowAnimation = new ScaleAnimation(1.0f, 1.0f, 0.0f, 1.0f);
-//        mShowAnimation.setInterpolator(new DecelerateInterpolator());
-//        mShowAnimation.setDuration(1000);
-//        mHideAnimation = new ScaleAnimation(1.0f, 1.0f, 1.0f, 0.0f);
-//        mHideAnimation.setInterpolator(new AccelerateInterpolator());
-//        mHideAnimation.setDuration(1000);
-//        mHideAnimation.setAnimationListener(new Animation.AnimationListener() {
-//            @Override
-//            public void onAnimationStart(Animation animation) {}
-//            @Override
-//            public void onAnimationEnd(Animation animation) {
-//                if (mDescTextView != null) {
-//                    mDescTextView.setVisibility(View.GONE);
-//                }
-//            }
-//            @Override
-//            public void onAnimationRepeat(Animation animation) {}
-//        });
-
         // ## Get DataBase ##
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
         SQLiteDatabase db = helper.getReadableDatabase();
@@ -113,21 +95,31 @@ public class DrawerTestActivity extends AppCompatActivity
             getSupportActionBar().setTitle(
                     buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_NAME)
             );
+
             if (DEBUG) Log.i(TAG, "onCreate: ToolBar Title : " + getSupportActionBar().getTitle());
         }
 
         // ## Main Rooms ##
-        mAdapter = new MainRoomArrayAdapter(
+        mMainRoomAdapter = new MainRoomArrayAdapter(
                 this,
                 android.R.layout.simple_list_item_1,
                 helper.getMainRooms(db, buildingID /* 100주년기념관 */)
         );
 
         // ## Insert SubMenu Into NavigationView ##
-        NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (mNavigationView != null) {
-            mNavigationView.setNavigationItemSelectedListener(this);
-            View headerLayout = mNavigationView.getHeaderView(0);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(this);
+            View headerLayout = navigationView.getHeaderView(0);
+
+            // ## Building Title ##
+            TextView buildingTitle = (TextView) headerLayout.findViewById(R.id.building_title);
+            if (buildingTitle != null) {
+                String title = buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_NAME);
+                int number = buildingDetailValues.getAsInteger(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_NUMBER);
+                title += " - " + number + "번건물";
+                buildingTitle.setText(title);
+            }
 
             // ## Building Description ##
             mDescTextView = (TextView) headerLayout.findViewById(R.id.description);
@@ -158,12 +150,15 @@ public class DrawerTestActivity extends AppCompatActivity
                 toggleButton.setOnClickListener(this);
             }
 
-            Menu menu = mNavigationView.getMenu();
-            SubMenu subMenu = menu.addSubMenu(this.getResources().getString(R.string.sub_title_main_rooms));
+            // ## Create Menu ##
+            Menu menu = navigationView.getMenu();
+            SubMenu subMenu = menu.addSubMenu(getResources().getString(R.string.sub_title_main_rooms));
+            subMenu.setGroupCheckable(0, true, true);
 
-            for (int i=0; i<mAdapter.getCount(); i++) {
-                Pair<String, Integer[]> item = mAdapter.getItem(i);
-                subMenu.add(Menu.FIRST, i, 0, item.first);
+            for (int i = 0; i< mMainRoomAdapter.getCount(); i++) {
+                Pair<String, Integer[]> item = mMainRoomAdapter.getItem(i);
+                subMenu.add(R.id.nav_group, i, 0, item.first)
+                        .setIcon(R.drawable.side_nav_bar_list_item);
             }
         }
 
@@ -172,66 +167,25 @@ public class DrawerTestActivity extends AppCompatActivity
         if (mFloorPager != null) {
             mFloorAdapter = new FloorPagerAdapter(getSupportFragmentManager(), this, buildingID);
             mFloorPager.setAdapter(mFloorAdapter);
+            mFloorPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+                @Override
+                public void onPageSelected(int position) {
+                    // TODO: 2016-07-28 층이 선택되면 -> 이 층에 포함된 층들이 MainRoom의 모든 Menu가 선택되게 한다.
+                }
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
         }
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         if (tabLayout != null) {
             tabLayout.setupWithViewPager(mFloorPager);
         }
-    }
-    public void expand(final View v) {
-        v.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        final int targetHeight = v.getMeasuredHeight();
-
-        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
-        v.getLayoutParams().height = 1;
-        v.setVisibility(View.VISIBLE);
-        Animation a = new Animation()
-        {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                v.getLayoutParams().height = interpolatedTime == 1
-                        ? ViewGroup.LayoutParams.WRAP_CONTENT
-                        : (int)(targetHeight * interpolatedTime);
-                v.requestLayout();
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        // 1dp/ms
-        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
-        a.setInterpolator(new CubicBezierInterpolator(0.4, 0, 0.2, 1));
-        v.startAnimation(a);
-    }
-
-    public void collapse(final View v) {
-        final int initialHeight = v.getMeasuredHeight();
-
-        Animation a = new Animation()
-        {
-            @Override
-            protected void applyTransformation(float interpolatedTime, Transformation t) {
-                if(interpolatedTime == 1){
-                    v.setVisibility(View.GONE);
-                }else{
-                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
-                    v.requestLayout();
-                }
-            }
-
-            @Override
-            public boolean willChangeBounds() {
-                return true;
-            }
-        };
-
-        // 1dp/ms
-        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
-        a.setInterpolator(new CubicBezierInterpolator(0.4, 0, 0.2, 1));
-        v.startAnimation(a);
     }
 
     @Override
@@ -240,9 +194,30 @@ public class DrawerTestActivity extends AppCompatActivity
         if (DEBUG) Log.i(TAG, "onStart: called!!");
 
         if (mResultItem != null && !isTried) {
+            // ## 검색한 결과를 통해 들어오는 경우 ##
             if (DEBUG) Log.i(TAG, "onStart: focus! : " + mResultItem.mFloorID + ", " + mResultItem.mRoomID);
             focusRoom(mResultItem.mFloorID, mResultItem.mRoomID);
             isTried = true;
+        } else {
+            // ## 정상적인 경로로 들어온 경우 ##
+
+            // ## 네비게이션뷰가 보여지게한다 ##
+            mDrawer.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mDrawer.openDrawer(GravityCompat.START);
+                    mDescTextView.setVisibility(View.VISIBLE);
+                }
+            }, 200);
+
+            // ## 지상을 먼저 선택되게 한다 ##
+            for (int i = 0; i < mFloorAdapter.getCount(); i++) {
+                Floor floor = mFloorAdapter.getFloor(i);
+                if (floor.getFloor() > 0) {
+                    mFloorPager.setCurrentItem(i, true);
+                    break;
+                }
+            }
         }
     }
 
@@ -255,16 +230,21 @@ public class DrawerTestActivity extends AppCompatActivity
         }
     }
 
+    MenuItem mPrevMenuItem;
     @Override
     public boolean onNavigationItemSelected(MenuItem menuItem) {
         // Handle navigation view item clicks here.
         int id = menuItem.getItemId();
         int groupID = menuItem.getGroupId();
 
+        if (mPrevMenuItem != null) {
+            mPrevMenuItem.setChecked(false);
+        }
         menuItem.setChecked(true);
+        mPrevMenuItem = menuItem;
 
-        if (groupID == Menu.FIRST) {
-            Pair<String, Integer[]> item = mAdapter.getItem(id);
+        if (groupID == R.id.nav_group) {
+            Pair<String, Integer[]> item = mMainRoomAdapter.getItem(id);
             if (DEBUG) Log.i(TAG, "onNavigationItemSelected: Building : " + item.first + ", [" + item.second[0] + "," + item.second[1] + "," + item.second[2] + "]");
 
             int floorID = item.second[1];
@@ -324,5 +304,79 @@ public class DrawerTestActivity extends AppCompatActivity
                 expand(mDescTextView);
             }
         }
+    }
+
+    public void expand(final View v) {
+        v.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
+
+        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
+        v.getLayoutParams().height = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? ViewGroup.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        a.setInterpolator(new CubicBezierInterpolator(0.4, 0, 0.2, 1));
+        v.startAnimation(a);
+    }
+
+    public void collapse(final View v) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                }else{
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        a.setInterpolator(new CubicBezierInterpolator(0.4, 0, 0.2, 1));
+        v.startAnimation(a);
+    }
+
+    //  ## For Drawer (( DrawerLayout.DrawerListener )) ##
+    @Override
+    public void onDrawerOpened(View drawerView) {
+
+    }
+    @Override
+    public void onDrawerClosed(View drawerView) {
+        mDescTextView.setVisibility(View.GONE);
+    }
+    @Override
+    public void onDrawerStateChanged(int newState) {
+
+    }
+    @Override
+    public void onDrawerSlide(View drawerView, float slideOffset) {
+
     }
 }

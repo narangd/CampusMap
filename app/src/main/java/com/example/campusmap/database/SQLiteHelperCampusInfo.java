@@ -371,13 +371,21 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         ContentValues contentValues = null;
         Cursor cursor = db.query(
                 BuildingEntry.TABLE_NAME,
-                new String[]{BuildingEntry.COLUMN_NAME_NAME, BuildingEntry.COLUMN_NAME_DESCRIPTION},
+                new String[]{
+                        BuildingEntry.COLUMN_NAME_NUMBER,
+                        BuildingEntry.COLUMN_NAME_NAME,
+                        BuildingEntry.COLUMN_NAME_DESCRIPTION
+                },
                 BuildingEntry._ID + "=?",
                 new String[]{String.valueOf(buildingID)},
                 null, null, null
         );
         if (cursor.moveToNext()) {
             contentValues = new ContentValues();
+            contentValues.put(
+                    BuildingEntry.COLUMN_NAME_NUMBER,
+                    cursor.getInt(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NUMBER))
+            );
             contentValues.put(
                     BuildingEntry.COLUMN_NAME_NAME,
                     cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME))

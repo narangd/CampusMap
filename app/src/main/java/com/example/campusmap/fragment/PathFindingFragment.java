@@ -13,11 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.example.campusmap.R;
-import com.example.campusmap.pathfinding.Drawing;
 import com.example.campusmap.asynctask.loader.DrawingLoader;
+import com.example.campusmap.pathfinding.Drawing;
 
 import java.util.Random;
 
@@ -82,20 +81,6 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
                     mDrawing.resetPath();
                     mDrawing.drawImageView(mImageView);
                     mImageView.invalidate();
-//                    mDrawing.reDraw();
-//                    TreeSet<Tile> testingSet = new TreeSet<>();
-//                    for (int i=1; i<=10; i++)  {
-//                        int number = random.nextInt(100);
-//                        Tile newTile = new Tile(0,0);
-//                        newTile.F = number;
-//                        testingSet.add(newTile);
-//                        if (DEBUG) Log.i(TAG, "==testingSet== : insert number : " + number);
-//                    }
-//                    if (DEBUG) Log.i(TAG, "==testingSet== : " + testingSet.toString());
-////                    while (!testingSet.isEmpty()) {
-////                        int number = testingSet.pollFirst();
-////                        if (DEBUG) Log.i(TAG, "==testingSet== : pollFirst result : " + number);
-////                    }
                 } else {
                     mSnackbar.setText("잠시 후 다시시도해주세요\n로딩중입니다.");
                     mSnackbar.show();
@@ -136,7 +121,7 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onLoaderReset(Loader<Drawing> loader) {
-        Toast.makeText(getActivity(), "초기화합니다..", Toast.LENGTH_SHORT).show();
+        if (DEBUG) Log.i(TAG, "+++ onLoaderReset() called! +++");
         mDrawing.getMap().resetPolygon();
 
         Log.i("PathFindingFragment", "onLoaderReset!!");

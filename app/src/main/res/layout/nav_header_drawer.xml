@@ -5,6 +5,7 @@
     android:background="@drawable/side_nav_bar"
     android:gravity="start"
     android:orientation="vertical"
+    android:paddingLeft="@dimen/nav_header_vertical_spacing"
     android:paddingTop="24dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
@@ -15,38 +16,40 @@
         android:src="@drawable/building_4"
         android:scaleType="centerCrop"
         android:contentDescription="@string/desc_building_image"
-        android:layout_marginTop="@dimen/nav_header_vertical_spacing"
-        android:layout_marginBottom="@dimen/nav_header_vertical_spacing"
-        android:layout_marginLeft="@dimen/nav_header_vertical_spacing"
-        android:layout_marginRight="@dimen/nav_header_vertical_spacing"/>
+        android:layout_marginTop="@dimen/nav_header_vertical_spacing"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/header"
-        android:layout_marginTop="@dimen/nav_header_vertical_spacing"
-        android:layout_marginBottom="@dimen/nav_header_vertical_spacing"
-        android:layout_marginLeft="@dimen/nav_header_vertical_spacing"
-        android:layout_marginRight="@dimen/nav_header_vertical_spacing"
-        android:gravity="start">
+        android:layout_height="wrap_content">
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sub_title_description"
-            android:layout_centerVertical="true"
-            style="@style/TextAppearance.AppCompat.Light.SearchResult.Title"/>
+            android:orientation="vertical"
+            android:layout_centerVertical="true">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/building_title"
+                android:text="@string/sub_title_description"
+                android:layout_marginTop="8dp"
+                style="@style/TextAppearance.AppCompat.Body1"/>
+
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/toggle_description"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
+            android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:paddingBottom="@dimen/nav_header_vertical_spacing"
+            android:paddingLeft="@dimen/nav_header_vertical_spacing"
+            android:paddingRight="@dimen/nav_header_vertical_spacing"
             android:scaleType="centerInside"
             android:src="@drawable/arrow_down_drop_circle"
-            android:background="@android:color/transparent"/>
+            style="@style/Widget.AppCompat.Button.Borderless"/>
 
     </RelativeLayout>
 
@@ -55,9 +58,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/test_text"
-        android:layout_marginBottom="@dimen/nav_header_vertical_spacing"
-        android:layout_marginLeft="@dimen/nav_header_vertical_spacing"
-        android:layout_marginRight="@dimen/nav_header_vertical_spacing"
+        android:paddingBottom="@dimen/nav_header_vertical_spacing"
+        android:paddingLeft="@dimen/nav_header_vertical_spacing"
+        android:paddingRight="@dimen/nav_header_vertical_spacing"
         android:visibility="gone"
         style="@style/TextAppearance.AppCompat.Body1"/>
 

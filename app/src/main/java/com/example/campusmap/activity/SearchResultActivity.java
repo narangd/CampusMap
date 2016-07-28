@@ -47,7 +47,7 @@ public class SearchResultActivity extends AppCompatActivity
         ArrayList<SearchResultItem> result = sqLiteHelperCampusInfo.searchResultItems(db, query);
         db.close();
 
-        ListView listView = (ListView)findViewById(R.id.result_listview);
+        ListView listView = (ListView)findViewById(R.id.result_list);
         if (listView != null) {
             listView.setAdapter(new SearchItemAdapter(
                     this,
