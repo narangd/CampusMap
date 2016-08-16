@@ -13,16 +13,17 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+            android:name=".activity.IntroActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activity.IntroActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activity.TestActivity"
             android:label="@string/title_activity_building"
@@ -47,6 +48,12 @@
             android:name=".activity.DrawerTestActivity"
             android:label="@string/title_activity_drawer_test"
             android:theme="@style/AppTheme.NoActionBar" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="d49e3a0cd5cad7b6c7eada6a1f35a85907f1cbca" />
     </application>
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 </manifest>

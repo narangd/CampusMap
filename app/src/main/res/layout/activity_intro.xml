@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="@android:color/white"
     tools:context=".activity.IntroActivity">
 
@@ -14,20 +16,20 @@
         android:background="#fdfdfd"
         android:contentDescription="@string/desc_app_logo" />
 
-    <TextView
-        android:id="@+id/text_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_alignBottom="@id/app_logo"
-        android:layout_marginBottom="30dp"
-        android:text="@string/test_text" />
+    <!--<TextView-->
+        <!--android:id="@+id/text_status"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:layout_alignBottom="@id/app_logo"-->
+        <!--android:layout_marginBottom="30dp"-->
+        <!--android:text="@string/test_text" />-->
 
-    <ProgressBar
-        android:id="@+id/progress_loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/text_status"
-        android:layout_centerHorizontal="true" />
+    <!--<ProgressBar-->
+        <!--android:id="@+id/progress_loading"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_above="@id/text_status"-->
+        <!--android:layout_centerHorizontal="true" />-->
 
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

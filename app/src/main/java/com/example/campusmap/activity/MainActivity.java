@@ -2,7 +2,6 @@ package com.example.campusmap.activity;
 
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -44,20 +43,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        // ## Start IntroActivity... ##
-        new AsyncTask<Void,Void,Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                if (!isStart) {
-                    startActivity(
-                            new Intent(MainActivity.this, IntroActivity.class)
-                    );
-                    isStart = true;
-                }
-                return null;
-            }
-        }.execute();
 
         // ## Layout ##
         super.onCreate(savedInstanceState);

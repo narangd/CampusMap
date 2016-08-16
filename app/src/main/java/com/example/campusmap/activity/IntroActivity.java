@@ -1,14 +1,13 @@
 package com.example.campusmap.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.example.campusmap.R;
 import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
@@ -17,13 +16,14 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+
+import io.fabric.sdk.android.Fabric;
 
 public class IntroActivity extends Activity {
     private static final String TAG = "IntroActivity";
     private static final boolean DEBUG = true;
-    private TextView mTextStatus;
-    private ProgressBar mProgressLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +31,8 @@ public class IntroActivity extends Activity {
 
         // ## Layout ##
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_intro);
-
-        mTextStatus = (TextView) findViewById(R.id.text_status);
-        mProgressLoading = (ProgressBar) findViewById(R.id.progress_loading);
     }
 
     @Override
@@ -49,11 +47,12 @@ public class IntroActivity extends Activity {
         final String FLOOR = SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME;
         final String ROOM = SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME;
 
+        if (DEBUG) Log.i(TAG, "onStart: DataBase Check");
+
        // ## Check Database ##
-        mTextStatus.setText("데이터베이스 확인중...");
         if (sqLiteHelper.getTableSize(db, BUILDING) == getTagSize(BUILDING) &&
                 sqLiteHelper.getTableSize(db, FLOOR) == getTagSize(FLOOR) &&
-                sqLiteHelper.getTableSize(db, ROOM) == getTagSize(ROOM)) {
+                sqLiteHelper.getTableSize(db, ROOM) == getTagSize(ROOM) && !DEBUG) {
             db.close();
 
             waitAsyncTask(null);
@@ -64,7 +63,7 @@ public class IntroActivity extends Activity {
             db.close();
 
             waitAsyncTask(
-                    new CampusInfoInsertAsyncTask(this).execute(R.xml.building_info)
+                    new CampusInfoInsertAsyncTask(IntroActivity.this).execute(R.xml.building_info)
             );
         }
     }
@@ -80,11 +79,11 @@ public class IntroActivity extends Activity {
                         sleep = 1500;
                         task.get();
                     }
+                } catch (CancellationException e) {
+                    Log.e(TAG, "doInBackground: task Cancel!");
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }
-
-                publishProgress();
 
                 try {
                     Thread.sleep(sleep);
@@ -92,22 +91,19 @@ public class IntroActivity extends Activity {
                     e.printStackTrace();
                 }
 
-                IntroActivity.this.finish();
+//                IntroActivity.this.finish();
                 return null;
-            }
-
-            @Override
-            protected void onProgressUpdate(Void... values) {
-                super.onProgressUpdate(values);
-
-                mTextStatus.setText("");
-                mProgressLoading.setVisibility(View.INVISIBLE);
             }
 
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
                 Log.i(TAG, "onPostExecute: data insert done, wait done.");
+
+                startActivity(
+                        new Intent(IntroActivity.this, MainActivity.class)
+                );
+                finish();
             }
         }.execute();
     }
@@ -131,7 +127,7 @@ public class IntroActivity extends Activity {
         return count;
     }
 
-    @Override
-    public void onBackPressed() { /* do noting.. */ }
+//    @Override
+//    public void onBackPressed() { /* do noting.. */ }
 
 }
