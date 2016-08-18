@@ -1,6 +1,7 @@
 package com.example.campusmap.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -106,6 +107,12 @@ public class MainActivity extends AppCompatActivity
                         show();
 
                 Log.i("MainActivity", "onOptionsItemSelected: Delete Data (building, floor, room");
+
+                SharedPreferences preferences = getSharedPreferences("buildinginfo", 0);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("version", 0);
+                editor.apply();
+
                 return true;
             case R.id.action_only_test:
                 Intent intent = new Intent(this, DrawerTestActivity.class);

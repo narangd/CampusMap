@@ -166,32 +166,34 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
 
 
 
-    public void insertBuilding(SQLiteDatabase db, int ID, int number, String name, String description) {
+    public long insertBuilding(SQLiteDatabase db, int ID, int number, String name, String description) {
         if ( !db.isReadOnly() ) {
             ContentValues values = new ContentValues();
             values.put(BuildingEntry._ID, ID);
             values.put(BuildingEntry.COLUMN_NAME_NUMBER, number);
             values.put(BuildingEntry.COLUMN_NAME_NAME, name);
             values.put(BuildingEntry.COLUMN_NAME_DESCRIPTION, description);
-            db.insert(BuildingEntry.TABLE_NAME, null, values);
+            return db.insert(BuildingEntry.TABLE_NAME, null, values);
         } else {
             Log.e(TAG, "insertBuilding: SQLiteDatabase is not Writable..");
         }
+        return -1;
     }
 
-    public void insertFloor(SQLiteDatabase db, int ID, int floor, int buildingID) {
+    public long insertFloor(SQLiteDatabase db, int ID, int floor, int buildingID) {
         if ( !db.isReadOnly() ) {
             ContentValues values = new ContentValues();
             values.put(FloorEntry._ID, ID);
             values.put(FloorEntry.COLUMN_NAME_NUMBER, floor);
             values.put(FloorEntry.COLUMN_NAME_BUILDING_ID, buildingID);
-            db.insert(FloorEntry.TABLE_NAME, null, values);
+            return db.insert(FloorEntry.TABLE_NAME, null, values);
         } else {
             Log.e(TAG, "insertBuilding: SQLiteDatabase is not Writable..");
         }
+        return -1;
     }
 
-    public void insertRoom(
+    public long insertRoom(
             SQLiteDatabase db,
             int ID, String name,
             String desc,
@@ -208,10 +210,11 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             values.put(RoomEntry.COLUMN_NAME_FLOOR_ID, floorID);
             values.put(RoomEntry.COLUMN_NAME_BUILDING_ID, buildingID);
             values.put(RoomEntry.COLUMN_NAME_MAIN, isMain? 1 : 0);
-            db.insert(RoomEntry.TABLE_NAME, null, values);
+            return db.insert(RoomEntry.TABLE_NAME, null, values);
         } else {
             Log.e(TAG, "insertBuilding: SQLiteDatabase is not Writable..");
         }
+        return -1;
     }
 
     public int getTableSize(SQLiteDatabase db, String tableName) {

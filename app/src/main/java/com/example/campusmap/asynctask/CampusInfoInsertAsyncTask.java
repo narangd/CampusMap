@@ -5,9 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.XmlResourceParser;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
@@ -18,25 +17,36 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 
-public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boolean> {
+public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolean> {
     private static final String TAG = "CampusInfoInsertAsync";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String ns = null;
+    private static final int TIMEOUT = 1000 * 5;
+
+    private SharedPreferences preferences;
+    private int version;
     private Context mContext;
     private ProgressDialog mDlg;
     private SQLiteHelperCampusInfo helper;
     private String message = "";
 
+    final AlertDialog alertDialog;
+
     public CampusInfoInsertAsyncTask(Context context) {
         mContext = context;
         helper = SQLiteHelperCampusInfo.getInstance(context);
+        alertDialog = new AlertDialog.Builder(mContext).create();
+        preferences = mContext.getSharedPreferences( "buildinginfo", 0 );
     }
 
     @Override
@@ -44,16 +54,8 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
         super.onPreExecute();
         Log.i(TAG, "-=##=- onPreExecute -=##=-");
 
-        ConnectivityManager manager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = manager.getActiveNetworkInfo();
-
-        if (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()) {
-            Log.i("연결됨" , "연결이 되었습니다.");
-
-        } else {
-            Log.i("연결 안 됨" , "연결이 다시 한번 확인해주세요");
-            cancel(true);
-        }
+        version = preferences.getInt( "version", 0 );
+        Log.i(TAG, "bringJSON: preferences version : " + version);
 
         mDlg = new ProgressDialog(mContext);
         mDlg.setCancelable(false);
@@ -65,59 +67,46 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
     }
 
     @Override
-    protected Boolean doInBackground(Integer... IDs) {
+    protected Boolean doInBackground(String... URLs) {
         if (DEBUG) Log.i(TAG, "doInBackground: called");
-        if (IDs == null || IDs.length < 1) {
+        if (URLs == null || URLs.length < 1) {
+            Log.e(TAG, "doInBackground: parameter expected");
             return false;
         }
 
-        String result = bringJSON("http://203.232.193.178/download/android/campusmap.php");
-//        if (DEBUG) {
-//            if (result != null) {
-//                result = result.substring(0, result.length() > 200 ? 200 : result.length());
-//                if (!result.equals("newest")) {
-//                    parsingJSON();
-//                }
-//            }
-//            Log.i(TAG, "doInBackground: result : " + result);
-//        }
+        SQLiteDatabase database = helper.getWritableDatabase();
+        String result = bringJSON(URLs[0]);
+
         if (isCancelled()) {
             return null;
         }
 
-        if (DEBUG) {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        message = result;
+        publishProgress(-2);
+        if (result != null)
+            Log.i(TAG, "doInBackground: result length : " + result.length());
+
+        if (result != null && !result.equals("newest")) {
+            database.beginTransaction();
+
+            message = "입력하는중입니다";
+            publishProgress(-1);
+
+            int version = parsingJSON(result, helper, database);
+
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putInt("version", version);
+            editor.apply();
+
+            database.setTransactionSuccessful();
+            database.endTransaction();
         }
+        database.close();
 
-        publishProgress(0);
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-        for (int ID : IDs) {
-            mDlg.setMax( getTotalCampusInfoTag(ID) );
-            XmlResourceParser parser = mContext.getResources().getXml(ID);
-
-            db.beginTransaction();
-            try {
-                if (result != null && !result.equals("newest")) {
-                    parsingJSON(result, helper, db);
-                }
-
-                parsingXML(parser, helper, db);
-
-                db.setTransactionSuccessful();
-            } catch (XmlPullParserException | IOException e) {
-                e.printStackTrace();
-            } finally {
-                db.endTransaction();
-            }
-
-            parser.close();
-        }
-        db.close();
+//        sqLiteHelper.deleteTable(database, BUILDING);
+//        sqLiteHelper.deleteTable(database, FLOOR);
+//        sqLiteHelper.deleteTable(database, ROOM);
+//        database.close();
 
         return true;
     }
@@ -129,77 +118,65 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
         try {
             long startMilli = System.currentTimeMillis();
 
-            if (DEBUG) Log.i(TAG, "bringJSON: URL : " + urlString);
             message ="서버에 접속하는 중입니다";
-            publishProgress(-1);
 
-            SharedPreferences preferences = mContext.getSharedPreferences("buildinginfo", 0);
-            int version = preferences.getInt("version", 0);
+            urlString += "?version=" + version;
+            if (DEBUG) Log.i(TAG, "bringJSON: URL : " + urlString);
 
-            URL url = new URL(urlString + "?version=" + version);
+            URL url = new URL(urlString);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setConnectTimeout(1000 * 15 /* 15초 */);
-            connection.setReadTimeout(1000 * 10 /* 10초 */);
+            connection.setRequestProperty("Accept-Encoding", "identity");
+            connection.setConnectTimeout( TIMEOUT );
+            connection.setReadTimeout( TIMEOUT );
             connection.setRequestMethod("GET");
+            connection.setDoOutput(true);
             connection.setDoInput(true);
-            connection.connect();
+//            connection.connect();
 
-            int contentLength = connection.getContentLength();
-
-            mDlg.setMax(contentLength);
+            OutputStream os = connection.getOutputStream();
+            OutputStreamWriter writer = new OutputStreamWriter(os);
+            writer.write("version=" + version);
+            writer.flush();
+            writer.close();
 
             if (DEBUG) {
 
-                Log.i(TAG, "bringJSON: take Time : " + (System.currentTimeMillis() - startMilli) + "ms");
-                Log.i(TAG, "bringJSON: Content Encoding : " + connection.getContentEncoding());
-                Log.i(TAG, "bringJSON: Content Length : " + contentLength);
+                Log.d(TAG, "bringJSON: take Time : " + (System.currentTimeMillis() - startMilli) + "ms");
+                Log.d(TAG, "bringJSON: Content Encoding : " + connection.getContentEncoding());
+                Log.d(TAG, "bringJSON: Content Length : " + connection.getContentLength());
 
-                Log.i(TAG, "bringJSON: Response Message : " + connection.getResponseMessage());
-                Log.i(TAG, "bringJSON: Response Code : " + connection.getResponseCode());
+                Log.d(TAG, "bringJSON: Response Message : " + connection.getResponseMessage());
+                Log.d(TAG, "bringJSON: Response Code : " + connection.getResponseCode());
 
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
 
-            message ="변환중입니다";
-            publishProgress(-1);
-
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 cancel(true);
+                Log.e(TAG, "bringJSON: i return null : " + connection.getResponseCode());
                 return null;
             }
 
-            char[] buffer = new char[1024];
-            InputStream in = connection.getInputStream();
-            InputStreamReader reader = new InputStreamReader(in, "UTF-8");
-//            BufferedReader bufferedReader = new BufferedReader(reader);
+            String line;
+            InputStream is = connection.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader reader  = new BufferedReader(isr);
 
-            long currentMilli = System.currentTimeMillis();
-            while (reader.read(buffer) > 0) {
-                builder.append(buffer);
-                publishProgress(builder.length());
-
-                if (DEBUG) {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if (System.currentTimeMillis() > currentMilli + 1000) {
-                    currentMilli = System.currentTimeMillis();
-                    if (DEBUG) Log.i(TAG, "bringJSON: current Length : " + builder.length());
-                }
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
             }
-            if (DEBUG) Log.i(TAG, "bringJSON: builder Length : " + builder.length());
+
+            Log.i(TAG, "bringJSON: builder : " + builder.toString());
+            Log.i(TAG, "bringJSON: builder length : " + builder.length());
 
             reader.close();
 
         } catch (SocketTimeoutException e) {
+            e.printStackTrace();
             cancel(true);
             return null;
         } catch (IOException e) {
@@ -213,7 +190,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
         return builder.toString();
     }
 
-    private void parsingXML(XmlResourceParser parser, SQLiteHelperCampusInfo helper, SQLiteDatabase db)
+    private void parsingXML(XmlResourceParser parser, SQLiteHelperCampusInfo helper, SQLiteDatabase database)
             throws IOException, XmlPullParserException {
 
         int count=0;
@@ -223,18 +200,18 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
         String buildingName="", path="", roomName;
         String text, main;
 
-        while (parser.next() != XmlResourceParser.END_DOCUMENT) {
-            if (parser.getEventType() != XmlResourceParser.START_TAG) {
+        while ( parser.next() != XmlResourceParser.END_DOCUMENT ) {
+            if ( parser.getEventType() != XmlResourceParser.START_TAG ) {
                 continue;
             }
 
-            switch (parser.getName()) {
+            switch ( parser.getName() ) {
                 case "building":  // ## <building num="1" name="100주년 기념관"> ##
                     number = Integer.parseInt(parser.getAttributeValue(ns, "num"));
                     if (number == 0)
                         number = Integer.parseInt(parser.getAttributeValue(ns, "number"));
                     buildingName = parser.getAttributeValue(ns, "name");
-                    helper.insertBuilding(db,
+                    helper.insertBuilding(database,
                             ++currentBuildingID,             // # id #
                             number,                          // # number #
                             buildingName,                    // # name #
@@ -246,7 +223,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
                     if (number == 0)
                         number = Integer.parseInt(parser.getAttributeValue(ns, "number"));
                     path = buildingName + " / " + String.valueOf(number)+"층";
-                    helper.insertFloor(db,
+                    helper.insertFloor(database,
                             ++currentFloorID,                // # id #
                             number,                          // # number #
                             currentBuildingID                // # building id #
@@ -258,7 +235,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
                     parser.require(XmlResourceParser.START_TAG, ns, "room");
                     parser.next();
                     text = parser.getText();
-                    helper.insertRoom(db,
+                    helper.insertRoom(database,
                             ++currentRoomID,                  // # id #
                             roomName,                         // # name
                             text,                             // # description #
@@ -270,73 +247,122 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
                     break;
             }
 
-            if (DEBUG) {
-                try {
-                    Thread.sleep(0, 500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    return;
-                }
-            }
-
             publishProgress(++count);
         }
 
         if (DEBUG) {
-            Log.i( TAG, "database insert building count : " + (currentBuildingID-1)
-                    + ", floor count : " + (currentFloorID-1)
-                    + ", insert room count : " + (currentRoomID-1) );
+            Log.d( TAG, "database insert building count : " + currentBuildingID
+                    + ", floor count : " + currentFloorID
+                    + ", insert room count : " + currentRoomID );
         }
     }
 
-    private void parsingJSON(String json, SQLiteHelperCampusInfo helper, SQLiteDatabase db) {
+    private int parsingJSON(String json, SQLiteHelperCampusInfo helper, SQLiteDatabase database) {
         int count=0;
         int currentBuildingID=0, currentFloorID=0, currentRoomID=0;
 
+        int version = 0;
         int number;
-        String name="", path="";
+        String buildingName, path, roomName;
         String description, main;
 
+        long rowID;
+        mDlg.setMax(getTotalCampusInfoJSONObject(json));
+        Log.i(TAG, "parsingJSON: json object count : " + mDlg.getMax());
+
         try {
-            JSONObject object = new JSONObject(json);
-            int version = object.getInt("version");
+            JSONObject buildingInfo = new JSONObject(json);
+            version = buildingInfo.getInt("version");
 
-            SharedPreferences preferences = mContext.getSharedPreferences("buildinginfo", 0);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putInt("version", version);
-            editor.apply();
-
-            JSONArray buildings = object.getJSONArray("building");
+            JSONArray buildings = buildingInfo.getJSONArray("building");
             for (int buildingIndex=0; buildingIndex<buildings.length(); buildingIndex++) {
 
                 JSONObject building = buildings.getJSONObject(buildingIndex);
                 number = Integer.parseInt( building.getString("number") );
-                name = building.getString("name");
+                buildingName = building.getString("name");
                 description = building.getString("description");
+                description = description == null ? "" : description;
 
-                if (DEBUG) {
-                    Log.i(TAG, "parsingJSON: id : " + ++currentBuildingID +
-                            ", number : " + number +
-                            ", name : " + name +
-                            ", description : " + description);
-                }
+                rowID = helper.insertBuilding(database,
+                        ++currentBuildingID,    // # id #
+                        number,                 // # number #
+                        buildingName,                   // # name #
+                        description             // # description #
+                );
+                publishProgress(++count);
+//                if (DEBUG) {
+//                    Log.d(TAG, "parsingJSON(building)["+rowID+"] id : " + currentBuildingID +
+//                            ", number : " + number +
+//                            ", name : " + buildingName +
+//                            ", description : " + description);
+//                }
 
                 JSONArray floors = building.getJSONArray("floor");
                 for (int floorIndex=0; floorIndex<floors.length(); floorIndex++) {
 
                     JSONObject floor = floors.getJSONObject(floorIndex);
                     number = Integer.parseInt( floor.getString("number") );
+
+                    path = buildingName + " / " + String.valueOf(number)+"층";
+                    rowID = helper.insertFloor(database,
+                            ++currentFloorID,                // # id #
+                            number,                          // # number #
+                            currentBuildingID                // # building id #
+                    );
+                    publishProgress(++count);
+//                    if (DEBUG) {
+//                        Log.d(TAG, "parsingJSON(floor)["+rowID+"] id : " + currentFloorID +
+//                                ", number : " + number);
+//                    }
+
+                    JSONArray rooms = floor.getJSONArray("room");
+                    for (int roomIndex=0; roomIndex<rooms.length(); roomIndex++) {
+
+                        JSONObject room = rooms.getJSONObject(roomIndex);
+                        roomName = room.getString("name");
+                        description = room.getString("description");
+                        description = description == null ? "" : description;
+                        main = room.getString("main");
+
+                        rowID = helper.insertRoom(database,
+                                ++currentRoomID,                  // # id #
+                                roomName,                         // # name
+                                description,                             // # description #
+                                path,                             // # path string #
+                                currentFloorID,                   // # floor id #
+                                currentBuildingID,                // # building id #
+                                main.equals("1")                      // # is main room? #
+                        );
+                        publishProgress(++count);
+//                        if (DEBUG) {
+//                            Log.d(TAG, "parsingJSON(room)["+rowID+"] id : " + currentRoomID +
+//                                    ", roomName : " + roomName +
+//                                    ", description : " + description +
+//                                    ", main : " + main +
+//                                    ", roomName : " + roomName);
+//                        }
+                    }
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-//                helper.insertBuilding(db,
-//                        ++currentBuildingID,    // # id #
-//                        number,                 // # number #
-//                        name,                   // # name #
-//                        description             // # description #
-//                );
             }
+
         } catch (JSONException e) {
             e.printStackTrace();
+            message = json;
+            publishProgress(-2);
         }
+
+        if (DEBUG) {
+            Log.d( TAG, "database insert building count : " + currentBuildingID
+                    + ", floor count : " + currentFloorID
+                    + ", insert room count : " + currentRoomID );
+        }
+
+        return version;
     }
 
     @Override
@@ -345,20 +371,33 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
             return;
         }
 
-        if (values[0] < 0) {
-            mDlg.setMessage(message);
-        } else {
+        if (values[0] >= 0) {
             mDlg.setIndeterminate(false);
             mDlg.setProgress(values[0]);
+        } else {
+            switch (-values[0]) {
+                case 1:
+                    mDlg.setMessage(message);
+                    break;
+                case 2:
+//                    alertDialog.setTitle("JSON 결과");
+//                    alertDialog.setMessage(message);
+//                    alertDialog.setCanceledOnTouchOutside(true);
+//                    alertDialog.show();
+                    break;
+            }
         }
 
     }
+
+
 
     @Override
     protected void onPostExecute(Boolean aBoolean) {
         super.onPostExecute(aBoolean);
         Log.i(TAG, "-=##=- onPostExecute -=##=-");
         mDlg.dismiss();
+        alertDialog.dismiss();
     }
 
     @Override
@@ -366,6 +405,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
         super.onCancelled();
         if (DEBUG) Log.i(TAG, "onCancelled: called!!");
         mDlg.dismiss();
+        alertDialog.dismiss();
     }
 
     @Override
@@ -373,6 +413,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
         super.onCancelled(aBoolean);
         if (DEBUG) Log.i(TAG, "onCancelled: called!! ("+aBoolean+")");
         mDlg.dismiss();
+        alertDialog.dismiss();
     }
 
     private int getTotalCampusInfoTag(int xml_ID) {
@@ -389,5 +430,15 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<Integer, Integer, Boole
         }
         parser.close();
         return max;
+    }
+
+    private int getTotalCampusInfoJSONObject(final String json) {
+        int count = 0;
+        for (int i=0; i<json.length(); i++) {
+            if (json.charAt(i) == '{') { // count json start object '{'
+                count++;
+            }
+        }
+        return count;
     }
 }

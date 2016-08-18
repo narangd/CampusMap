@@ -1,8 +1,10 @@
 package com.example.campusmap.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,7 +12,6 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.example.campusmap.R;
 import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
-import com.example.campusmap.database.SQLiteHelperCampusInfo;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -23,7 +24,7 @@ import io.fabric.sdk.android.Fabric;
 
 public class IntroActivity extends Activity {
     private static final String TAG = "IntroActivity";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,32 +40,22 @@ public class IntroActivity extends Activity {
     protected void onStart() {
         super.onStart();
 
-        // ## Database ##
-        final SQLiteHelperCampusInfo sqLiteHelper = SQLiteHelperCampusInfo.getInstance(IntroActivity.this);
-        final SQLiteDatabase db = sqLiteHelper.getReadableDatabase();
-
-        final String BUILDING = SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME;
-        final String FLOOR = SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME;
-        final String ROOM = SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME;
-
         if (DEBUG) Log.i(TAG, "onStart: DataBase Check");
 
-       // ## Check Database ##
-        if (sqLiteHelper.getTableSize(db, BUILDING) == getTagSize(BUILDING) &&
-                sqLiteHelper.getTableSize(db, FLOOR) == getTagSize(FLOOR) &&
-                sqLiteHelper.getTableSize(db, ROOM) == getTagSize(ROOM) && !DEBUG) {
-            db.close();
+        ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = manager.getActiveNetworkInfo();
 
-            waitAsyncTask(null);
-        } else {
-            sqLiteHelper.deleteTable(db, BUILDING);
-            sqLiteHelper.deleteTable(db, FLOOR);
-            sqLiteHelper.deleteTable(db, ROOM);
-            db.close();
+        if (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()) {
+            Log.i(TAG, "onStart: 인터넷에 연결되어 있습니다");
 
             waitAsyncTask(
-                    new CampusInfoInsertAsyncTask(IntroActivity.this).execute(R.xml.building_info)
+                    new CampusInfoInsertAsyncTask(IntroActivity.this).execute(
+                            "http://203.232.193.178/download/android/campusmap.php"
+                    )
             );
+        } else {
+            Log.e(TAG, "onStart: 인터넷에 연결되어 있지 않습니다");
+            waitAsyncTask( null );
         }
     }
 
@@ -91,7 +82,6 @@ public class IntroActivity extends Activity {
                     e.printStackTrace();
                 }
 
-//                IntroActivity.this.finish();
                 return null;
             }
 
