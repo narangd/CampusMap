@@ -1,8 +1,6 @@
 package com.example.campusmap.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -16,13 +14,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.example.campusmap.R;
-import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.database.SearchResultItem;
-import com.example.campusmap.fragment.BuildingInfoFragment;
 import com.example.campusmap.fragment.CampusMapFragment;
+import com.example.campusmap.fragment.MenuPlannerFragment;
 import com.example.campusmap.fragment.PathFindingFragment;
 
 public class MainActivity extends AppCompatActivity
@@ -30,7 +26,6 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
 //    private static final boolean
     public static final int SEARCH_RESULT_ACTIVITY_REQUEST_CODE = 1;
-    private boolean isStart = false;
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -63,7 +58,6 @@ public class MainActivity extends AppCompatActivity
         if (mViewPager != null) {
             mViewPager.setAdapter(mSectionsPagerAdapter);
         }
-//        mViewPager.setOffscreenPageLimit(0);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         if (tabLayout != null) {
@@ -90,37 +84,9 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         switch (id) {
             case  R.id.action_settings:
-//                startActivity(new Intent(this, ParallaxActiviry.class));
-                return true;
-            case R.id.action_reset_db:
-                SQLiteHelperCampusInfo sqLiteHelperCampusInfo = SQLiteHelperCampusInfo.getInstance(this);
-                SQLiteDatabase db = sqLiteHelperCampusInfo.getWritableDatabase();
-
-                sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME);
-                sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME);
-                sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME);
-
-                Toast.makeText(getApplicationContext(), "데이터를 모두 삭제하였습니다.", Toast.LENGTH_SHORT).
-                        show();
-
-                Log.i("MainActivity", "onOptionsItemSelected: Delete Data (building, floor, room");
-
-                SharedPreferences preferences = getSharedPreferences("buildinginfo", 0);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt("version", 0);
-                editor.apply();
-
-                return true;
-            case R.id.action_only_test:
-                Intent intent = new Intent(this, DrawerTestActivity.class);
-                intent.putExtra(DrawerTestActivity.KEY_BUILDING_ID, 1);
-                startActivity(intent);
-                return true;
-            case R.id.action_parallax:
-                startActivity(new Intent(this, ScrollingActivity.class));
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
         }
 
@@ -129,9 +95,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        if (mViewPager.getCurrentItem() == 1 && BuildingInfoFragment.getInstance().getIndex() > 0)
-            BuildingInfoFragment.getInstance().onBackPressed();
-        else
+//        if (mViewPager.getCurrentItem() == 1 && BuildingInfoFragment.getInstance().getIndex() > 0)
+//            BuildingInfoFragment.getInstance().onBackPressed();
+//        else
             super.onBackPressed();
     }
 
@@ -205,7 +171,7 @@ public class MainActivity extends AppCompatActivity
         public Fragment getItem(int position) {
             switch (position) {
                 case CampusMapFragment.TAP_INDEX: return CampusMapFragment.newInstance();
-                case BuildingInfoFragment.TAP_INDEX: return BuildingInfoFragment.getInstance();
+                case MenuPlannerFragment.TAP_INDEX: return MenuPlannerFragment.newInstance();
                 case PathFindingFragment.TAP_INDEX: return PathFindingFragment.newInstance();
             }
             return Fragment.instantiate(getApplicationContext(),"out of index:" + position);
@@ -222,8 +188,8 @@ public class MainActivity extends AppCompatActivity
             switch (position) {
                 case CampusMapFragment.TAP_INDEX:
                     return "캠퍼스 맵";
-                case BuildingInfoFragment.TAP_INDEX:
-                    return "건물정보";
+                case MenuPlannerFragment.TAP_INDEX:
+                    return "이번주 식단표"; //"건물정보";
                 case PathFindingFragment.TAP_INDEX:
                     return "길찾기";
             }

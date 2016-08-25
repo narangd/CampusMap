@@ -6,9 +6,11 @@ import android.content.SharedPreferences;
 import android.content.res.XmlResourceParser;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import com.example.campusmap.R;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 
 import org.json.JSONArray;
@@ -27,7 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 
-public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolean> {
+public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Integer> {
     private static final String TAG = "CampusInfoInsertAsync";
     private static final boolean DEBUG = false;
     private static final String ns = null;
@@ -46,7 +48,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolea
         mContext = context;
         helper = SQLiteHelperCampusInfo.getInstance(context);
         alertDialog = new AlertDialog.Builder(mContext).create();
-        preferences = mContext.getSharedPreferences( "buildinginfo", 0 );
+        preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     @Override
@@ -54,8 +56,8 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolea
         super.onPreExecute();
         Log.i(TAG, "-=##=- onPreExecute -=##=-");
 
-        version = preferences.getInt( "version", 0 );
-        Log.i(TAG, "bringJSON: preferences version : " + version);
+        version = preferences.getInt( mContext.getString(R.string.pref_key_db_version), 0 );
+        Log.i(TAG, "onPreExecute: preferences version : " + version);
 
         mDlg = new ProgressDialog(mContext);
         mDlg.setCancelable(false);
@@ -67,15 +69,19 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolea
     }
 
     @Override
-    protected Boolean doInBackground(String... URLs) {
+    protected Integer doInBackground(String... URLs) {
         if (DEBUG) Log.i(TAG, "doInBackground: called");
         if (URLs == null || URLs.length < 1) {
             Log.e(TAG, "doInBackground: parameter expected");
-            return false;
+            return 0;
         }
 
+        String BUILDING = SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME;
+        String FLOOR = SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME;
+        String ROOM = SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME;
         SQLiteDatabase database = helper.getWritableDatabase();
         String result = bringJSON(URLs[0]);
+        int version = 0;
 
         if (isCancelled()) {
             return null;
@@ -92,23 +98,19 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolea
             message = "입력하는중입니다";
             publishProgress(-1);
 
-            int version = parsingJSON(result, helper, database);
+            helper.deleteTable(database, BUILDING);
+            helper.deleteTable(database, FLOOR);
+            helper.deleteTable(database, ROOM);
 
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putInt("version", version);
-            editor.apply();
+            version = parsingJSON(result, helper, database);
+            Log.i(TAG, "doInBackground: JSON version : " + version);
 
             database.setTransactionSuccessful();
             database.endTransaction();
         }
         database.close();
 
-//        sqLiteHelper.deleteTable(database, BUILDING);
-//        sqLiteHelper.deleteTable(database, FLOOR);
-//        sqLiteHelper.deleteTable(database, ROOM);
-//        database.close();
-
-        return true;
+        return version;
     }
 
     private String bringJSON(String urlString) {
@@ -283,7 +285,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolea
                 description = building.getString("description");
                 description = description == null ? "" : description;
 
-                rowID = helper.insertBuilding(database,
+                helper.insertBuilding(database,
                         ++currentBuildingID,    // # id #
                         number,                 // # number #
                         buildingName,                   // # name #
@@ -304,7 +306,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolea
                     number = Integer.parseInt( floor.getString("number") );
 
                     path = buildingName + " / " + String.valueOf(number)+"층";
-                    rowID = helper.insertFloor(database,
+                    helper.insertFloor(database,
                             ++currentFloorID,                // # id #
                             number,                          // # number #
                             currentBuildingID                // # building id #
@@ -324,7 +326,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolea
                         description = description == null ? "" : description;
                         main = room.getString("main");
 
-                        rowID = helper.insertRoom(database,
+                        helper.insertRoom(database,
                                 ++currentRoomID,                  // # id #
                                 roomName,                         // # name
                                 description,                             // # description #
@@ -342,11 +344,14 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolea
 //                                    ", roomName : " + roomName);
 //                        }
                     }
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+
+//                    if (DEBUG) {
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+//                    }
                 }
             }
 
@@ -393,8 +398,8 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolea
 
 
     @Override
-    protected void onPostExecute(Boolean aBoolean) {
-        super.onPostExecute(aBoolean);
+    protected void onPostExecute(Integer version) {
+        super.onPostExecute(version);
         Log.i(TAG, "-=##=- onPostExecute -=##=-");
         mDlg.dismiss();
         alertDialog.dismiss();
@@ -409,9 +414,9 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Boolea
     }
 
     @Override
-    protected void onCancelled(Boolean aBoolean) {
-        super.onCancelled(aBoolean);
-        if (DEBUG) Log.i(TAG, "onCancelled: called!! ("+aBoolean+")");
+    protected void onCancelled(Integer version) {
+        super.onCancelled(version);
+        if (DEBUG) Log.i(TAG, "onCancelled: called!! ("+version+")");
         mDlg.dismiss();
         alertDialog.dismiss();
     }

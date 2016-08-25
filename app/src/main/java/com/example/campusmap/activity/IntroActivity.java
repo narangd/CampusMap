@@ -3,20 +3,20 @@ package com.example.campusmap.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.example.campusmap.R;
 import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -63,21 +63,32 @@ public class IntroActivity extends Activity {
         new AsyncTask<Void,Void,Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                int sleep = 1000;
-
                 try {
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(IntroActivity.this);
+                    SharedPreferences.Editor editor = preferences.edit();
+
                     if (task != null) {
-                        sleep = 1500;
-                        task.get();
+                        int version = (int) task.get();
+                        String key = IntroActivity.this.getString(R.string.pref_key_db_version);
+                        Log.i(TAG, "doInBackground: version : " + version);
+                        if (version > preferences.getInt(key, 0)) {
+                            editor.putInt(getString(R.string.pref_key_db_version), version);
+                        }
                     }
+
+                    PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+                    editor.putString(getString(R.string.pref_key_app_version), pInfo.versionName);
+                    editor.apply();
+
                 } catch (CancellationException e) {
                     Log.e(TAG, "doInBackground: task Cancel!");
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (InterruptedException | ExecutionException | PackageManager.NameNotFoundException e) {
                     e.printStackTrace();
                 }
 
                 try {
-                    Thread.sleep(sleep);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -90,34 +101,17 @@ public class IntroActivity extends Activity {
                 super.onPostExecute(aVoid);
                 Log.i(TAG, "onPostExecute: data insert done, wait done.");
 
-                startActivity(
-                        new Intent(IntroActivity.this, MainActivity.class)
-                );
+                Intent main = new Intent(IntroActivity.this, MainActivity.class);
+                main.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                main.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(main);
+
                 finish();
             }
         }.execute();
     }
 
-    public int getTagSize(final String tagName) {
-        int count=0;
-        XmlPullParser parser = getApplicationContext().getResources().getXml(R.xml.building_info);
-        try {
-            while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                if (parser.getEventType() != XmlPullParser.START_TAG) {
-                    continue;
-                }
-
-                if (parser.getName().equals(tagName)) {
-                    count++;
-                }
-            }
-        } catch (XmlPullParserException | IOException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
-
-//    @Override
-//    public void onBackPressed() { /* do noting.. */ }
+    @Override
+    public void onBackPressed() { /* do noting.. */ }
 
 }

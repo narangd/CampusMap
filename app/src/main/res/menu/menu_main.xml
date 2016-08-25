@@ -11,12 +11,9 @@
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
 
-    <item android:id="@+id/action_reset_db" android:title="@string/action_reset_db"
-        android:orderInCategory="100" app:showAsAction="never" />
+    <!--<item android:id="@+id/action_only_test" android:title="@string/action_only_test"-->
+        <!--android:orderInCategory="100" app:showAsAction="never" />-->
 
-    <item android:id="@+id/action_only_test" android:title="@string/action_only_test"
-        android:orderInCategory="100" app:showAsAction="never" />
-
-    <item android:id="@+id/action_parallax" android:title="@string/action_only_test"
-        android:orderInCategory="100" app:showAsAction="never" />
+    <!--<item android:id="@+id/action_parallax" android:title="@string/action_only_test"-->
+        <!--android:orderInCategory="100" app:showAsAction="never" />-->
 </menu>
