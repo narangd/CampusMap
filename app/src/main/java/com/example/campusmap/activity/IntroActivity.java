@@ -16,6 +16,7 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.example.campusmap.R;
 import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
+import com.example.campusmap.fragment.MenuPlannerFragment;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -79,6 +80,9 @@ public class IntroActivity extends Activity {
 
                     PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
                     editor.putString(getString(R.string.pref_key_app_version), pInfo.versionName);
+                    editor.putBoolean(getString(R.string.pref_key_today_menu_planner),
+                            !preferences.getString(getString(R.string.pref_key_last_skip_date), "-").equals(MenuPlannerFragment.TODAY_DATE)
+                    );
                     editor.apply();
 
                 } catch (CancellationException e) {
@@ -103,9 +107,8 @@ public class IntroActivity extends Activity {
 
                 Intent main = new Intent(IntroActivity.this, MainActivity.class);
                 main.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                main.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                main.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(main);
-
                 finish();
             }
         }.execute();

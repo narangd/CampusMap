@@ -11,14 +11,16 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.example.campusmap.R;
+import com.example.campusmap.form.MenuPlanner;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -38,8 +40,8 @@ public class MenuPlannerFragment extends Fragment {
     private static final SimpleDateFormat GNTECH_DATE_FORMAT = new SimpleDateFormat("M월 d일(E)", Locale.KOREAN);
     public static final String TODAY_DATE = GNTECH_DATE_FORMAT.format(new Date());
 
-    private TextView textView;
     private SharedPreferences preferences;
+    private RecyclerView recyclerView;
 
     public MenuPlannerFragment() {
     }
@@ -72,58 +74,64 @@ public class MenuPlannerFragment extends Fragment {
             }
         });
 
-        textView = (TextView) rootView.findViewById(R.id.text);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.menu_recycler_view);
+        recyclerView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
 
-
-        boolean is_today_show =  !preferences.getString(getString(R.string.pref_key_last_skip_date), "").equals(TODAY_DATE);
-
-        if (isIntetnetConnect() && is_today_show) {
-            new AsyncTask<Void, String, Pair<String,String>>() {
+        if (isIntetnetConnect()) {
+            new AsyncTask<Void, String, Pair<MenuPlanner,ArrayList<MenuPlanner>>>() {
                 @Override
-                protected Pair<String,String> doInBackground(Void... params) {
+                protected Pair<MenuPlanner,ArrayList<MenuPlanner>> doInBackground(Void... params) {
                     return parseGNTechMenuPlaner();
                 }
 
                 @Override
-                protected void onPostExecute(Pair<String,String> result) {
+                protected void onPostExecute(Pair<MenuPlanner,ArrayList<MenuPlanner>> result) {
                     super.onPostExecute(result);
 
-                    builder.setTitle("오늘의 학식입니다");
-                    builder.setMessage(result.first);
-                    builder.show();
-                    Log.i(TAG, "onPostExecute: length : " + result.second.length());
+                    if (result.first == null || result.second == null) {
+                        return;
+                    }
 
-                    textView.setText(result.second);
+                    MenuPlanner.MealAdapter mealAdapter = new MenuPlanner.MealAdapter(result.first);
+                    recyclerView.setAdapter(mealAdapter);
+
+                    boolean is_today_show =  !preferences.getString(getString(R.string.pref_key_last_skip_date), "").equals(TODAY_DATE);
+                    if (is_today_show) {
+                        builder.setTitle("오늘의 학식입니다"); // breakfast lunch dinner
+                        builder.setMessage(result.first.toString());
+                        builder.show();
+                    }
+                    Log.i(TAG, "onPostExecute: length : " + result.second.size());
                 }
             }.execute();
         } else {
-            textView.setText("인터넷에 연결이 되어 있지 않습니다...");
+            Log.e(TAG, "onCreateView: 인터넷에 연결이 되어 있지 않습니다...");
         }
 
         return rootView;
     }
 
-    private Pair<String,String> parseGNTechMenuPlaner() {
-        ArrayList<StringBuilder> days = new ArrayList<>();
-        StringBuilder builder = new StringBuilder();
-        String today = "";
+    private Pair<MenuPlanner,ArrayList<MenuPlanner>> parseGNTechMenuPlaner() {
+        ArrayList<MenuPlanner> menuPlanners = new ArrayList<>();
+        MenuPlanner today = null;
         int today_index = 0;
-
         Document doc;
+
         try {
             doc = Jsoup.connect(GNTechURL).get();
             Elements tags = doc.select("table");
             Elements ths = tags.get(1).select("thead>tr>th");
-            ths.remove(0);
-            ths.remove(ths.size()-1);
+            ths.remove(0); // 구분 삭제
+            ths.remove(ths.size()-1); // 비고 삭제
 
             Log.i(TAG, "parseGNTechMenuPlaner: ths : " + ths.size());
             for (int i=0; i<ths.size(); i++) {
-                StringBuilder th_builder = new StringBuilder();
-                th_builder.append("날짜 : ")
-                        .append(ths.get(i).ownText())
-                        .append("\n\n");
-                days.add(th_builder);
+                // date
+                menuPlanners.add(
+                        new MenuPlanner(ths.get(i).ownText())
+                );
 
                 if (ths.get(i).ownText().equals(TODAY_DATE)) {
                     today_index = i;
@@ -131,30 +139,28 @@ public class MenuPlannerFragment extends Fragment {
             }
 
             Element tbody = tags.get(1).select("tbody").first();
-            for (Element tr : tbody.children()) {
-                Elements tr_days = tr.children();
-                for (int i=1; i<tr_days.size(); i++) {
-                    days.get(i-1)
-                            .append("<")
-                            .append(tr_days.get(0).ownText())
-                            .append(">\n")
-                            .append(tr_days.get(i).html().replace("<br>", "\n").replace("&amp;","&"))
-                            .append("\n\n");
+            // 조, 중, 석, 교 -- skip 조
+            for (int meal_index=1; meal_index<tbody.children().size(); meal_index++) {
+
+                Elements tr_days = tbody.children().get(meal_index).children();
+                // 일 (월 화 수 목 금) 토
+                for (int day_index=1; day_index<tr_days.size(); day_index++) {
+                    String menu = tr_days.get(day_index).html().replace("&amp;","&");
+                    menuPlanners.get(day_index-1).addMeal(
+                            meal_index,
+                            tr_days.get(0).ownText(),
+                            menu.split("<br>")
+                    );
 
                 }
             }
-            today = days.get(today_index).toString();
-
-            for (StringBuilder day : days) {
-                builder.append(day.toString());
-                builder.append("=-------------=\n\n");
-            }
+            today = menuPlanners.get(today_index);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new Pair<>(today, builder.toString());
+        return new Pair<>(today, menuPlanners);
     }
 
     @Override

@@ -1,0 +1,1054 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<university>
+    <building number="1" name="100주년 기념관">
+        <floor number="1">
+            <room name="방재센터"/>
+            <room name="행정사무실"/>
+            <room name="관리사무실"/>
+            <room name="관리실"/>
+            <room name="강사대기실"/>
+            <room name="하역공간"/>
+            <room name="다목적강당(1000석)" main="1"/>
+            <room name="소극장" main="1"/>
+            <room name="강사대기실"/>
+        </floor>
+        <floor number="2">
+            <room name="갤러리(기획전시실)"/>
+            <room name="A/V 조명 조정실"/>
+            <room name="100주년 대학 역사관" main="1"/>
+            <room name="강사대기실"/>
+        </floor>
+        <floor number="3">
+            <room name="강의실"/>
+            <room name="강의실"/>
+            <room name="강의실"/>
+            <room name="강의실"/>
+            <room name="강의실"/>
+            <room name="휴게공간"/>
+        </floor>
+        <floor number="4">
+            <room name="401강의실"/>
+            <room name="402강의실"/>
+            <room name="시스템실"/>
+            <room name="원장실"/>
+            <room name="자료실"/>
+            <room name="업무개발실"/>
+            <room name="행정실"/>
+        </floor>
+        <floor number="5">
+            <room name="직조디자인실습실"/>
+            <room name="직조디자인실습실"/>
+            <room name="천염염색실습실"/>
+            <room name="천염염색실습실"/>
+            <room name="교수연구실" description="김규범"/>
+            <room name="대학원작업실"/>
+            <room name="제판디자인실"/>
+            <room name="교수연구실" description="최주현"/>
+            <room name="교수연구실" description="조윤진"/>
+            <room name="니트디자인"/>
+            <room name="텍스타일디자인학과사무실" main="1"/>
+            <room name="교수연구실" description="이애자"/>
+        </floor>
+        <floor number="6">
+            <room name="준비실"/>
+            <room name="패션상품기획실습실"/>
+            <room name="융합디자인연구소/조형디자인 준비실"/>
+            <room name="조형디자인실습실"/>
+            <room name="디지털건출설계실" description="김규범"/>
+            <room name="통합건축설계실"/>
+            <room name="친환경건축설계실"/>
+        </floor>
+        <floor number="7">
+            <room name="계획건축설계실(1학년A반)"/>
+            <room name="기본건축설계실(1학년B반)"/>
+            <room name="친환경건축설계실(4학년A반)"/>
+            <room name="기초건축설계실(4학년B반)"/>
+            <room name="교수연구실" description="양금석"/>
+            <room name="교수연구실" description="김화봉"/>
+            <room name="건축세미나실2"/>
+            <room name="교수연구실" description="안은희"/>
+            <room name="교수연구실" description="김근성"/>
+            <room name="건축세미나실1"/>
+            <room name="교수연구실" description="강재중"/>
+            <room name="건축학과사무실" main="1"/>
+        </floor>
+        <floor number="8">
+            <room name="세미나실-2"/>
+            <room name="세미나실-1"/>
+            <room name="영어실습실-2"/>
+            <room name="영어실습실-1"/>
+            <room name="교수연구실" description="배대권"/>
+            <room name="교수연구실" description="진용우"/>
+            <room name="교수연구실" description="랜디"/>
+            <room name="교수연구실" description="이석영"/>
+            <room name="교수연구실" description="안병길"/>
+            <room name="교수연구실" description="이봉환"/>
+            <room name="준비실"/>
+            <room name="영어학과사무실" main="1"/>
+        </floor>
+        <floor number="9">
+            <room name="아동실습실-1"/>
+            <room name="아동실습실-2"/>
+            <room name="아동실습실-3"/>
+            <room name="교수연구실"/>
+            <room name="교수연구실" description="김현옥"/>
+            <room name="세미나실-2"/>
+            <room name="교수연구실" description="김경호"/>
+            <room name="교수연구실" description="고경필"/>
+            <room name="세미나실-1"/>
+            <room name="교수연구실" description="황경애"/>
+            <room name="아동가정복지학과사무실" main="1"/>
+        </floor>
+        <floor number="10">
+            <room name="국제교류원 행정실" main="1"/>
+            <room name="국제교류원 8강의실"/>
+            <room name="국제교류원 7강의실"/>
+            <room name="국제교류원 6강의실"/>
+            <room name="국제교류원 5강의실"/>
+            <room name="국제교류원 4강의실"/>
+            <room name="국제교류원 3강의실"/>
+            <room name="국제교류원 2강의실"/>
+            <room name="국제교류원 1강의실"/>
+            <room name="국제교류원 강사대기실"/>
+            <room name="국제교류원 원장실"/>
+        </floor>
+        <floor number="11">
+            <room name="멀구슬고시원"/>
+            <room name="인문사회과학대학 스터디룸"/>
+            <room name="구,조형디자인대학 스터디룸"/>
+            <room name="통합건출설계실" description="5학년A반"/>
+            <room name="계획건축설계실" description="5학년B반"/>
+            <room name="대학원공통학생회실"/>
+            <room name="창업학과전담교수실"/>
+            <room name="동영상강의실"/>
+            <room name="창업실습실"/>
+            <room name="창업비즈니스센터"/>
+            <room name="창업학과사무실" main="1"/>
+        </floor>
+        <floor number="12">
+            <room name="강의실" description="경제분석실"/>
+            <room name="강의실"/>
+            <room name="강의실"/>
+            <room name="계획건축설계실1" description="3학년A반"/>
+            <room name="계획건축설계실2" description="3학년B반"/>
+            <room name="교수연구실" description="조혜정"/>
+            <room name="사회복지학과사무실" main="1"/>
+            <room name="교수연구실" description="강대선"/>
+            <room name="교수연구실" description="권혁창"/>
+            <room name="교수연구실" description="박동철"/>
+            <room name="교수연구실" description="김규"/>
+        </floor>
+        <floor number="13">
+            <room name="강의실"/>
+            <room name="강의실"/>
+            <room name="강의실"/>
+            <room name="교수연구실" description="권혁진"/>
+            <room name="교수연구실" description="조덕래"/>
+            <room name="경제정보검색실"/>
+            <room name="교수연구실" description="박종현"/>
+            <room name="교수연구실" description="송원근"/>
+            <room name="세미나실"/>
+            <room name="교수연구실" description="이웅호"/>
+            <room name="산업경제학과사무실" main="1"/>
+        </floor>
+        <floor number="14">
+            <room name="접견실"/>
+            <room name="준비실"/>
+            <room name="회의실"/>
+            <room name="세미나실1"/>
+            <room name="세미나실2"/>
+            <room name="교수연구실" description="공실"/>
+            <room name="교수연구실" description="공실"/>
+            <room name="교수연구실" description="공실"/>
+        </floor>
+        <floor number="15">
+            <room name="전망휴게식당"/>
+            <room name="주방"/>
+            <room name="휴게실"/>
+            <room name="식품창고"/>
+            <room name="화장실"/>
+            <room name="스카이라운지"  main="1"/>
+        </floor>
+    </building>
+    <building number="2" name="학생회관(종실관)">
+
+    </building>
+    <building number="3" name="자연과학실험동">
+        <floor number="1">
+            <room name="실험실-1"/>
+            <room name="양돈과학기술센터 종합실험실"/>
+            <room name="실험실-2"/>
+        </floor>
+    </building>
+    <building number="4" name="도서관">
+
+    </building>
+    <building number="5" name="생명과학 2호관">
+        <floor number="1">
+            <room name="조림육종실험실"/>
+            <room name="조림육종준비실"/>
+            <room name="산림자원학과사무실"/>
+            <room name="교수연구실" description="추갑철"/>
+            <room name="교수연구실" description="안현철"/>
+            <room name="교수연구실" description="이총규"/>
+            <room name="산림경영실험실"/>
+            <room name="교수연구실" description="김봉규"/>
+            <room name="교수연구실" description="박재현"/>
+            <room name="산림보호실험실"/>
+            <room name="산림토목실험실"/>
+            <room name="산림토목준비실"/>
+        </floor>
+        <floor number="2">
+            <room name="식품위생실험실"/>
+            <room name="식품미생물실험실"/>
+            <room name="교수연구실" description="서원택"/>
+            <room name="교수연구실" description="조계만"/>
+            <room name="삼림생태실험실"/>
+            <room name="교수연구실" description="조현서"/>
+            <room name="교수연구실" description="김춘식"/>
+            <room name="산림토양실험실"/>
+            <room name="산림토양준비실" description="박재현"/>
+            <room name="209강의실"/>
+        </floor>
+        <floor number="3">
+            <room name="301강의실"/>
+            <room name="생명과학대학 스터디룸"/>
+            <room name="303강의실"/>
+            <room name="304강의실"/>
+            <room name="305강의실"/>
+            <room name="306강의실"/>
+            <room name="307강의실"/>
+        </floor>
+    </building>
+    <building number="6" name="박물관">
+
+    </building>
+    <building number="7" name="상경 1호관">
+        <floor number="1">
+            <room name="101강의실"/>
+            <room name="102강의실"/>
+            <room name="103강의실"/>
+            <room name="104강의실"/>
+        </floor>
+        <floor number="2">
+            <room name="교수연구실" description="곽영식"/>
+            <room name="교수연구실" description="반성식"/>
+            <room name="교수연구실" description="김상표"/>
+            <room name="교수연구실" description="하환호"/>
+            <room name="회계실무실습실"/>
+            <room name="교수연구실" description="허익구"/>
+            <room name="교수연구실" description="김예경"/>
+        </floor>
+        <floor number="3">
+            <room name="전자상거래실습실"/>
+            <room name="전자상거래무역학과사무실"/>
+            <room name="회계정보처리실"/>
+            <room name="교수연구실" description="이원기"/>
+            <room name="교수연구실" description="홍효석"/>
+        </floor>
+    </building>
+    <building number="8" name="상경 2호관">
+        <floor number="1">
+            <room name="101강의실"/>
+            <room name="경영실무실습실"/>
+            <room name="경영정보실습실"/>
+            <room name="참살이식품실습실"/>
+            <room name="참살이식품실습실"/>
+            <room name="111강의실"/>
+            <room name="벤처경영학과사무실"/>
+            <room name="109강의실"/>
+            <room name="108강의실"/>
+            <room name="107강의실"/>
+            <room name="식품조리실습실"/>
+            <room name="식품조리실습실"/>
+            <room name="청사관리원실"/>
+        </floor>
+        <floor number="2">
+            <room name="교수연구실" description="박종복"/>
+            <room name="교수연구실" description="박종해"/>
+            <room name="교수연구실" description="조동환"/>
+            <room name="교수연구실" description="김성호"/>
+            <room name="신임교수연구실"/>
+            <room name="세무회계실습실"/>
+            <room name="재무회계실습실"/>
+            <room name="무역세미나실"/>
+            <room name="경영세미나실"/>
+            <room name="전자상거래세미나실"/>
+            <room name="경영학과 석박사과정 공동연구실"/>
+            <room name="212강의실"/>
+            <room name="회계학세미나실"/>
+            <room name="상경대학 스터디룸2"/>
+            <room name="상경대학스터디룸1"/>
+            <room name="상경대학 세미나실"/>
+        </floor>
+        <floor number="3">
+            <room name="창업지원단 사무실"/>
+            <room name="회의실 및 상담실"/>
+            <room name="주방"/>
+            <room name="세미나실" description="회의실"/>
+            <room name="보육실1"/>
+            <room name="보육실2"/>
+            <room name="보육실3"/>
+            <room name="보육실4"/>
+            <room name="보육실5"/>
+            <room name="경제경영지원센터"/>
+            <room name="GTEP실험실 및 비즈니스 센터"/>
+            <room name="APP교육실" description="강의실"/>
+            <room name="창업지원단 단장실"/>
+        </floor>
+    </building>
+    <building number="9" name="교양학관">
+        <floor number="1">
+            <room name="101강의실"/>
+            <room name="102강의실"/>
+            <room name="103강의실"/>
+            <room name="104강의실"/>
+        </floor>
+        <floor number="2">
+            <room name="교양학부사무실"/>
+            <room name="교수연구실" description="나희라"/>
+            <room name="교수연구실" description="이윤복"/>
+            <room name="교수연구실" description="전일주"/>
+            <room name="교수연구실" description="심갑식"/>
+            <room name="교수연구실" description="문범두"/>
+            <room name="207강의실"/>
+        </floor>
+        <floor number="3">
+            <room name="모성아동간호학실습실"/>
+            <room name="조정실"/>
+            <room name="성이간호학실습실"/>
+            <room name="실습평가실"/>
+            <room name="통합실습실"/>
+        </floor>
+    </building>
+    <building number="10" name="청담관(학군단)">
+        <floor number="-1">
+            <room name="강의실"/>
+            <room name="휴게실"/>
+            <room name="준비실"/>
+            <room name="전실" description=""/>
+        </floor>
+        <floor number="3">
+            <room name="교수연구실" description="이선혜"/>
+            <room name="교수연구실" description="유제복"/>
+            <room name="교수연구실" description="홍은영"/>
+            <room name="교수연구실" description="이은숙"/>
+            <room name="글로벌무역통상학과사무실"/>
+            <room name="강의실"/>
+            <room name="교수연구실" description="신임"/>
+            <room name="교수연구실" description="이정신"/>
+            <room name="강의실"/>
+            <room name="교수연구실"/>
+            <room name="교수연구실"/>
+            <room name="강의실"/>
+        </floor>
+    </building>
+    <building number="11" name="자연과학 1호관">
+        <floor number="1">
+            <room name="식품화학실험실"/>
+            <room name="교수연구실" description="신의철"/>
+            <room name="교수연구실" description="남상해"/>
+            <room name="교수연구실" description="김현영"/>
+            <room name="교수연구실" description="최진상"/>
+            <room name="교수연구실" description="주옥수"/>
+            <room name="세미나실"/>
+            <room name="식품과학부사무실"/>
+            <room name="농산식품가공준비실"/>
+            <room name="식품가공실험실"/>
+            <room name="영양학실험실"/>
+            <room name="식품분석실험준비실"/>
+            <room name="식품분석실험실"/>
+        </floor>
+        <floor number="2">
+            <room name="교수연구실" description="윤창술"/>
+            <room name="교수연구실" description="김철호"/>
+            <room name="교수연구실" description="박상혁"/>
+            <room name="교수연구실" description="권진택"/>
+            <room name="교수연구실" description="손성문"/>
+            <room name="교수연구실" description="김동훈"/>
+            <room name="회계정보학과사무실"/>
+            <room name="사회과학정보처리실"/>
+            <room name="EC프로젝트실"/>
+            <room name="원가분석실"/>
+            <room name="재무제표분석실"/>
+            <room name="전산회계실습실"/>
+            <room name="전자무역실습실"/>
+        </floor>
+        <floor number="3">
+            <room name="건강사정실습실"/>
+            <room name="간호학과사무실"/>
+            <room name="교수연구실" description="민계식"/>
+            <room name="교수연구실" description="서영미"/>
+            <room name="간호학과세미나실"/>
+            <room name="실습준비실"/>
+            <room name="기본간호학실습실"/>
+            <room name="간호학실습실"/>
+            <room name="간호학실습실"/>
+            <room name="긴초간호과학실"/>
+        </floor>
+    </building>
+    <building number="12" name="제4생활관(건립 예정)"/>
+    <building number="13" name="제3생활관(실천관)"/>
+    <building number="14" name="제1생활관(자각관)"/>
+    <building number="15" name="구)본관">
+        <floor number="1">
+            <room name="신협" main="1"/>
+            <room name="잡카페" main="1"/>
+            <room name="102강의실"/>
+            <room name="주차관리실" main="1"/>
+            <room name="교환 및 기기실"/>
+            <room name="103강의실"/>
+            <room name="내분비생리학실험실"/>
+            <room name="토양환경실험실"/>
+            <room name="소방기기실"/>
+        </floor>
+        <floor number="2">
+            <room name="CAP실(e-learning)"/>
+            <room name="정독실"/>
+            <room name="205강의실"/>
+            <room name="공학교육혁신센터" main="1"/>
+            <room name="외래강사휴게실"/>
+            <room name="201강의실"/>
+            <room name="202강의실"/>
+            <room name="203강의실"/>
+            <room name="에너지공학과 신규 실험실"/>
+            <room name="청담사상연구소" main="1"/>
+        </floor>
+        <floor number="3">
+            <room name="301강의실"/>
+            <room name="302강의실"/>
+            <room name="평생학습중심대학사업단"/>
+            <room name="자유전공학부사무실" main="1"/>
+            <room name="평생학습대학 스터디룸"/>
+            <room name="평생학습대학 스터디룸"/>
+            <room name="회의실"/>
+            <room name="사회적경제 전문인력 양성사업단"/>
+            <room name="교수연구실" description="안용태"/>
+            <room name="교수연구실" description="박치훈"/>
+            <room name="GTEP 사업단/전담교수님"/>
+            <room name="교수연구실" description="정현영"/>
+            <room name="에너지공학과사무실"/>
+            <room name="산업협력역량개발원" main="1"/>
+            <room name="창고"/>
+        </floor>
+    </building>
+    <building number="16" name="대학본부">
+        <floor number="1">
+            <room name="학생처장실"/>
+            <room name="학생서비스센터"/>
+            <room name="학사관리과"/>
+        </floor>
+        <floor number="2">
+            <room name="강당"/>
+        </floor>
+        <floor number="3">
+            <room name="공조실"/>
+        </floor>
+        <floor number="4">
+            <room name="융합기술공과 대학장실"/>
+            <room name="건설공학과 대학장실"/>
+            <room name="상경대학 학장실"/>
+            <room name="생명공학과 대학장실"/>
+            <room name="인문사회과학대학 학장실"/>
+            <room name="통신실"/>
+        </floor>
+        <floor number="5">
+            <room name="기획처"/>
+            <room name="기획처장실"/>
+            <room name="학생상담센터"/>
+            <room name="사회봉사센터"/>
+            <room name="장애학생지원센터"/>
+            <room name="중회의실"/>
+            <room name="접견실"/>
+            <room name="부속실"/>
+            <room name="총장집무실"/>
+        </floor>
+        <floor number="6">
+            <room name="단과대학 통합행정실"/>
+            <room name="학과상담실"/>
+            <room name="회의실"/>
+            <room name="통합행정 실장실"/>
+            <room name="교무처장실"/>
+            <room name="교무입학과장실"/>
+            <room name="교무팀"/>
+            <room name="대학원 통합행정실"/>
+            <room name="입시관리팀"/>
+            <room name="일반대학원 원장실"/>
+            <room name="산업대학원 원장실"/>
+            <room name="창업대학원 원장실"/>
+        </floor>
+        <floor number="7">
+            <room name="시설계"/>
+            <room name="전기계"/>
+            <room name="사무국장실"/>
+            <room name="총무과장실"/>
+            <room name="총무계"/>
+            <room name="재무계"/>
+            <room name="소회의실"/>
+        </floor>
+        <floor number="8">
+            <room name="산학협력단"/>
+            <room name="산학협력단장실"/>
+            <room name="직장협의회 노조사무실"/>
+            <room name="스튜디오"/>
+            <room name="교육역량 강화센터"/>
+            <room name="교수회"/>
+            <room name="교수의장실"/>
+        </floor>
+        <floor number="9">
+            <room name="대회의실"/>
+        </floor>
+    </building>
+    <building number="17" name="체육관">
+
+    </building>
+    <building number="18" name="공학1호관">
+        <floor number="-1">
+            <room name="대피실"/>
+        </floor>
+        <floor number="1">
+            <room name="멀티미디어실" main="1"/>
+            <room name="영사실"/>
+            <room name="대학원세미나실"/>
+            <room name="기초전기전자실습실"/>
+            <room name="캡스톤디자인실5"/>
+            <room name="데이터통신실습실"/>
+            <room name="자료실"/>
+            <room name="교수연구실"/>
+            <room name="스튜디오" description="안용태"/>
+            <room name="사진암실" description="박치훈"/>
+            <room name="캡스톤디자인실6"/>
+            <room name="컴퓨터정보센터" main="1" description="정현영"/>
+            <room name="캡스톤디자인실1"/>
+            <room name="융합기술공과대학 스터디룸"/>
+            <room name="융합기술공과대학 그룹세미나실"/>
+        </floor>
+        <floor number="2">
+            <room name="교수연구실" description="김완규"/>
+            <room name="교수연구실" description="김창근"/>
+            <room name="교수연구실" description="김현주"/>
+            <room name="데이터베이스실습실"/>
+            <room name="강의실"/>
+            <room name="프로그램실습실"/>
+            <room name="IT융합연구회"/>
+            <room name="컴퓨터공학과사무실" main="1"/>
+            <room name="프로그래밍언어실습실"/>
+        </floor>
+        <floor number="3">
+            <room name="전자공학과사무실" main="1"/>
+            <room name="교수연구실" description="이병로"/>
+            <room name="통신시스템실험실"/>
+            <room name="교수연구실" description="탁한호"/>
+            <room name="교수연구실" description="이광석"/>
+            <room name="강의실"/>
+            <room name="자료실"/>
+            <room name="디지털시스템실습실"/>
+            <room name="캡스톤디자인실4"/>
+            <room name="교수연구실" description="신임"/>
+            <room name="컴퓨터응용실험실"/>
+            <room name="캡스톤디자인실3"/>
+        </floor>
+        <floor number="4">
+            <room name="컴퓨터공학과 시스템실"/>
+            <room name="캡스톤디자인실2"/>
+            <room name="컴퓨터공학과 산학협력실"/>
+            <room name="교수연구실" description="김봉기"/>
+            <room name="교수연구실" description="김병철"/>
+            <room name="교수연구실" description="송진국"/>
+            <room name="교수연구실" description="김흥준"/>
+            <room name="캡스톤디자인실5"/>
+            <room name="강의실"/>
+            <room name="자료실(학생회)"/>
+            <room name="캡스톤디장인실2"/>
+            <room name="공용강의실"/>
+            <room name="교수연구실" description="전중창"/>
+            <room name="캡스톤디자인실4"/>
+            <room name="캡스톤디자인실3"/>
+        </floor>
+        <floor number="5">
+            <room name="캡스톤디자인실1"/>
+            <room name="자료실"/>
+        </floor>
+    </building>
+    <building number="19" name="파워플랜트"/>
+    <building number="20" name="공학 2호관">
+        <floor number="1">
+            <room name="자동차공학과사무실"/>
+            <room name="교수연구실" description="심한섭"/>
+            <room name="교수연구실" description="이치우"/>
+            <room name="교수연구실" description="김남경"/>
+            <room name="교수연구실" description="안국찬"/>
+            <room name="교수연구실" description="김봉환"/>
+            <room name="차량역학실험실"/>
+            <room name="101강의실"/>
+            <room name="차량열공학실험실"/>
+            <room name="차량전자실험실"/>
+        </floor>
+        <floor number="2">
+            <room name="교수연구실" description="정태상"/>
+            <room name="대학원세미나실"/>
+            <room name="준비실"/>
+            <room name="교수연구실" description="김유영"/>
+            <room name="외래강사실"/>
+            <room name="기계공학과사무실"/>
+            <room name="CAD/CAM실습실"/>
+            <room name="교수연구실" description="김태규"/>
+            <room name="201강의실"/>
+            <room name="202강의실"/>
+            <room name="계측제어공학실험실"/>
+        </floor>
+        <floor number="3">
+            <room name="교수연구실" description="양영준"/>
+            <room name="세미나실"/>
+            <room name="교수연구실" description="곽태수"/>
+            <room name="교수연구실" description="김인환"/>
+            <room name="교수연구실" description="허남수"/>
+            <room name="교수연구실" description="김명규"/>
+            <room name="자동화실험실"/>
+            <room name="301강의실"/>
+            <room name="302강의실" description="안용태"/>
+            <room name="" description="박치훈"/>
+            <room name="유공압제어실험실"/>
+        </floor>
+        <floor number="4">
+            <room name="교수연구실" description="배강열"/>
+            <room name="교수연구실" description="최태완"/>
+            <room name="메카트로닉스공학과사무실"/>
+            <room name="교수연구실" description="이태환"/>
+            <room name="교수연구실" description="배준경"/>
+            <room name="교수연구실" description="박진현"/>
+            <room name="제어계측실험실"/>
+            <room name="401강의실"/>
+            <room name="메카트로닉스응용실험실"/>
+            <room name="컴퓨터응용실험실"/>
+        </floor>
+        <floor number="5">
+            <room name="502강의실"/>
+            <room name="교수연구실" description="김해지"/>
+            <room name="교수연구실"/>
+            <room name="대학원세미나실"/>
+            <room name="교수연구실" description="오석규"/>
+            <room name="전동력응용실험실"/>
+            <room name="열유체실험실"/>
+            <room name="생산자동화실험실"/>
+            <room name="실험준비실"/>
+            <room name="501강의실"/>
+            <room name="마이크로프로세서응용실험실" description="정현영"/>
+            <room name="로봇및지능제어실험실"/>
+            <room name="공정제어응용실험실"/>
+            <room name="자동제어응용실험실"/>
+            <room name="자동제어응용실험실" description="실통합"/>
+        </floor>
+    </building>
+    <building number="21" name="생명과학1호관">
+        <floor number="1">
+            <room name="세미나실(바이오홀)"/>
+            <room name="교수연구실" description="채윤석"/>
+            <room name="교수연구실" description="홍점규"/>
+            <room name="원예학과사무실"/>
+            <room name="교수연구실" description="안상열"/>
+            <room name="자원식물실험실"/>
+            <room name="교수연구실" description="윤재길"/>
+            <room name="교수연구실" description="이상우"/>
+            <room name="교수연구실" description="최경옥"/>
+            <room name="식물병해관리학실험실-2"/>
+            <room name="식물병해관리학실험실-1"/>
+            <room name="원예작물육종학실험실"/>
+            <room name="원예생명공학실험실"/>
+            <room name="식물병리학및보호학실험실"/>
+            <room name="생리생태실험실"/>
+            <room name="101강의실"/>
+        </floor>
+        <floor number="2">
+            <room name="축산환경실험실"/>
+            <room name="동물발생공학실험실"/>
+            <room name="실내조경/화훼디자인실"/>
+            <room name="동물생명공동기자재실1"/>
+            <room name="교수연구실" description="장인석"/>
+            <room name="교수연구실" description="박희성"/>
+            <room name="교수연구실" description="김충희"/>
+            <room name="교수연구실" description="조광근"/>
+            <room name="교수연구실" description="정기화"/>
+            <room name="교수연구실" description="이철영"/>
+            <room name="교수연구실" description="김철옥"/>
+            <room name="교수연구실" description="송영민"/>
+            <room name="동물소재공학과사무실"/>
+            <room name="동물영양과학실험실"/>
+            <room name="동물유전공학실험실"/>
+            <room name="동물영양생리학실험실"/>
+            <room name="동물영양생리학준비실"/>
+            <room name="애완동물준비실"/>
+            <room name="애완동물실험실"/>
+            <room name="친환경소재개발실"/>
+        </floor>
+        <floor number="3">
+            <room name="식육유통품질연구실"/>
+            <room name="동물생명과학과세미나실"/>
+            <room name="교수연구실" description="김일석"/>
+            <room name="교수연구실" description="진상근"/>
+            <room name="교수연구실" description="김두환"/>
+            <room name="교수연구실" description="신용욱"/>
+            <room name="교수연구실" description="전현식"/>
+            <room name="교수연구실" description="김권래"/>
+            <room name="교수연구실" description="조영손"/>
+            <room name="농학한약자원학부사무실"/>
+            <room name="교수연구실" description="정은주"/>
+            <room name="교수연구실" description="이철호"/>
+            <room name="교수연구실" description="이신우"/>
+            <room name="식물유전공학실험실"/>
+            <room name="생약학실험실"/>
+            <room name="생약학실험실"/>
+            <room name="식육가공과학실험실"/>
+            <room name="302강의실"/>
+        </floor>
+        <floor number="4">
+            <room name="작물학실험실"/>
+            <room name="대학원세미나실"/>
+            <room name="403강의실"/>
+            <room name="동물생명과학과사무실"/>
+            <room name="대학원강의실"/>
+            <room name="공용기기실2"/>
+            <room name="교수연구실" description="문양수"/>
+            <room name="교수연구실" description="문여황"/>
+            <room name="교수연구실" description="손시환"/>
+            <room name="세포배양실"/>
+            <room name="대학원세미나실"/>
+            <room name="세포배양실"/>
+            <room name="대학원세미나실"/>
+            <room name="분자세포유전학실험실"/>
+            <room name="반추동물영양과학실험실"/>
+            <room name="준비실"/>
+            <room name="분자생물학실험실"/>
+            <room name="404강의실"/>
+        </floor>
+        <floor number="5">
+            <room name="생식공학실험실"/>
+            <room name="동뮬유전체연구실"/>
+            <room name="식물생리생화학실험실"/>
+            <room name="종자실용화연구소/도라지특화"/>
+            <room name="영농정착교육사업단"/>
+            <room name="503강의실"/>
+            <room name="한약리학실험실"/>
+            <room name="한약리학동물사육실"/>
+        </floor>
+    </building>
+    <building number="22" name="공동실험실습실">
+        <floor number="1">
+            <room name="관리실"/>
+            <room name="자료실"/>
+            <room name="컴퓨터실1"/>
+            <room name="컴퓨터실2"/>
+            <room name="재료분석 및 기계공작실"/>
+            <room name="파일럿 플랜트실"/>
+            <room name="세미나실(아톰홀)"/>
+            <room name="산학협력중심대학(기업위성연구실)"/>
+        </floor>
+        <floor number="2">
+            <room name="수질검사센터"/>
+            <room name="컴퓨터실4"/>
+            <room name="컴퓨터실3"/>
+            <room name="GLP전문인력양성교육장1"/>
+            <room name="CAM가공실"/>
+            <room name="기기분석실"/>
+            <room name="미생물실"/>
+            <room name="기기분석실"/>
+            <room name="이화학분석실험실"/>
+        </floor>
+        <floor number="3">
+            <room name="공기질검사센터 기기분석실"/>
+            <room name="기자재수리실"/>
+            <room name="행정실/분석상담실"/>
+            <room name="회의실"/>
+            <room name="GLP전문인력양성고육장2"/>
+            <room name="강의실(세미나실)"/>
+            <room name="전실1"/>
+            <room name="전실2"/>
+            <room name="암실"/>
+            <room name="현미경분석실"/>
+            <room name="기초화학실험실"/>
+            <room name="기초물리실험실"/>
+            <room name="제도실습실"/>
+        </floor>
+        <floor number="4">
+            <room name="차단실"/>
+            <room name="토양분석실"/>
+            <room name="원소분석실"/>
+            <room name="전실"/>
+            <room name="크레마토그레피실"/>
+            <room name="분광광도계실"/>
+            <room name="실험준비실(분석부)"/>
+            <room name="초원심분리실"/>
+            <room name="유전자연기서열분석실"/>
+            <room name="실험준비생)" description="생물공학부"/>
+        </floor>
+    </building>
+    <building number="23" name="공학 3호관">
+        <floor number="1">
+            <room name="세미나실"/>
+            <room name="대학원세미나실"/>
+            <room name="컴퓨터실" description="전공동아리연구실"/>
+            <room name="교수연구실" description="정재우"/>
+            <room name="교수연구실" description="이춘석"/>
+            <room name="교수연구실" description="서현효"/>
+            <room name="교수연구실" description="박정호"/>
+            <room name="외래강사실"/>
+            <room name="교수연구실" description="전기일"/>
+            <room name="교수연구실" description="김형갑"/>
+            <room name="환경공학과사무실"/>
+            <room name="대기실험실"/>
+            <room name="수질실험실"/>
+            <room name="미생물실험실"/>
+            <room name="환경기기실"/>
+            <room name="폐기물실험실"/>
+        </floor>
+        <floor number="2">
+            <room name="생태복원실습실"/>
+            <room name="대학원세미나실"/>
+            <room name="조경미학스튜디오"/>
+            <room name="샘플제작실"/>
+            <room name="교수연구실" description="유명희"/>
+            <room name="교수연구실" description="최길동"/>
+            <room name="대학원연구실"/>
+            <room name="수처리세미나실"/>
+            <room name="교수연구실" description="박현건"/>
+            <room name="건설공과대학 스터디룸"/>
+            <room name="인테리어디자인실습실"/>
+            <room name="인테리어디자인실습준비실"/>
+            <room name="염색디자인실습실"/>
+            <room name="환경에너지실험실"/>
+        </floor>
+        <floor number="3">
+            <room name="301강의실"/>
+            <room name="생물신소재공학실험실"/>
+            <room name="교수연구실" description="조수정"/>
+            <room name="세미나실"/>
+            <room name="교수연구실" description="김철호"/>
+            <room name="교수연구실" description="이상원"/>
+            <room name="교수연구실" description="갈상완"/>
+            <room name="교수연구실" description="조용운"/>
+            <room name="교수연구실" description="김홍출"/>
+            <room name="제약공학과사무실"/>
+            <room name="생물공학실험실"/>
+            <room name="유전공학실험실"/>
+            <room name="기기실"/>
+            <room name="생화학실험실"/>
+            <room name="발효공학실험실"/>
+            <room name="미생물실험실"/>
+            <room name="미생물응용실험실"/>
+            <room name="이화학분석실험실"/>
+        </floor>
+        <floor number="4">
+            <room name="401강의실"/>
+            <room name="402강의실"/>
+            <room name="교수연구실" description="나종범"/>
+            <room name="교수연구실" description="노정관"/>
+            <room name="교수연구실" description="윤승락"/>
+            <room name="교수연구실" description="조종수"/>
+            <room name="교수연구실" description="김사익"/>
+            <room name="교수연구실" description="김동귀"/>
+            <room name="인테리어자료공학과사무실"/>
+            <room name="현미경실"/>
+            <room name="인테리어소재가공실"/>
+            <room name="인테리어재료물리실험실"/>
+            <room name="인테리어재료화학실험실"/>
+            <room name="인테리어종이재료실험실"/>
+            <room name="실내환경및고분자재료학실험실"/>
+        </floor>
+    </building>
+    <building number="24" name="기계실습장">
+        <floor number="1">
+            <room name="유체공학실"/>
+            <room name="열공학실"/>
+            <room name="기계공작실"/>
+            <room name="차량공작실습실"/>
+            <room name="차량공작실험준비실"/>
+        </floor>
+    </building>
+    <building number="25" name="자동차실습장">
+        <floor number="1">
+            <room name="차량동력실험실"/>
+        </floor>
+    </building>
+    <building number="26" name="인테리어실습장">
+        <floor number="1">
+            <room name="풍동실험실"/>
+            <room name="목질재료실험실"/>
+            <room name="가구디자인실기실"/>
+            <room name="가구디자인실기실"/>
+        </floor>
+    </building>
+    <building number="27" name="공학 4호관">
+        <floor number="1">
+            <room name="구조실험실"/>
+            <room name="수리실험실"/>
+            <room name="조경계획실습실/조경미학"/>
+            <room name="기초화학실험실"/>
+            <room name="건설정보화연구실"/>
+            <room name="건설재료실험실"/>
+            <room name="수환경실험실"/>
+            <room name="토질실험준비실"/>
+            <room name="토질실험실"/>
+            <room name="시공재료실험실"/>
+        </floor>
+        <floor number="2">
+            <room name="구조해석실"/>
+            <room name="원격탐사실"/>
+            <room name="측량기기실"/>
+            <room name="201강의실"/>
+            <room name="교수연구실" description="안진희"/>
+            <room name="교수연구실" description="오홍섭"/>
+            <room name="교수연구실" description="김창학"/>
+            <room name="교수연구실" description="문홍득"/>
+            <room name="교수연구실" description="이석배"/>
+            <room name="교수연구실" description="김기흥"/>
+            <room name="교수연구실" description="이원홍"/>
+            <room name="교수연구실" description="이형래"/>
+            <room name="교수연구실"/>
+            <room name="외래강사실"/>
+            <room name="토목공학과사무실"/>
+            <room name="세미나실"/>
+            <room name="204강의실"/>
+            <room name="203강의실"/>
+            <room name="202강의실"/>
+            <room name="토목전산실"/>
+        </floor>
+        <floor number="3">
+            <room name="건축환경설비연구실"/>
+            <room name="공학설계실"/>
+            <room name="조형실습실"/>
+            <room name="전산해석실"/>
+            <room name="교수연구실" description="임서형"/>
+            <room name="교수연구실" description="유석형"/>
+            <room name="교수연구실" description="강현식"/>
+            <room name="교수연구실" description="이선영"/>
+            <room name="교수연구실" description="정창헌"/>
+            <room name="구조실험실"/>
+            <room name="건축공학과사무실"/>
+            <room name="세미나실"/>
+            <room name="강의실"/>
+            <room name="건축환경실험실"/>
+            <room name="학생회실"/>
+            <room name="건축전산실"/>
+            <room name="강의실2"/>
+            <room name="건축기초설계실"/>
+        </floor>
+        <floor number="4">
+            <room name="컴퓨터조경설계실"/>
+            <room name="실험준비실"/>
+            <room name="교수연구실" description="이춘석"/>
+            <room name="교수연구실" description="강호철"/>
+            <room name="교수연구실" description="임의제"/>
+            <room name="교수연구실" description="김태균"/>
+            <room name="교수연구실" description="류남형"/>
+            <room name="교수연구실" description="이수동"/>
+            <room name="외래강사실"/>
+            <room name="교수연구실" description="허근영"/>
+            <room name="조경시공실습실"/>
+            <room name="조경설계실스실"/>
+            <room name="강의실"/>
+            <room name="조경준비실"/>
+            <room name="조경학과사무실"/>
+            <room name="도시녹화공학사무실"/>
+            <room name="조경제도실습실"/>
+            <room name="세미나실"/>
+        </floor>
+    </building>
+    <building number="28" name="산학협력관">
+        <floor number="1">
+            <room name="전시실"/>
+            <room name="관리실/숙직실"/>
+            <room name="매점"/>
+            <room name="대회의실"/>
+            <room name="유희실"/>
+            <room name="교실(유아)/참관실"/>
+            <room name="사무실"/>
+            <room name="양호실"/>
+            <room name="교실(영아)"/>
+            <room name="교실(영아)"/>
+            <room name="식당/주방/창고"/>
+            <room name="교실(유아)/참관실"/>
+            <room name="교실(유아)/참관실"/>
+        </floor>
+        <floor number="2">
+            <room name="동물생명산업센터 장비실-1"/>
+            <room name="동물생명산업센터 장비실-2"/>
+            <room name="친화경농산물인증센터 사무실"/>
+            <room name="동물생명산업센터 사무실"/>
+            <room name="양돈과학기술센터 사무실"/>
+            <room name="양돈과학기술센터 소장실"/>
+            <room name="양돈과학기술센터 전임교수실"/>
+            <room name="소상공인지원센터"/>
+            <room name="중회의실"/>
+            <room name="소회의실"/>
+            <room name="중소기업산학협력센터 사무실"/>
+            <room name="보육교사교육원행정실/원장실"/>
+            <room name="전임교수실" description="김현주"/>
+            <room name="전임교수실" description="김순자"/>
+            <room name="실기실습실"/>
+            <room name="METEC 교육실-2"/>
+            <room name="제15 보육실"/>
+            <room name="제14 보육실"/>
+            <room name="제17 보육실"/>
+            <room name="제16 보육실"/>
+            <room name="201강의실"/>
+            <room name="202강으실"/>
+        </floor>
+        <floor number="3">
+            <room name="제1 보육실"/>
+            <room name="제2 보육실"/>
+            <room name="제3 보육실"/>
+            <room name="제4 보육실"/>
+            <room name="행정실/소장실"/>
+            <room name="제5 보육실"/>
+            <room name="제6 보윣ㄹ"/>
+            <room name="제7 보육실"/>
+            <room name="제8 보육실"/>
+            <room name="제9 보육실"/>
+            <room name="301강의실"/>
+            <room name="창고"/>
+            <room name="세미나실"/>
+            <room name="제10 보육실"/>
+            <room name="제11 보육실"/>
+            <room name="어린이생명과학교육원사무실"/>
+            <room name="어린이생명과학교육원실험실"/>
+            <room name="평생교육원 행정실"/>
+            <room name="미술실-2"/>
+            <room name="실내체육실"/>
+            <room name="상담실"/>
+            <room name="제2 강의실"/>
+            <room name="제1 강의실"/>
+            <room name="제12 보육실"/>
+            <room name="제13 보육실"/>
+            <room name="304강의실"/>
+            <room name="미술실-1"/>
+            <room name="305강의실"/>
+            <room name="외래강사실"/>
+            <room name="자료실"/>
+            <room name="303강의실"/>
+            <room name="302강의실"/>
+        </floor>
+        <floor number="4">
+            <room name="총동창회 회장실"/>
+            <room name="총동창회 사무실"/>
+            <room name="게스트하우스-1"/>
+            <room name="게스트하우스-2"/>
+            <room name="게스트하우스-3"/>
+            <room name="게스트하우스-4"/>
+            <room name="게스트하우스-5"/>
+            <room name="게스트하우스-6"/>
+            <room name="게스트하우스-7"/>
+            <room name="게스트하우스-8"/>
+        </floor>
+        <floor number="5">
+            <room name="게스트하우스-9"/>
+            <room name="게스트하우스-10"/>
+            <room name="게스트하우스-11"/>
+            <room name="게스트하우스-12"/>
+            <room name="게스트하우스-13"/>
+            <room name="게스트하우스-14"/>
+            <room name="게스트하우스-15"/>
+            <room name="게스트하우스-16"/>
+        </floor>
+    </building>
+    <building number="29" name="제2생활관(탐구관)"/>
+</university>

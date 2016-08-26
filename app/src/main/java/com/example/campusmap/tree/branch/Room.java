@@ -3,36 +3,36 @@ package com.example.campusmap.tree.branch;
 import java.io.Serializable;
 
 public class Room implements Serializable {
-    private int mID;
-    private String mName;
-    private String mText;
-    private int mBuildingID;
-    private int mFloorID;
+    private int id;
+    private String name;
+    private String desc;
+    private int buildingID;
+    private int floorID;
 
-    public Room(int id, String name, String text, int buildingID, int floorID) {
-        mID = id;
-        mName = name;
-        mText = text;
-        mBuildingID = buildingID;
-        mFloorID = floorID;
+    public Room(int id, String name, String desc, int buildingID, int floorID) {
+        this.id = id;
+        this.name = name;
+        this.desc = desc;
+        this.buildingID = buildingID;
+        this.floorID = floorID;
     }
 
-    public int getID() { return mID; }
+    public int getID() { return id; }
 
     public String getName() {
-        return mName;
+        return name;
     }
 
     public String getText() {
-        return mText;
+        return desc;
     }
 
-    public int getBuildingID() { return mBuildingID; }
+    public int getBuildingID() { return buildingID; }
 
-    public int getFloorID() { return mFloorID; }
+    public int getFloorID() { return floorID; }
 
     @Override
     public String toString() {
-        return mName + (mText==null ? "" : "\n\t"+ mText.trim());
+        return name + (desc ==null || desc.length()<=0 ? "" : "\n\t"+ desc.trim());
     }
 }

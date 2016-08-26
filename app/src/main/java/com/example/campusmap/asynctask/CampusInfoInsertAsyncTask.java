@@ -92,7 +92,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
         if (result != null)
             Log.i(TAG, "doInBackground: result length : " + result.length());
 
-        if (result != null && !result.equals("newest")) {
+        if (result != null && result.length() > 0 && !result.equals("newest")) {
             database.beginTransaction();
 
             message = "입력하는중입니다";
@@ -172,17 +172,15 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
                 builder.append(line);
             }
 
-            Log.i(TAG, "bringJSON: builder : " + builder.toString());
-            Log.i(TAG, "bringJSON: builder length : " + builder.length());
-
             reader.close();
 
         } catch (SocketTimeoutException e) {
-            e.printStackTrace();
+            Log.e(TAG, "bringJSON: Time Out : " + e.getMessage());
             cancel(true);
             return null;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "bringJSON: local.. " + e.getLocalizedMessage());
+//            e.printStackTrace();
         } finally {
             if (connection != null) {
                 connection.disconnect();

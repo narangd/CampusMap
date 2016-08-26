@@ -125,10 +125,12 @@ public class DrawerTestActivity extends AppCompatActivity
             mDescTextView = (TextView) headerLayout.findViewById(R.id.description);
             if (mDescTextView != null) {
                 String desc = buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_DESCRIPTION);
-                desc += "\n여분으로 보여질 텍스트1";
-                desc += "\n여분으로 보여질 텍스트2";
-                desc += "\n여분으로 보여질 텍스트3";
-                desc += "\n여분으로 보여질 텍스트4";
+                if (desc == null || desc.length() <= 0) {
+                    desc = "여분으로 보여질 텍스트1";
+                    desc += "\n여분으로 보여질 텍스트2";
+                    desc += "\n여분으로 보여질 텍스트3";
+                    desc += "\n여분으로 보여질 텍스트4";
+                }
                 mDescTextView.setText(desc);
             }
 
@@ -200,15 +202,6 @@ public class DrawerTestActivity extends AppCompatActivity
             isTried = true;
         } else {
             // ## 정상적인 경로로 들어온 경우 ##
-
-            // ## 네비게이션뷰가 보여지게한다 ##
-            mDrawer.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mDrawer.openDrawer(GravityCompat.START);
-                    mDescTextView.setVisibility(View.VISIBLE);
-                }
-            }, 200);
 
             // ## 지상을 먼저 선택되게 한다 ##
             for (int i = 0; i < mFloorAdapter.getCount(); i++) {
