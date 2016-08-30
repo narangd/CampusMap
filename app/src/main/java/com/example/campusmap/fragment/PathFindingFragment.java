@@ -1,9 +1,9 @@
 package com.example.campusmap.fragment;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -13,31 +13,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.asynctask.loader.DrawingLoader;
 import com.example.campusmap.pathfinding.Drawing;
+import com.example.campusmap.pathfinding.Map;
+import com.example.campusmap.pathfinding.Tile;
 
-import java.util.Random;
+import java.util.TreeMap;
 
 
 public class PathFindingFragment extends Fragment implements LoaderManager.LoaderCallbacks<Drawing> {
-    private static final String TAG = "ADP_PathFindingFragment";
-    private static final boolean DEBUG = true;
-    private static PathFindingFragment fragment = null;
+    private static final String TAG = "PathFindingFragment";
+    private static final boolean DEBUG = false;
     public static final int TAP_INDEX = 2;
 
-    private Snackbar mSnackbar;
-    ImageView mImageView;
-    FloatingActionButton fab;
-    Drawing mDrawing;
+    private Toast toast;
+    private ImageView mImageView;
+    private Drawing mDrawing;
     private ProgressBar mProgressBar;
 
+    private AsyncTask pathFindAsyncTask;
+
     public static PathFindingFragment newInstance() {
-        if (fragment == null) {
-            fragment = new PathFindingFragment();
-        }
-        return fragment;
+        return new PathFindingFragment();
     }
 
     public PathFindingFragment() {
@@ -66,39 +66,67 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
 
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
         mProgressBar.setIndeterminate(true);
+        toast = Toast.makeText(getContext(), "토스트", Toast.LENGTH_SHORT);
 
-        final Random random = new Random();
-
-        fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
         fab.setVisibility(View.VISIBLE);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mDrawing != null) {
-                    mSnackbar.setText("경로를 표시합니다.");
-                    mSnackbar.show();
 
-                    mDrawing.resetPath();
-                    mDrawing.drawImageView(mImageView);
-                    mImageView.invalidate();
+                    runPathFindingAsyncTask();
+
                 } else {
-                    mSnackbar.setText("잠시 후 다시시도해주세요\n로딩중입니다.");
-                    mSnackbar.show();
+                    toast.setText("로딩중입니다\n잠시 후 다시시도해주세요");
+                    toast.show();
                 }
             }
         });
-        mSnackbar = Snackbar.make(rootView, "", Snackbar.LENGTH_SHORT)
-                .setAction("Action", null);
+
+        // for test
+//        TreeSet<Tile>
 
         return rootView;
+    }
+
+    private void runPathFindingAsyncTask() {
+        if (pathFindAsyncTask == null) {
+            toast.setText("경로를 검색합니다.");
+            toast.show();
+
+            pathFindAsyncTask = new AsyncTask<Void,Void,Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    mDrawing.resetPath();
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    super.onPostExecute(aVoid);
+                    mDrawing.drawOnImageView(mImageView);
+                    pathFindAsyncTask = null;
+                }
+            }.execute();
+        } else {
+            toast.setText("경로를 검색중입니다");
+            toast.show();
+        }
     }
 
     // ## Polygon Loader (( LoaderManager.LoaderCallbacks )) ##
     @Override
     public Loader<Drawing> onCreateLoader(int id, Bundle args) {
         if (DEBUG) Log.i(TAG, "+++ onCreateLoader() called! +++");
-        mSnackbar.setText("로딩중입니다...");
-        mSnackbar.show();
+        toast.setText("로딩중입니다...");
+        toast.show();
 
         return new DrawingLoader(getActivity(), mImageView);
     }
@@ -108,15 +136,41 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
         if (DEBUG) Log.i(TAG, "+++ onLoadFinished() called! +++");
 
         mDrawing = drawing;
-        drawing.drawImageView(mImageView);
-        mImageView.invalidate();
+        drawing.resetPath();
+        drawing.drawOnImageView(mImageView);
 
         mProgressBar.setIndeterminate(false);
         mProgressBar.setVisibility(View.GONE);
 
+        Map map = mDrawing.getMap();
+        TreeMap<Tile, Tile> treeMap = new TreeMap<>();
 
-        mSnackbar.setText("로드를 완료했습니다.");
-        mSnackbar.show();
+
+        for (Tile tile : map.getNeighborOfTile(map.start)) {
+            treeMap.put(tile, tile);
+            Log.i(TAG, "onLoadFinished: treemap neighbor : " + treeMap);
+        }
+        Log.i(TAG, "onLoadFinished: neighbor : " + map.getNeighborOfTile(map.start));
+        Log.i(TAG, "onLoadFinished: treemap neighbor : " + treeMap);
+        Log.i(TAG, "onCreateView: start:" + map.start + ", goal:" + map.goal);
+
+        Log.i(TAG, "onLoadFinished: remove entry : " + treeMap.pollFirstEntry());
+        Log.i(TAG, "onLoadFinished: treemap neighbor : " + treeMap);
+        Log.i(TAG, "onLoadFinished: remove entry : " + treeMap.pollFirstEntry());
+        Log.i(TAG, "onLoadFinished: treemap neighbor : " + treeMap);
+
+
+//        TreeMap<Integer, Integer> arr = new TreeMap<>();
+//        arr.put(0, 1);
+//        Log.i(TAG, "onLoadFinished: items : " + arr);
+//        arr.put(1, 7);
+//        Log.i(TAG, "onLoadFinished: items : " + arr);
+//        arr.put(4, 3);
+//        Log.i(TAG, "onLoadFinished: items : " + arr);
+//        arr.put(3, 9);
+//        Log.i(TAG, "onLoadFinished: items : " + arr);
+//        arr.put(2, 5);
+//        Log.i(TAG, "onLoadFinished: items : " + arr);
     }
 
     @Override

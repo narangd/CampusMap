@@ -9,7 +9,7 @@ import com.example.campusmap.pathfinding.Tile;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 /**
  * Created by 연구생 on 2015-11-10.
@@ -27,38 +27,39 @@ public class AStar {
             return null;
 
         HashSet<Tile> closedSet = new HashSet<>();
-        TreeSet<Tile> openSet = new TreeSet<>();
+//        SortedList<Tile> openSet = new SortedList<>();
+//        ArrayList<Tile> openSet = new ArrayList<>();
+        TreeMap<Tile,Tile> openMap = new TreeMap<>();
 
         HashMap<Tile, Tile> cameFrom = new HashMap<>();
 
-        openSet.add(start);
-//        start.state = Tile.State.OPEN;
+//        openSet.insert(start);
+        openMap.put(start, start);
 
-//        goal.parent = null;
-//        start.G = 0;
-//        start.H = map.getDistance(start, goal);
-//        start.F = start.G + start.H;
+        int count = 10;
+        Log.i("AStar", "findPath: openmap : " + openMap);
 
-        while( openSet.size() > 0)//size() > 0 )
+        while( openMap.size() > 0)//size() > 0 )
         {
-            Log.d("AStar", "openSet List : " + openSet.toString());
-            Tile current =  openSet.pollFirst(); // error this .... compare...
+//            Collections.sort(openSet);
+//            Tile current = openSet.pollFirst();
+            Tile current = openMap.pollFirstEntry().getValue();
+            //openSet.get(0); // error this .... compare...
             if (current == goal)
                 break;
 
             closedSet.add(current);
+//            openSet.remove(current);
 
-
-            for ( Tile neighbor : map.getNeighborOfTile(current) )
-            {
+            for ( Tile neighbor : map.getNeighborOfTile(current) ) {
                 if (closedSet.contains(neighbor) || neighbor.state == Tile.State.WALL)
                     continue;       // Ignore the neighbor which is already evaluated.
 
                 // The distance from start to a neighbor
                 int tentative_gScore = current.G + current.getDistance(neighbor);
 
-                if (!openSet.contains(neighbor)) {
-                    openSet.add(neighbor); // Discover a new node
+                if (!openMap.containsValue(neighbor)) {
+                    openMap.put(neighbor, neighbor); // Discover a new node
                 }
                 else if (tentative_gScore >= neighbor.G)
                     continue;       // This is not a better path.
@@ -70,9 +71,13 @@ public class AStar {
                 neighbor.H = map.getDistance(goal, neighbor);
                 neighbor.F = neighbor.G + neighbor.H; // F = G + H.
             }
+            Log.i("AStar", "findPath: openmap : " + openMap);
+
+            if (--count <= 0)
+                break;
         }
 
-        openSet.clear();
+        openMap.clear();
         closedSet.clear();
 
         return reconstructPath(cameFrom, goal);

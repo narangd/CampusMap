@@ -1,11 +1,8 @@
 package com.example.campusmap.fragment;
 
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -19,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.campusmap.Internet;
 import com.example.campusmap.R;
 import com.example.campusmap.form.MenuPlanner;
 
@@ -62,50 +60,12 @@ public class MenuPlannerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_menu_planer, container, false);
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setPositiveButton("닫기", null);
-        builder.setNegativeButton("오늘그만보기", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(getString(R.string.pref_key_last_skip_date), TODAY_DATE);
-                editor.putBoolean(getString(R.string.pref_key_today_menu_planner), false);
-                editor.apply();
-            }
-        });
-
         recyclerView = (RecyclerView) rootView.findViewById(R.id.menu_recycler_view);
         recyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
-        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setLayoutManager( new LinearLayoutManager(getContext()) );
 
-        if (isIntetnetConnect()) {
-            new AsyncTask<Void, String, Pair<MenuPlanner,ArrayList<MenuPlanner>>>() {
-                @Override
-                protected Pair<MenuPlanner,ArrayList<MenuPlanner>> doInBackground(Void... params) {
-                    return parseGNTechMenuPlaner();
-                }
-
-                @Override
-                protected void onPostExecute(Pair<MenuPlanner,ArrayList<MenuPlanner>> result) {
-                    super.onPostExecute(result);
-
-                    if (result.first == null || result.second == null) {
-                        return;
-                    }
-
-                    MenuPlanner.MealAdapter mealAdapter = new MenuPlanner.MealAdapter(result.first);
-                    recyclerView.setAdapter(mealAdapter);
-
-                    boolean is_today_show =  !preferences.getString(getString(R.string.pref_key_last_skip_date), "").equals(TODAY_DATE);
-                    if (is_today_show) {
-                        builder.setTitle("오늘의 학식입니다"); // breakfast lunch dinner
-                        builder.setMessage(result.first.toString());
-                        builder.show();
-                    }
-                    Log.i(TAG, "onPostExecute: length : " + result.second.size());
-                }
-            }.execute();
+        if (Internet.isIntetnetConnect(getContext())) {
+            new MenuPlannerAsyncTask().execute();
         } else {
             Log.e(TAG, "onCreateView: 인터넷에 연결이 되어 있지 않습니다...");
         }
@@ -117,11 +77,10 @@ public class MenuPlannerFragment extends Fragment {
         ArrayList<MenuPlanner> menuPlanners = new ArrayList<>();
         MenuPlanner today = null;
         int today_index = 0;
-        Document doc;
 
         try {
-            doc = Jsoup.connect(GNTechURL).get();
-            Elements tags = doc.select("table");
+            Document document = Jsoup.connect(GNTechURL).get();
+            Elements tags = document.select("table");
             Elements ths = tags.get(1).select("thead>tr>th");
             ths.remove(0); // 구분 삭제
             ths.remove(ths.size()-1); // 비고 삭제
@@ -143,7 +102,7 @@ public class MenuPlannerFragment extends Fragment {
             for (int meal_index=1; meal_index<tbody.children().size(); meal_index++) {
 
                 Elements tr_days = tbody.children().get(meal_index).children();
-                // 일 (월 화 수 목 금) 토
+                // 구분 일 (월 화 수 목 금) 토
                 for (int day_index=1; day_index<tr_days.size(); day_index++) {
                     String menu = tr_days.get(day_index).html().replace("&amp;","&");
                     menuPlanners.get(day_index-1).addMeal(
@@ -163,17 +122,49 @@ public class MenuPlannerFragment extends Fragment {
         return new Pair<>(today, menuPlanners);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    private class MenuPlannerAsyncTask extends AsyncTask<Void, String, Pair<MenuPlanner, ArrayList<MenuPlanner>>> {
+        private AlertDialog.Builder builder;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
 
-//        alertDialog.dismiss();
-    }
+            builder = new AlertDialog.Builder(getContext());
+            builder.setPositiveButton("닫기", null);
+            builder.setNegativeButton("오늘그만보기", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString(getString(R.string.pref_key_last_skip_date), TODAY_DATE);
+                    editor.putBoolean(getString(R.string.pref_key_today_menu_planner), false);
+                    editor.apply();
+                }
+            });
+        }
 
-    private boolean isIntetnetConnect() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+        @Override
+        protected Pair<MenuPlanner,ArrayList<MenuPlanner>> doInBackground(Void... params) {
+            return parseGNTechMenuPlaner();
+        }
+
+        @Override
+        protected void onPostExecute(Pair<MenuPlanner,ArrayList<MenuPlanner>> result) {
+            super.onPostExecute(result);
+
+            if (result.first == null || result.second == null) {
+                return;
+            }
+
+            MenuPlanner.MealAdapter mealAdapter = new MenuPlanner.MealAdapter(result.first);
+            recyclerView.setAdapter(mealAdapter);
+
+            boolean is_today_show =  !preferences.getString(getString(R.string.pref_key_last_skip_date), "").equals(TODAY_DATE);
+            if (is_today_show) {
+                builder.setTitle("오늘의 학식입니다"); // breakfast lunch dinner
+                builder.setMessage(result.first.toString());
+                builder.show();
+            }
+            Log.i(TAG, "onPostExecute: length : " + result.second.size());
+        }
     }
 
 }

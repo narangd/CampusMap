@@ -6,40 +6,32 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 
+import com.example.campusmap.algorithm.AStar;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeSet;
 
 public class Map {
     private static final String TAG = "ADP_Drawing";
     private static final boolean DEBUG = false;
 
-    /**
-     * Width Tile Count
-     */
-    public static final int XSIZE = 120; // before120
-    /**
-     * Height Tile Count
-      */
-    public static final int YSIZE = 90; // before 90
+    /** Width Tile Count */
+    public static final int XSIZE = 20; // before120
+    /** Height Tile Count */
+    public static final int YSIZE = 15; // before 90
 
-    /**
-     * Tile 2D Array
-     */
-    Tile[][] tiles;
+    /** Tile 2D Array */
+    private Tile[][] tiles;
     ArrayList<Polygon> obstacle = new ArrayList<>();
 
-    /**
-     * Width Tile Size
-     */
+    /** Width Tile Size */
     public int xTileSIZE;
-    /**
-     * Height Tile Size
-     */
+    /** Height Tile Size */
     public int yTileSIZE;
 
     private Random random = new Random();
@@ -47,6 +39,8 @@ public class Map {
     public Tile start;
     public Tile goal;
     Path path = new Path();
+
+    private Drawing.Progress progress;
 
     // canvas
     public Map(int width, int height) {
@@ -163,12 +157,6 @@ public class Map {
         return neighbor;
     }
 
-    /**
-     * H cost..
-     * @param one
-     * @param another
-     * @return
-     */
     public int getDistance(Tile one, Tile another) {
         int xDistance = Math.abs(one.getX()-another.getX())/ Tile.width;
         int yDistance = Math.abs(one.getY()-another.getY())/ Tile.height;
@@ -190,38 +178,16 @@ public class Map {
 
     public void pathFinding() {
         updateFromPath(Tile.State.NONE);
-        path.replacePath( findPath(start, goal) );
+//        path.replacePath( findPath(start, goal) );
+        path.replacePath(AStar.findPath(this, start, goal));
         updateFromPath(Tile.State.WAY);
         start.state = Tile.State.START;
         goal.state = Tile.State.GOAL;
     }
 
     public void drawTiles(Canvas canvas, Paint paint) {
-        for (Tile[] tiles : this.tiles)
-        {
-            for (Tile tile : tiles)
-            {
-//                switch(tile.getState())
-//                {
-//                    case WALL:
-////                        if (isWallVisible)
-//                            //canvas.setColor(Color.YELLOW);
-//                        paint.setColor(Color.YELLOW);
-////                        else
-////                            continue;
-//                        break;
-//                    case START:
-//                        paint.setColor(Color.GREEN);
-//                        break;
-//                    case GOAL:
-//                        paint.setColor(Color.RED);
-//                        break;
-//                    case WAY:
-//                        paint.setColor(Color.BLUE);
-//                        break;
-//                    default:
-//                        continue;
-//                }
+        for (Tile[] tiles : this.tiles) {
+            for (Tile tile : tiles) {
                 tile.draw(canvas, paint);
             }
         }
@@ -232,8 +198,8 @@ public class Map {
             return null;
 
         HashSet<Tile> closedSet = new HashSet<>();
-//        TreeSet<Tile> openSet = new TreeSet<>();
-        ArrayList<Tile> openSet = new ArrayList<>();
+        TreeSet<Tile> openSet = new TreeSet<>(new Tile.TileSorter());
+//        ArrayList<Tile> openSet = new ArrayList<>();
 
         HashMap<Tile, Tile> cameFrom = new HashMap<>();
 
@@ -245,20 +211,20 @@ public class Map {
 //        start.H = map.getDistance(start, goal);
 //        start.F = start.G + start.H;
 
-//        int count = 2;
+        int count = 10;
 
         while( openSet.size() > 0)//size() > 0 )
         {
-            Collections.sort(openSet);
-            Tile current =  openSet.get(0); // error this .... compare...
+//            Collections.sort(openSet);
+            Tile current = openSet.pollFirst();
+                    //openSet.get(0); // error this .... compare...
             if (current == goal)
                 break;
 
             closedSet.add(current);
             openSet.remove(current);
 
-            for ( Tile neighbor : getNeighborOfTile(current) )
-            {
+            for ( Tile neighbor : getNeighborOfTile(current) ) {
                 if (closedSet.contains(neighbor) || neighbor.state == Tile.State.WALL)
                     continue;       // Ignore the neighbor which is already evaluated.
 
@@ -278,8 +244,8 @@ public class Map {
                 neighbor.H = getDistance(goal, neighbor);
                 neighbor.F = neighbor.G + neighbor.H; // F = G + H.
             }
-//            if (--count <= 0)
-//                break;
+            if (--count <= 0)
+                break;
         }
 
         openSet.clear();
@@ -293,15 +259,14 @@ public class Map {
         while (cameFrom.containsKey(current)) {
             current = cameFrom.get(current);
             path.add(current.getPoint());
-        }cameFrom.clear();
+        }
+        cameFrom.clear();
         return path;
     }
 
-
-
-
-
-
+    public void setOnProgressUpdate(Drawing.Progress progress) {
+        this.progress = progress;
+    }
 
     public Tile getTile(int x, int y)
     {
@@ -309,6 +274,7 @@ public class Map {
             return null;
         return tiles[y/Tile.height][x/Tile.width];
     }
+
     public int getxTileSIZE() {
         return xTileSIZE;
     }

@@ -11,22 +11,23 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-/**
- * Created by DB-31 on 2015-11-03.
- */
 public class Drawing implements View.OnLongClickListener{
     private static final String TAG = "ADP_Drawing";
     private static final boolean DEBUG = false;
 
     private Context mContext;
     private Paint paint;
+    private ImageView imageView;
 
     private Map map;
     private BitmapDrawable back;
 
+    private Progress progress;
+
     public Drawing(Context context, ImageView imageView) {
         mContext = context;
 
+        this.imageView = imageView;
         imageView.setLongClickable(true);
         imageView.setOnLongClickListener(this);
 
@@ -48,8 +49,8 @@ public class Drawing implements View.OnLongClickListener{
         map.pathFinding();
     }
 
-    public void drawImageView(ImageView imageView) {
-        if (DEBUG) Log.i(TAG, "+++ drawImageView() called! +++");
+    public void drawOnImageView(ImageView imageView) {
+        if (DEBUG) Log.i(TAG, "+++ drawOnImageView() called! +++");
 
         if (back != null) {
             Bitmap copyBitmap = back.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
@@ -59,7 +60,12 @@ public class Drawing implements View.OnLongClickListener{
             map.drawTiles(copyCanvas, paint); // draw map to copied Canvas.
 
             imageView.setImageBitmap(copyBitmap);
+            imageView.invalidate();
         }
+    }
+
+    public void setOnProgressUpdate(Progress progress) {
+        this.progress = progress;
     }
 
     @Override
@@ -88,5 +94,10 @@ public class Drawing implements View.OnLongClickListener{
         }
 
         return count;
+    }
+
+    public interface Progress {
+        void onProgressUpdate();
+
     }
 }

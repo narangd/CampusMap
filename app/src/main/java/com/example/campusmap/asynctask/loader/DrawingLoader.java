@@ -6,42 +6,33 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.example.campusmap.pathfinding.Drawing;
 import com.example.campusmap.database.SQLiteHelperOstacle;
+import com.example.campusmap.pathfinding.Drawing;
 import com.example.campusmap.pathfinding.Map;
 import com.example.campusmap.pathfinding.Polygon;
 
 import java.util.ArrayList;
 
-/**
- * Created by DBLAB on 2016-06-16.
- */
 public class DrawingLoader extends AsyncTaskLoader<Drawing> {
-    private static final String TAG = "ADP_MapLoader";
+    private static final String TAG = "DrawingLoader";
     private static final boolean DEBUG = false;
 
-    private Context mContext;
-    private ImageView mImageView;
-    private Drawing mDrawing;
+    private Context context;
+    private ImageView imageView;
+    private Drawing drawing;
 
     public DrawingLoader(Context context, ImageView imageView) {
         super(context);
-        mContext = context;
-        mImageView = imageView;
+        this.context = context;
+        this.imageView = imageView;
     }
 
     @Override
     public Drawing loadInBackground() {
         if (DEBUG) Log.i(TAG, "+++ loadInBackground() called! +++");
 
-//        try {
-//            Thread.sleep(2000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
         if (DEBUG) Log.i(TAG, "+++ create new Map +++");
-        Drawing drawing = new Drawing(mContext, mImageView);
+        Drawing drawing = new Drawing(context, imageView);
         Map map = drawing.getMap();
 
         ArrayList<Polygon> polygons = new ArrayList<>();
@@ -73,8 +64,8 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
             }
         }
 
-        Drawing oldDrawing = mDrawing;
-        mDrawing = drawing;
+        Drawing oldDrawing = this.drawing;
+        this.drawing = drawing;
 
         if (isStarted()) {
             if (DEBUG) Log.i(TAG, "+++ Delivering results to the LoaderManager for" +
@@ -96,9 +87,9 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
     protected void onStartLoading() {
         if (DEBUG) Log.i(TAG, "+++ onStartLoading() called! +++");
 
-        if (mDrawing != null) {
+        if (drawing != null) {
             if (DEBUG) Log.i(TAG, "+++ Delivering previously loaded data to the client...");
-            deliverResult(mDrawing);
+            deliverResult(drawing);
         } else {
             if (DEBUG) Log.i(TAG, "+++ The current data is data is null... so force load! +++");
             forceLoad();
@@ -118,10 +109,10 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
 
         onStopLoading();
 
-        if (mDrawing != null) {
+        if (drawing != null) {
             if (DEBUG) Log.w(TAG, "+++ mMap.resetPolygon() called! +++");
-            mDrawing.getMap().resetPolygon(); // release map
-            mDrawing = null;
+            drawing.getMap().resetPolygon(); // release map
+            drawing = null;
         }
     }
 

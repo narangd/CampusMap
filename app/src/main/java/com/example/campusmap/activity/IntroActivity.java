@@ -1,19 +1,17 @@
 package com.example.campusmap.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.example.campusmap.Internet;
 import com.example.campusmap.R;
 import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
 import com.example.campusmap.fragment.MenuPlannerFragment;
@@ -43,10 +41,7 @@ public class IntroActivity extends Activity {
 
         if (DEBUG) Log.i(TAG, "onStart: DataBase Check");
 
-        ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = manager.getActiveNetworkInfo();
-
-        if (activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting()) {
+        if (Internet.isIntetnetConnect(this)) {
             Log.i(TAG, "onStart: 인터넷에 연결되어 있습니다");
 
             waitAsyncTask(

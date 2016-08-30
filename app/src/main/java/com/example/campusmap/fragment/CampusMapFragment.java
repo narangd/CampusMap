@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.activity.DrawerTestActivity;
@@ -22,19 +21,12 @@ import com.example.campusmap.view.TouchImageView;
 public class CampusMapFragment extends Fragment implements AdapterView.OnItemClickListener {
     private static final String TAG = "CampusMapFragment";
     public static final int TAP_INDEX = 0;
-    private static CampusMapFragment fragment = null;
 
     private Context context;
     private ArrayAdapter<Building> mAdapter;
-    private Toast toast;
-//    private ArrayList<BuildingLocation> mTrigerBoxes = new ArrayList<>();
-
 
     public static CampusMapFragment newInstance() {
-        if (fragment == null) {
-            fragment = new CampusMapFragment();
-        }
-        return fragment;
+        return new CampusMapFragment();
     }
 
     public CampusMapFragment() {
@@ -47,9 +39,8 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         View rootView = inflater.inflate(R.layout.fragment_campus_map, container, false);
         context = rootView.getContext();
 
-        toast = Toast.makeText(context, "", Toast.LENGTH_SHORT);
-
         ListView listView = (ListView) rootView.findViewById(R.id.building_list);
+
         ViewGroup imageHeader = (ViewGroup) inflater.inflate(R.layout.header_building, listView, false);
         if (imageHeader != null) {
             TouchImageView touchImageView = (TouchImageView) imageHeader.findViewById(R.id.campus_map_view);
@@ -78,14 +69,10 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(context, DrawerTestActivity.class);
         Building building = mAdapter.getItem(position-1);
+
+        Intent intent = new Intent(context, DrawerTestActivity.class);
         intent.putExtra(DrawerTestActivity.KEY_BUILDING_ID, building.getID()); // id to index
         startActivity(intent);
     }

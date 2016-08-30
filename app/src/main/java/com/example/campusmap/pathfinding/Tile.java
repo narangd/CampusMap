@@ -6,6 +6,8 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 
+import java.util.Comparator;
+
 /**
  * Created by DB-31 on 2015-11-03.
  */
@@ -78,8 +80,10 @@ public class Tile implements Comparable<Tile> {
     }
 
     public void draw(Canvas canvas, Paint paint) {
+        paint.setStyle(Paint.Style.FILL);
         paint.setColor(getColor());
         canvas.drawRect(rect, paint);
+
 
         if (DEBUG) {
             // parent 방향
@@ -92,12 +96,16 @@ public class Tile implements Comparable<Tile> {
                 canvas.drawLine(rect.centerX(), rect.centerY(), rect.centerX()+dx, rect.centerY()+dy, paint);
             }
 
-//            paint.setColor(Color.BLACK);
-//            paint.setTextSize(7);
-//            Point centerPoint = getPoint();
-//            canvas.drawText("F"+Integer.toString(F), getX(), centerPoint.y, paint);
-//            canvas.drawText("G"+Integer.toString(G), getX(), getY()+Tile.height, paint);
-//            canvas.drawText("H"+Integer.toString(H), centerPoint.x, getY()+Tile.height, paint);
+            paint.setColor(Color.LTGRAY);
+            paint.setStyle(Paint.Style.STROKE);
+            canvas.drawRect(rect, paint);
+
+            paint.setColor(Color.BLACK);
+            paint.setTextSize(8);
+            Point centerPoint = getPoint();
+            canvas.drawText("F"+Integer.toString(F), getX(), centerPoint.y, paint);
+            canvas.drawText("G"+Integer.toString(G), getX(), getY()+Tile.height, paint);
+            canvas.drawText("H"+Integer.toString(H), centerPoint.x, getY()+Tile.height, paint);
         }
     }
 
@@ -120,7 +128,12 @@ public class Tile implements Comparable<Tile> {
 //            return -1;
     }
 
-//    @Override
+    @Override
+    public boolean equals(Object o) {
+        return hashCode() == o.hashCode();
+    }
+
+    //    @Override
 //    public int compare(Tile one, Tile another) {
 //        if (one.F > another.F)
 //            return 1;
@@ -136,6 +149,13 @@ public class Tile implements Comparable<Tile> {
 
     public State getState() {
         return state;
+    }
+
+    public static class TileSorter implements Comparator<Tile> {
+        @Override
+        public int compare(Tile lhs, Tile rhs) {
+            return lhs.compareTo(rhs);
+        }
     }
 
 }

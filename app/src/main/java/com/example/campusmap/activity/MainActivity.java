@@ -27,10 +27,6 @@ public class MainActivity extends AppCompatActivity
 //    private static final boolean
     public static final int SEARCH_RESULT_ACTIVITY_REQUEST_CODE = 1;
 
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-
-    private ViewPager mViewPager;
-
     private SearchView searchView;
     private MenuItem searchItem;
 
@@ -48,15 +44,11 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // ## PagerAdapter... ##
-        if (mSectionsPagerAdapter == null) {
-            mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        }
-
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
         if (mViewPager != null) {
-            mViewPager.setAdapter(mSectionsPagerAdapter);
+            MainContentsPagerAdapter mainContentsPagerAdapter = new MainContentsPagerAdapter(getSupportFragmentManager());
+            mViewPager.setAdapter(mainContentsPagerAdapter);
         }
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -71,8 +63,7 @@ public class MainActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.menu_main, menu);
         searchItem = menu.findItem(R.id.action_search);
 
-        // 밑을 하면 검색뷰가 안열림.
-        //MenuItemCompat.setOnActionExpandListener(searchItem, this);
+        MenuItemCompat.setOnActionExpandListener(searchItem, this);
 
         searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setOnQueryTextListener(this);
@@ -94,14 +85,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onBackPressed() {
-//        if (mViewPager.getCurrentItem() == 1 && BuildingInfoFragment.getInstance().getIndex() > 0)
-//            BuildingInfoFragment.getInstance().onBackPressed();
-//        else
-            super.onBackPressed();
-    }
-
-    @Override
     public boolean onQueryTextSubmit(String query) {
         Intent intent = new Intent(MainActivity.this, SearchResultActivity.class);
         intent.putExtra("query", query);
@@ -114,32 +97,19 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onQueryTextChange(String newText) {
-//        final String[] from = new String[] {"str"};
-//        final int[] to = new int[] {android.R.id.text1};
-//        CursorAdapter cursorAdapter = new SimpleCursorAdapter(
-//                this,
-//                android.R.layout.simple_list_item_1,
-//                BuildingInfoParser.searchSuggestions(this, newText),
-//                from,
-//                to,
-//                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER
-//        );
-//        searchView.setSuggestionsAdapter(cursorAdapter);
-        // 속도가 느려서 사용하지 않음... 나중에 db로 대체..
-        //System.out.println(newText);
         return false;
     }
 
     @Override
     public boolean onMenuItemActionExpand(MenuItem item) {
         searchView.setQuery(previousQuery, false);
-        return false;
+        return true;
     }
 
     @Override
     public boolean onMenuItemActionCollapse(MenuItem item) {
         previousQuery = searchView.getQuery().toString();
-        return false;
+        return true;
     }
 
     @Override
@@ -159,11 +129,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    // ------------------------------- SectionsPagerAdapter -------------------------------------//
+    private class MainContentsPagerAdapter extends FragmentPagerAdapter {
 
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
+        public MainContentsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
@@ -186,12 +154,9 @@ public class MainActivity extends AppCompatActivity
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
-                case CampusMapFragment.TAP_INDEX:
-                    return "캠퍼스 맵";
-                case MenuPlannerFragment.TAP_INDEX:
-                    return "이번주 식단표"; //"건물정보";
-                case PathFindingFragment.TAP_INDEX:
-                    return "길찾기";
+                case CampusMapFragment.TAP_INDEX: return "캠퍼스 맵";
+                case MenuPlannerFragment.TAP_INDEX: return "이번주 식단표"; //"건물정보";
+                case PathFindingFragment.TAP_INDEX: return "길찾기";
             }
             return null;
         }
