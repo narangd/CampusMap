@@ -8,9 +8,6 @@ import android.graphics.Rect;
 
 import java.util.Comparator;
 
-/**
- * Created by DB-31 on 2015-11-03.
- */
 public class Tile implements Comparable<Tile> {
 
     public enum State {
@@ -18,15 +15,15 @@ public class Tile implements Comparable<Tile> {
         OPEN, CLOSE
     }
     private static final int SIZE = 10;
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     public static int width = SIZE;
     public static int height = SIZE;
     Rect rect;
     public State state;
-    public int F; // F:비용
     public int G; // G:시작점에서 새로운 지점까지 이동비용.
     public int H; // 얻어진 사각형으로 부터 최종목적지점 까지 예상 이동 비용.
+    public int F; // F:총비용
     public Tile parent;
 
     public Tile(int x, int y) {
@@ -100,12 +97,12 @@ public class Tile implements Comparable<Tile> {
             paint.setStyle(Paint.Style.STROKE);
             canvas.drawRect(rect, paint);
 
-            paint.setColor(Color.BLACK);
-            paint.setTextSize(8);
-            Point centerPoint = getPoint();
-            canvas.drawText("F"+Integer.toString(F), getX(), centerPoint.y, paint);
-            canvas.drawText("G"+Integer.toString(G), getX(), getY()+Tile.height, paint);
-            canvas.drawText("H"+Integer.toString(H), centerPoint.x, getY()+Tile.height, paint);
+//            paint.setColor(Color.BLACK);
+//            paint.setTextSize(10);
+//            Point centerPoint = getPoint();
+//            canvas.drawText("F"+Integer.toString(F), getX(), centerPoint.y, paint);
+//            canvas.drawText("G"+Integer.toString(G), getX(), getY()+Tile.height, paint);
+//            canvas.drawText("H"+Integer.toString(H), centerPoint.x, getY()+Tile.height, paint);
         }
     }
 

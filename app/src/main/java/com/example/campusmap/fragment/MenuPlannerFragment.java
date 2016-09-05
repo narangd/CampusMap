@@ -7,9 +7,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -19,6 +18,7 @@ import android.view.ViewGroup;
 import com.example.campusmap.Internet;
 import com.example.campusmap.R;
 import com.example.campusmap.form.MenuPlanner;
+import com.example.campusmap.fragment.pager.MenuPlannerPagerAdapter;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -39,7 +39,7 @@ public class MenuPlannerFragment extends Fragment {
     public static final String TODAY_DATE = GNTECH_DATE_FORMAT.format(new Date());
 
     private SharedPreferences preferences;
-    private RecyclerView recyclerView;
+    private ViewPager viewPager;
 
     public MenuPlannerFragment() {
     }
@@ -58,11 +58,9 @@ public class MenuPlannerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_menu_planer, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_menu_planner, container, false);
 
-        recyclerView = (RecyclerView) rootView.findViewById(R.id.menu_recycler_view);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager( new LinearLayoutManager(getContext()) );
+        viewPager = (ViewPager) rootView.findViewById(R.id.view_pager);
 
         if (Internet.isIntetnetConnect(getContext())) {
             new MenuPlannerAsyncTask().execute();
@@ -73,9 +71,8 @@ public class MenuPlannerFragment extends Fragment {
         return rootView;
     }
 
-    private Pair<MenuPlanner,ArrayList<MenuPlanner>> parseGNTechMenuPlaner() {
+    private Pair<Integer,ArrayList<MenuPlanner>> parseGNTechMenuPlaner() {
         ArrayList<MenuPlanner> menuPlanners = new ArrayList<>();
-        MenuPlanner today = null;
         int today_index = 0;
 
         try {
@@ -113,16 +110,15 @@ public class MenuPlannerFragment extends Fragment {
 
                 }
             }
-            today = menuPlanners.get(today_index);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new Pair<>(today, menuPlanners);
+        return new Pair<>(today_index, menuPlanners);
     }
 
-    private class MenuPlannerAsyncTask extends AsyncTask<Void, String, Pair<MenuPlanner, ArrayList<MenuPlanner>>> {
+    private class MenuPlannerAsyncTask extends AsyncTask<Void, String, Pair<Integer, ArrayList<MenuPlanner>>> {
         private AlertDialog.Builder builder;
         @Override
         protected void onPreExecute() {
@@ -142,27 +138,32 @@ public class MenuPlannerFragment extends Fragment {
         }
 
         @Override
-        protected Pair<MenuPlanner,ArrayList<MenuPlanner>> doInBackground(Void... params) {
+        protected Pair<Integer,ArrayList<MenuPlanner>> doInBackground(Void... params) {
             return parseGNTechMenuPlaner();
         }
 
         @Override
-        protected void onPostExecute(Pair<MenuPlanner,ArrayList<MenuPlanner>> result) {
+        protected void onPostExecute(Pair<Integer,ArrayList<MenuPlanner>> result) {
             super.onPostExecute(result);
 
             if (result.first == null || result.second == null) {
                 return;
             }
 
-            MenuPlanner.MealAdapter mealAdapter = new MenuPlanner.MealAdapter(result.first);
-            recyclerView.setAdapter(mealAdapter);
+            viewPager.setAdapter(
+                    new MenuPlannerPagerAdapter(
+                            getActivity().getSupportFragmentManager(),
+                            result.second
+                    )
+            );
+            viewPager.setCurrentItem(result.first);
 
-            boolean is_today_show =  !preferences.getString(getString(R.string.pref_key_last_skip_date), "").equals(TODAY_DATE);
-            if (is_today_show) {
-                builder.setTitle("오늘의 학식입니다"); // breakfast lunch dinner
-                builder.setMessage(result.first.toString());
-                builder.show();
-            }
+//            boolean is_today_show =  !preferences.getString(getString(R.string.pref_key_last_skip_date), "").equals(TODAY_DATE);
+//            if (is_today_show) {
+//                builder.setTitle("오늘의 학식입니다"); // breakfast lunch dinner
+//                builder.setMessage(result.first.toString());
+//                builder.show();
+//            }
             Log.i(TAG, "onPostExecute: length : " + result.second.size());
         }
     }

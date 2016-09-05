@@ -58,6 +58,7 @@ public class Drawing implements View.OnLongClickListener{
 
             if (DEBUG) Log.i(TAG, "+++ reDraw Tile count : "+getWallCount()+" +++");
             map.drawTiles(copyCanvas, paint); // draw map to copied Canvas.
+            map.drawPath(copyCanvas, paint);
 
             imageView.setImageBitmap(copyBitmap);
             imageView.invalidate();

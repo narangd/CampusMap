@@ -22,6 +22,9 @@ import com.example.campusmap.pathfinding.Map;
 import com.example.campusmap.pathfinding.Tile;
 
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 
 public class PathFindingFragment extends Fragment implements LoaderManager.LoaderCallbacks<Drawing> {
@@ -98,11 +101,11 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
             pathFindAsyncTask = new AsyncTask<Void,Void,Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
 
                     mDrawing.resetPath();
                     return null;
@@ -113,6 +116,21 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
                     super.onPostExecute(aVoid);
                     mDrawing.drawOnImageView(mImageView);
                     pathFindAsyncTask = null;
+                }
+            }.execute();
+            new AsyncTask<Void,Void,Void>() {
+
+                @Override
+                protected Void doInBackground(Void... params) {
+                    if (pathFindAsyncTask != null)
+                        try {
+                            pathFindAsyncTask.get(2L, TimeUnit.SECONDS);
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (TimeoutException e) {
+                            return null;
+                        }
+                    return null;
                 }
             }.execute();
         } else {

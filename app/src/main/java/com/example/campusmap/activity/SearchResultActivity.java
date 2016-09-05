@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.adapter.SearchItemAdapter;
@@ -41,13 +43,13 @@ public class SearchResultActivity extends AppCompatActivity
             toolbar.setTitle("\"" + query + "\"을(를) 검색한 결과입니다.");
         }
 
-        SQLiteHelperCampusInfo sqLiteHelperCampusInfo = SQLiteHelperCampusInfo.getInstance(this);
-        SQLiteDatabase db = sqLiteHelperCampusInfo.getReadableDatabase();
+        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
+        SQLiteDatabase db = helper.getReadableDatabase();
 
-        ArrayList<SearchResultItem> result = sqLiteHelperCampusInfo.searchResultItems(db, query);
+        ArrayList<SearchResultItem> result = helper.searchResultItems(db, query);
         db.close();
 
-        ListView listView = (ListView)findViewById(R.id.result_list);
+        final ListView listView = (ListView)findViewById(R.id.result_list);
         if (listView != null) {
             listView.setAdapter(new SearchItemAdapter(
                     this,
@@ -55,6 +57,19 @@ public class SearchResultActivity extends AppCompatActivity
                     result
             ));
             listView.setOnItemClickListener(this);
+        }
+
+        FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
+        if (floatingActionButton != null) {
+            floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listView != null) {
+                        listView.smoothScrollToPosition(0);
+                    }
+                    Toast.makeText(SearchResultActivity.this, "fab!", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 

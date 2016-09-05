@@ -1,6 +1,7 @@
 package com.example.campusmap.pathfinding;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -21,9 +22,9 @@ public class Map {
     private static final boolean DEBUG = false;
 
     /** Width Tile Count */
-    public static final int XSIZE = 20; // before120
+    public static final int XSIZE = 120; // before120
     /** Height Tile Count */
-    public static final int YSIZE = 15; // before 90
+    public static final int YSIZE = 90; // before 90
 
     /** Tile 2D Array */
     private Tile[][] tiles;
@@ -177,10 +178,10 @@ public class Map {
     }
 
     public void pathFinding() {
-        updateFromPath(Tile.State.NONE);
+//        updateFromPath(Tile.State.NONE);
 //        path.replacePath( findPath(start, goal) );
         path.replacePath(AStar.findPath(this, start, goal));
-        updateFromPath(Tile.State.WAY);
+//        updateFromPath(Tile.State.WAY);
         start.state = Tile.State.START;
         goal.state = Tile.State.GOAL;
     }
@@ -190,6 +191,20 @@ public class Map {
             for (Tile tile : tiles) {
                 tile.draw(canvas, paint);
             }
+        }
+    }
+
+    public void drawPath(Canvas canvas, Paint paint) {
+        if (path == null || path.size() <= 0) {
+            return;
+        }
+
+        paint.setColor(Color.CYAN);
+        paint.setStrokeWidth(3);
+        Point prevPoint = path.getPath().pollFirst();
+        for (Point point : path.getPath()) {
+            canvas.drawLine(prevPoint.x, prevPoint.y, point.x, point.y, paint);
+            prevPoint = point;
         }
     }
 

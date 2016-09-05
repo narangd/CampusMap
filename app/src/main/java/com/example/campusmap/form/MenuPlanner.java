@@ -10,11 +10,12 @@ import com.example.campusmap.R;
 
 import org.jsoup.helper.StringUtil;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MenuPlanner {
+public class MenuPlanner implements Serializable {
 //    private static final String[] HEADER = {
 //            "조식", "중식", "석식", "교직원"
 //    };
@@ -48,7 +49,7 @@ public class MenuPlanner {
         return builder.toString();
     }
 
-    public static class Meal {
+    public static class Meal implements Serializable {
         private String header;
         private ArrayList<String> menuArray = new ArrayList<>();
 

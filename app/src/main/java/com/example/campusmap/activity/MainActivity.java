@@ -102,13 +102,16 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onMenuItemActionExpand(MenuItem item) {
+
         searchView.setQuery(previousQuery, false);
+        Log.i(TAG, "onMenuItemActionExpand: item:" + item);
         return true;
     }
 
     @Override
     public boolean onMenuItemActionCollapse(MenuItem item) {
         previousQuery = searchView.getQuery().toString();
+        Log.i(TAG, "onMenuItemActionCollapse: item:" + item);
         return true;
     }
 
