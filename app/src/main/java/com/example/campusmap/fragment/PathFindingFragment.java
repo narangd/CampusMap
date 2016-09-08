@@ -18,10 +18,7 @@ import android.widget.Toast;
 import com.example.campusmap.R;
 import com.example.campusmap.asynctask.loader.DrawingLoader;
 import com.example.campusmap.pathfinding.Drawing;
-import com.example.campusmap.pathfinding.Map;
-import com.example.campusmap.pathfinding.Tile;
 
-import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -159,36 +156,6 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
 
         mProgressBar.setIndeterminate(false);
         mProgressBar.setVisibility(View.GONE);
-
-        Map map = mDrawing.getMap();
-        TreeMap<Tile, Tile> treeMap = new TreeMap<>();
-
-
-        for (Tile tile : map.getNeighborOfTile(map.start)) {
-            treeMap.put(tile, tile);
-            Log.i(TAG, "onLoadFinished: treemap neighbor : " + treeMap);
-        }
-        Log.i(TAG, "onLoadFinished: neighbor : " + map.getNeighborOfTile(map.start));
-        Log.i(TAG, "onLoadFinished: treemap neighbor : " + treeMap);
-        Log.i(TAG, "onCreateView: start:" + map.start + ", goal:" + map.goal);
-
-        Log.i(TAG, "onLoadFinished: remove entry : " + treeMap.pollFirstEntry());
-        Log.i(TAG, "onLoadFinished: treemap neighbor : " + treeMap);
-        Log.i(TAG, "onLoadFinished: remove entry : " + treeMap.pollFirstEntry());
-        Log.i(TAG, "onLoadFinished: treemap neighbor : " + treeMap);
-
-
-//        TreeMap<Integer, Integer> arr = new TreeMap<>();
-//        arr.put(0, 1);
-//        Log.i(TAG, "onLoadFinished: items : " + arr);
-//        arr.put(1, 7);
-//        Log.i(TAG, "onLoadFinished: items : " + arr);
-//        arr.put(4, 3);
-//        Log.i(TAG, "onLoadFinished: items : " + arr);
-//        arr.put(3, 9);
-//        Log.i(TAG, "onLoadFinished: items : " + arr);
-//        arr.put(2, 5);
-//        Log.i(TAG, "onLoadFinished: items : " + arr);
     }
 
     @Override

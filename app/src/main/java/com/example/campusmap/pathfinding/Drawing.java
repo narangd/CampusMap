@@ -17,7 +17,6 @@ public class Drawing implements View.OnLongClickListener{
 
     private Context mContext;
     private Paint paint;
-    private ImageView imageView;
 
     private Map map;
     private BitmapDrawable back;
@@ -27,7 +26,6 @@ public class Drawing implements View.OnLongClickListener{
     public Drawing(Context context, ImageView imageView) {
         mContext = context;
 
-        this.imageView = imageView;
         imageView.setLongClickable(true);
         imageView.setOnLongClickListener(this);
 

@@ -16,7 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.campusmap.R;
-import com.example.campusmap.database.SearchResultItem;
+import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.MenuPlannerFragment;
 import com.example.campusmap.fragment.PathFindingFragment;
@@ -79,6 +79,9 @@ public class MainActivity extends AppCompatActivity
             case  R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
+            case  R.id.action_only_test:
+                startActivity(new Intent(this, InfoUpdaterActivity.class));
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -120,13 +123,13 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SEARCH_RESULT_ACTIVITY_REQUEST_CODE && resultCode == SearchResultActivity.RESULT_OK) {
             Bundle extras = data.getExtras();
-            SearchResultItem searchResultItem = (SearchResultItem) extras.get("SearchResultItem");
+            InfoLocation infoLocation = (InfoLocation) extras.get(DrawerTestActivity.KEY_SEACH_ITEM);
 
-            Log.d(TAG, "Serializable SearchResultItem Data : " + searchResultItem);
-            if (searchResultItem != null) {
+            Log.d(TAG, "Serializable InfoLocation Data : " + infoLocation);
+            if (infoLocation != null) {
 
                 Intent intent = new Intent(this, DrawerTestActivity.class);
-                intent.putExtra(DrawerTestActivity.KEY_SEACH_ITEM, searchResultItem);
+                intent.putExtra(DrawerTestActivity.KEY_SEACH_ITEM, infoLocation);
                 startActivity(intent);
             }
         }

@@ -12,12 +12,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.adapter.SearchItemAdapter;
+import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
-import com.example.campusmap.database.SearchResultItem;
 
 import java.util.ArrayList;
 
@@ -27,7 +26,7 @@ public class SearchResultActivity extends AppCompatActivity
     public static final int RESULT_OK = 1;
 
     String query;
-    SearchResultItem searchResultItem;
+    InfoLocation infoLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +45,7 @@ public class SearchResultActivity extends AppCompatActivity
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
         SQLiteDatabase db = helper.getReadableDatabase();
 
-        ArrayList<SearchResultItem> result = helper.searchResultItems(db, query);
+        ArrayList<InfoLocation> result = helper.searchResultItems(db, query);
         db.close();
 
         final ListView listView = (ListView)findViewById(R.id.result_list);
@@ -65,9 +64,8 @@ public class SearchResultActivity extends AppCompatActivity
                 @Override
                 public void onClick(View v) {
                     if (listView != null) {
-                        listView.smoothScrollToPosition(0);
+                        listView.setSelectionAfterHeaderView();
                     }
-                    Toast.makeText(SearchResultActivity.this, "fab!", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -76,9 +74,9 @@ public class SearchResultActivity extends AppCompatActivity
     // ## For ListView ##
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        searchResultItem = (SearchResultItem)adapterView.getItemAtPosition(position);
-        Log.i(TAG, "onItemClick: " + searchResultItem.toString());
-        alertMessage(searchResultItem.toString());
+        infoLocation = (InfoLocation)adapterView.getItemAtPosition(position);
+        Log.i(TAG, "onItemClick: " + infoLocation.toString());
+        alertMessage(infoLocation.toString());
     }
 
     public void alertMessage(String destination) {
@@ -95,7 +93,7 @@ public class SearchResultActivity extends AppCompatActivity
         switch (which) {
             case DialogInterface.BUTTON_POSITIVE:
                 Intent result = new Intent();
-                result.putExtra("SearchResultItem", searchResultItem);
+                result.putExtra(DrawerTestActivity.KEY_SEACH_ITEM, infoLocation);
                 setResult(RESULT_OK, result);
                 finish();
                 break;

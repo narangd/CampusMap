@@ -15,12 +15,12 @@
             android:name=".activity.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activity.IntroActivity"
+            android:noHistory="true"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:noHistory="true">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -51,14 +51,19 @@
             android:name=".activity.DrawerTestActivity"
             android:label="@string/title_activity_drawer_test"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.InfoUpdaterActivity"
+            android:label="@string/title_activity_info_updater"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="d49e3a0cd5cad7b6c7eada6a1f35a85907f1cbca" />
 
-        <activity
-            android:name=".activity.SettingsActivity"
-            android:label="@string/title_activity_settings" />
     </application>
 
 </manifest>

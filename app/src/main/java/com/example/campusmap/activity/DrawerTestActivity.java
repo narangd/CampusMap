@@ -28,8 +28,8 @@ import android.widget.TextView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.adapter.MainRoomArrayAdapter;
+import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
-import com.example.campusmap.database.SearchResultItem;
 import com.example.campusmap.fragment.RoomListFragment;
 import com.example.campusmap.fragment.pager.FloorPagerAdapter;
 import com.example.campusmap.tree.branch.Floor;
@@ -41,7 +41,7 @@ public class DrawerTestActivity extends AppCompatActivity
 
     private static final String TAG = "DrawerTestActivity";
     public static final String KEY_BUILDING_ID = "building_id";
-    public static final String KEY_SEACH_ITEM = "search_item";
+    public static final String KEY_SEACH_ITEM = "InfoLocation";
     private static final boolean DEBUG = false;
 
     private DrawerLayout mDrawer;
@@ -49,7 +49,7 @@ public class DrawerTestActivity extends AppCompatActivity
     private ViewPager mFloorPager;
     private FloorPagerAdapter mFloorAdapter;
     private boolean isTried = false;
-    private SearchResultItem mResultItem;
+    private InfoLocation mResultItem;
     private TextView mDescTextView;
 
     @Override
@@ -73,7 +73,7 @@ public class DrawerTestActivity extends AppCompatActivity
 
         Intent intent = getIntent();
         int buildingID = intent.getIntExtra(KEY_BUILDING_ID, -1);
-        mResultItem = (SearchResultItem)intent.getSerializableExtra(KEY_SEACH_ITEM);
+        mResultItem = (InfoLocation)intent.getSerializableExtra(KEY_SEACH_ITEM);
 
         if (buildingID == -1 && mResultItem == null) {
             finish();

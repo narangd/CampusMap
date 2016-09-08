@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--<color name="colorPrimary">#cddc39</color>-->
+    <!--<color name="colorPrimaryWhite">#dce775</color>-->
+    <!--<color name="colorPrimaryDark">#afb42b</color>-->
+    <!--<color name="colorAccent">#c6ff00</color>-->
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryWhite">#c1c8ed</color>
     <color name="colorPrimaryDark">#303F9F</color>
@@ -8,6 +12,9 @@
     <color name="white">#ffffff</color>
     <color name="gray_white">#bbbbbb</color>
     <color name="gray">#777777</color>
+
     <color name="drawer_item_default" >#ffffff</color>
     <color name="drawer_item_checked">#e0e0e0</color>
+
+    <color name="recyclerview_background">#F5F5F5</color>
 </resources>

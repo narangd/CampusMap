@@ -10,12 +10,8 @@ import android.util.Log;
 import com.example.campusmap.algorithm.AStar;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.TreeSet;
 
 public class Map {
     private static final String TAG = "ADP_Drawing";
@@ -200,83 +196,17 @@ public class Map {
         }
 
         paint.setColor(Color.CYAN);
-        paint.setStrokeWidth(3);
-        Point prevPoint = path.getPath().pollFirst();
-        for (Point point : path.getPath()) {
-            canvas.drawLine(prevPoint.x, prevPoint.y, point.x, point.y, paint);
-            prevPoint = point;
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(10);
+
+        android.graphics.Path path = new android.graphics.Path();
+
+        Point prevPoint = this.path.getPath().pollFirst();
+        path.moveTo(prevPoint.x, prevPoint.y);
+        for (Point point : this.path.getPath()) {
+            path.lineTo(point.x, point.y);
         }
-    }
-
-    public LinkedList<Point> findPath(Tile start, Tile goal) {
-        if(start == null || goal == null)
-            return null;
-
-        HashSet<Tile> closedSet = new HashSet<>();
-        TreeSet<Tile> openSet = new TreeSet<>(new Tile.TileSorter());
-//        ArrayList<Tile> openSet = new ArrayList<>();
-
-        HashMap<Tile, Tile> cameFrom = new HashMap<>();
-
-        openSet.add(start);
-//        start.state = Tile.State.OPEN;
-
-//        goal.parent = null;
-//        start.G = 0;
-//        start.H = map.getDistance(start, goal);
-//        start.F = start.G + start.H;
-
-        int count = 10;
-
-        while( openSet.size() > 0)//size() > 0 )
-        {
-//            Collections.sort(openSet);
-            Tile current = openSet.pollFirst();
-                    //openSet.get(0); // error this .... compare...
-            if (current == goal)
-                break;
-
-            closedSet.add(current);
-            openSet.remove(current);
-
-            for ( Tile neighbor : getNeighborOfTile(current) ) {
-                if (closedSet.contains(neighbor) || neighbor.state == Tile.State.WALL)
-                    continue;       // Ignore the neighbor which is already evaluated.
-
-                // The distance from start to a neighbor
-                int tentative_gScore = current.G + current.getDistance(neighbor);
-
-                if (!openSet.contains(neighbor)) {
-                    openSet.add(neighbor); // Discover a new node
-                }
-                else if (tentative_gScore >= neighbor.G)
-                    continue;       // This is not a better path.
-
-                // This path is the best until now. Record it!
-                cameFrom.put(neighbor, current);
-                neighbor.parent = current;
-                neighbor.G = tentative_gScore;
-                neighbor.H = getDistance(goal, neighbor);
-                neighbor.F = neighbor.G + neighbor.H; // F = G + H.
-            }
-            if (--count <= 0)
-                break;
-        }
-
-        openSet.clear();
-        closedSet.clear();
-
-        return reconstructPath(cameFrom, goal);
-    }
-
-    private LinkedList<Point> reconstructPath(HashMap<Tile,Tile> cameFrom, Tile current) {
-        LinkedList<Point> path = new LinkedList<>();
-        while (cameFrom.containsKey(current)) {
-            current = cameFrom.get(current);
-            path.add(current.getPoint());
-        }
-        cameFrom.clear();
-        return path;
+        canvas.drawPath(path, paint);
     }
 
     public void setOnProgressUpdate(Drawing.Progress progress) {

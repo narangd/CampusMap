@@ -95,13 +95,13 @@ public class MenuPlannerFragment extends Fragment {
             }
 
             Element tbody = tags.get(1).select("tbody").first();
-            // 조, 중, 석, 교 -- skip 조
-            for (int meal_index=1; meal_index<tbody.children().size(); meal_index++) {
+            // 조, 중, 석, 교
+            for (int meal_index=0; meal_index<tbody.children().size(); meal_index++) {
 
                 Elements tr_days = tbody.children().get(meal_index).children();
                 // 구분 일 (월 화 수 목 금) 토
                 for (int day_index=1; day_index<tr_days.size(); day_index++) {
-                    String menu = tr_days.get(day_index).html().replace("&amp;","&");
+                    String menu = tr_days.get(day_index).html().replace("&amp;","&").replace("\n", "").replace(" ", "");
                     menuPlanners.get(day_index-1).addMeal(
                             meal_index,
                             tr_days.get(0).ownText(),

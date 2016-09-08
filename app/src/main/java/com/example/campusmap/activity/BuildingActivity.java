@@ -30,7 +30,7 @@ public class BuildingActivity extends AppCompatActivity {
         mRoom = (Room) intent.getSerializableExtra(KEY_ROOM);
 
 //        Serializable serializableExtra = getIntent().getSerializableExtra("search_item");
-//        SearchResultItem resultItem = (SearchResultItem) serializableExtra;
+//        InfoLocation resultItem = (InfoLocation) serializableExtra;
 //        resultItem.
 
 //        ((TabLayout) findViewById(R.id.tabs)).

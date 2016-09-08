@@ -9,7 +9,11 @@ import android.widget.TextView;
 import com.example.campusmap.R;
 
 import org.jsoup.helper.StringUtil;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -135,6 +139,13 @@ public class MenuPlanner implements Serializable {
                 ViewHolder viewHolder = (ViewHolder) holder;
                 viewHolder.title.setText(meals.get(position).getHeader());
                 viewHolder.menu.setText(StringUtil.join(meals.get(position).getMenus(), "\n"));
+
+                try {
+                    XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+                    parser.setInput(new ByteArrayInputStream(StringUtil.join(meals.get(position).getMenus(), "").getBytes()), "UTF-8");
+                } catch (XmlPullParserException e) {
+                    e.printStackTrace();
+                }
             }
         }
 

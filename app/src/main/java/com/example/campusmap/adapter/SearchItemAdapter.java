@@ -8,16 +8,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
-import com.example.campusmap.database.SearchResultItem;
 
 import java.util.List;
 
-public class SearchItemAdapter extends ArrayAdapter<SearchResultItem> {
+public class SearchItemAdapter extends ArrayAdapter<InfoLocation> {
 
-    private List<SearchResultItem> mList;
+    private List<InfoLocation> mList;
 
-    public SearchItemAdapter(Context context, int resource, List<SearchResultItem> list) {
+    public SearchItemAdapter(Context context, int resource, List<InfoLocation> list) {
         super(context, resource, list);
         mList = list;
     }
@@ -35,12 +35,12 @@ public class SearchItemAdapter extends ArrayAdapter<SearchResultItem> {
         TextView text1 = (TextView) view.findViewById(android.R.id.text1);
         TextView text2 = (TextView) view.findViewById(android.R.id.text2);
 
-        SearchResultItem currentItem = mList.get(position);
+        InfoLocation currentItem = mList.get(position);
 
         text1.setText(currentItem.toString());
 
         // ## Search Database ##
-        if (currentItem.mRoomID != SearchResultItem.NONE) { // room
+        if (currentItem.mRoomID != InfoLocation.NONE) { // room
             SQLiteHelperCampusInfo sqLiteHelperCampusInfo = SQLiteHelperCampusInfo.getInstance(getContext());
             SQLiteDatabase db = sqLiteHelperCampusInfo.getReadableDatabase();
             String path = sqLiteHelperCampusInfo.getRoomPath(db, currentItem.mRoomID);

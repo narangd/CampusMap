@@ -30,6 +30,7 @@
             android:id="@+id/result_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:fastScrollEnabled="true"
             android:background="?android:attr/activatedBackgroundIndicator"/>
 
     </android.support.design.widget.CoordinatorLayout>
@@ -38,6 +39,6 @@
         android:visibility="visible"
         android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:layout_gravity="bottom|end" android:layout_margin="@dimen/fab_margin"
-        android:src="@android:drawable/ic_dialog_email" />
+        android:src="@drawable/arrow_upward_white" />
 
 </android.support.design.widget.CoordinatorLayout>

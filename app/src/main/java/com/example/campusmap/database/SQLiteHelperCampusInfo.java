@@ -232,8 +232,8 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         db.delete(tableName, null, null);
     }
 
-    public ArrayList<SearchResultItem> searchResultItems(SQLiteDatabase db, String query) {
-        ArrayList<SearchResultItem> resultList = new ArrayList<>();
+    public ArrayList<InfoLocation> searchResultItems(SQLiteDatabase db, String query) {
+        ArrayList<InfoLocation> resultList = new ArrayList<>();
         query = "%" + query + "%";
 
         // ## Search Building ##
@@ -248,11 +248,11 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 null, null,
                 BuildingEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING);
         while (buildingCursor.moveToNext()) {
-            resultList.add(new SearchResultItem(
+            resultList.add(new InfoLocation(
                     buildingCursor.getString(buildingCursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME)),
                     buildingCursor.getInt(buildingCursor.getColumnIndex(BuildingEntry._ID)),
-                    SearchResultItem.NONE,
-                    SearchResultItem.NONE
+                    InfoLocation.NONE,
+                    InfoLocation.NONE
             ));
         }
         buildingCursor.close();
@@ -271,7 +271,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 null, null,
                 RoomEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING);
         while (roomCursor.moveToNext()) {
-            resultList.add(new SearchResultItem(
+            resultList.add(new InfoLocation(
                     roomCursor.getString(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME)),
                     roomCursor.getInt(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_BUILDING_ID)),
                     roomCursor.getInt(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_FLOOR_ID)),
@@ -308,17 +308,19 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         Cursor cursor = db.query(
                 BuildingEntry.TABLE_NAME,
                 new String[]{
-                        BuildingEntry.COLUMN_NAME_NAME,
-                        BuildingEntry._ID
+                        BuildingEntry._ID,
+                        BuildingEntry.COLUMN_NAME_NUMBER,
+                        BuildingEntry.COLUMN_NAME_NAME
                 },
                 null, null,
                 null, null,
                 BuildingEntry._ID + ORDER_BY_ASCENDING
         );
         while (cursor.moveToNext()) {
-            String name = cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME));
             int id = cursor.getInt(cursor.getColumnIndex(BuildingEntry._ID));
-            buildingList.add( new Building(id, name) );
+            int number = cursor.getInt(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NUMBER));
+            String name = cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME));
+            buildingList.add( new Building(id, number, name) );
         }
         cursor.close();
         return buildingList;
