@@ -310,7 +310,8 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 new String[]{
                         BuildingEntry._ID,
                         BuildingEntry.COLUMN_NAME_NUMBER,
-                        BuildingEntry.COLUMN_NAME_NAME
+                        BuildingEntry.COLUMN_NAME_NAME,
+                        BuildingEntry.COLUMN_NAME_DESCRIPTION
                 },
                 null, null,
                 null, null,
@@ -320,7 +321,8 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             int id = cursor.getInt(cursor.getColumnIndex(BuildingEntry._ID));
             int number = cursor.getInt(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NUMBER));
             String name = cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME));
-            buildingList.add( new Building(id, number, name) );
+            String description = cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_DESCRIPTION));
+            buildingList.add( new Building(id, number, name, description) );
         }
         cursor.close();
         return buildingList;
@@ -372,11 +374,12 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         return roomList;
     }
 
-    public ContentValues getBuildingDetail(SQLiteDatabase db, int buildingID) {
-        ContentValues contentValues = null;
+    public Building getBuildingDetail(SQLiteDatabase db, int buildingID) {
+        Building building = null;
         Cursor cursor = db.query(
                 BuildingEntry.TABLE_NAME,
                 new String[]{
+                        BuildingEntry._ID,
                         BuildingEntry.COLUMN_NAME_NUMBER,
                         BuildingEntry.COLUMN_NAME_NAME,
                         BuildingEntry.COLUMN_NAME_DESCRIPTION
@@ -386,22 +389,64 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 null, null, null
         );
         if (cursor.moveToNext()) {
-            contentValues = new ContentValues();
-            contentValues.put(
-                    BuildingEntry.COLUMN_NAME_NUMBER,
-                    cursor.getInt(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NUMBER))
-            );
-            contentValues.put(
-                    BuildingEntry.COLUMN_NAME_NAME,
-                    cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME))
-            );
-            contentValues.put(
-                    BuildingEntry.COLUMN_NAME_DESCRIPTION,
-                    cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_DESCRIPTION))
-            );
+            int id = cursor.getInt(cursor.getColumnIndex(BuildingEntry._ID));
+            int number = cursor.getInt(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NUMBER));
+            String name = cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME));
+            String description = cursor.getString(cursor.getColumnIndex(BuildingEntry.COLUMN_NAME_DESCRIPTION));
+            building = new Building(id, number, name, description);
         }
         cursor.close();
-        return contentValues;
+        return building;
+    }
+
+    public Floor getFloorDetail(SQLiteDatabase db, int floorID) {
+        Floor floor = null;
+        Cursor cursor = db.query(
+                FloorEntry.TABLE_NAME,
+                new String[]{
+                        FloorEntry._ID,
+                        FloorEntry.COLUMN_NAME_NUMBER,
+                        FloorEntry.COLUMN_NAME_BUILDING_ID
+                },
+                FloorEntry._ID + "=?",
+                new String[]{String.valueOf(floorID)},
+                null, null, null
+        );
+        if (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex(FloorEntry._ID));
+            int number = cursor.getInt(cursor.getColumnIndex(FloorEntry.COLUMN_NAME_NUMBER));
+            int building_id = cursor.getInt(cursor.getColumnIndex(FloorEntry.COLUMN_NAME_BUILDING_ID));
+            floor = new Floor(id, number, building_id);
+        }
+        cursor.close();
+        return floor;
+    }
+
+    public Room getRoomDetail(SQLiteDatabase db, int roomID) {
+        Room room = null;
+        Cursor cursor = db.query(
+                RoomEntry.TABLE_NAME,
+                new String[]{
+                        RoomEntry._ID,
+                        RoomEntry.COLUMN_NAME_NAME,
+                        RoomEntry.COLUMN_NAME_DESCRIPTION,
+                        RoomEntry.COLUMN_NAME_BUILDING_ID,
+                        RoomEntry.COLUMN_NAME_FLOOR_ID
+                },
+                RoomEntry._ID + "=?",
+                new String[]{String.valueOf(roomID)},
+                null, null, null
+        );
+        if (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex(RoomEntry._ID));
+            String name = cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME));
+            String description = cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_DESCRIPTION));
+            int building_id = cursor.getInt(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_BUILDING_ID));
+            int floor_id = cursor.getInt(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_FLOOR_ID));
+            room = new Room(id, name, description, building_id, floor_id);
+        }
+        cursor.close();
+        return room;
     }
 
     public ArrayList<Pair<String,Integer[]>> getMainRooms(SQLiteDatabase db, int buildingID) {

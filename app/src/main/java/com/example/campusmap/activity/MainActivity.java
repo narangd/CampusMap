@@ -123,13 +123,13 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SEARCH_RESULT_ACTIVITY_REQUEST_CODE && resultCode == SearchResultActivity.RESULT_OK) {
             Bundle extras = data.getExtras();
-            InfoLocation infoLocation = (InfoLocation) extras.get(DrawerTestActivity.KEY_SEACH_ITEM);
+            InfoLocation infoLocation = (InfoLocation) extras.get(DrawerTestActivity.KEY_INFO_LOCATION);
 
             Log.d(TAG, "Serializable InfoLocation Data : " + infoLocation);
             if (infoLocation != null) {
 
                 Intent intent = new Intent(this, DrawerTestActivity.class);
-                intent.putExtra(DrawerTestActivity.KEY_SEACH_ITEM, infoLocation);
+                intent.putExtra(DrawerTestActivity.KEY_INFO_LOCATION, infoLocation);
                 startActivity(intent);
             }
         }

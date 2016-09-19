@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,14 +14,20 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.database.InfoLocation;
+import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.tree.branch.Building;
+import com.example.campusmap.tree.branch.Floor;
+import com.example.campusmap.tree.branch.Room;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,46 +39,56 @@ public class InfoUpdaterActivity extends AppCompatActivity {
     };
     public static final String KEY_INFO_LOCATION = "InfoLocation";
     private UserLoginTask mAuthTask = null;
+    private String tag = "";
 
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
-    private View mProgressView;
     private View mLoginFormView;
-    private Toolbar mToolbar;
+    private TextView mSubTitleTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info_updater);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ListView listView = (ListView) findViewById(R.id.list_view);
+        ViewGroup imageHeader = (ViewGroup) getLayoutInflater().inflate(R.layout.content_info_updater, listView, false);
+        if (listView != null) {
+            listView.addHeaderView(imageHeader, null, false);
+            listView.setAdapter(new ArrayAdapter<>(
+                    this,
+                    android.R.layout.simple_list_item_1,
+                    new String[]{"가","가","가","가","가","가","가","가","가","가","가","가","가","가","가"}
+            ));
+        }
+        mLoginFormView = imageHeader.findViewById(R.id.login_form);
+        mSubTitleTextView = (TextView) imageHeader.findViewById(R.id.sub_title);
+        mEmailView = (AutoCompleteTextView) imageHeader.findViewById(R.id.email);
+        mPasswordView = (EditText) imageHeader.findViewById(R.id.password);
 
         setInfoFromParameter();
 
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         ArrayList<String> list = new ArrayList<>();
         for (String email : DUMMY_CREDENTIALS) {
             list.add(email.split(":")[0]);
         }
         addEmailsToAutoComplete(list);
 
-        mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
+                    attemptSubmit();
                     return true;
                 }
                 return false;
             }
         });
-
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
     }
 
     private void setInfoFromParameter() {
@@ -82,10 +99,35 @@ public class InfoUpdaterActivity extends AppCompatActivity {
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle(infoLocation.toString());
             }
+
+            SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
+            SQLiteDatabase db = helper.getReadableDatabase();
+
+
+            mSubTitleTextView = (TextView) findViewById(R.id.sub_title);
+            if (mSubTitleTextView != null) {
+                String title = "";
+                if (infoLocation.mBuildingID != InfoLocation.NONE) {
+                    Building building = helper.getBuildingDetail(db, infoLocation.mBuildingID);
+                    tag = "building";
+                    title += building.getName();
+                }
+                if (infoLocation.mFloorID != InfoLocation.NONE) {
+                    Floor floor = helper.getFloorDetail(db, infoLocation.mFloorID);
+                    tag = "floor";
+                    title += " / " + floor.toString();
+                }
+                if (infoLocation.mRoomID != InfoLocation.NONE) {
+                    Room room = helper.getRoomDetail(db, infoLocation.mRoomID);
+                    tag = "room";
+                    title += " / " + room.getName();
+                }
+                mSubTitleTextView.setText(title);
+            }
         }
     }
 
-    private void attemptLogin() {
+    private void attemptSubmit() {
         if (mAuthTask != null) {
             return;
         }
@@ -160,18 +202,18 @@ public class InfoUpdaterActivity extends AppCompatActivity {
                 }
             });
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
+//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//            mProgressView.animate().setDuration(shortAnimTime).alpha(
+//                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//                }
+//            });
         } else {
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }

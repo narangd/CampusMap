@@ -93,7 +93,7 @@ public class SearchResultActivity extends AppCompatActivity
         switch (which) {
             case DialogInterface.BUTTON_POSITIVE:
                 Intent result = new Intent();
-                result.putExtra(DrawerTestActivity.KEY_SEACH_ITEM, infoLocation);
+                result.putExtra(DrawerTestActivity.KEY_INFO_LOCATION, infoLocation);
                 setResult(RESULT_OK, result);
                 finish();
                 break;

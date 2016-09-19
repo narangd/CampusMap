@@ -1,6 +1,7 @@
 package com.example.campusmap.fragment;
 
 
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,17 +9,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.campusmap.R;
+import com.example.campusmap.activity.InfoUpdaterActivity;
+import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.tree.branch.Floor;
 import com.example.campusmap.tree.branch.Room;
 
 import java.util.ArrayList;
 
-public class RoomListFragment extends Fragment {
+public class RoomListFragment extends Fragment implements AdapterView.OnItemLongClickListener {
     private static final String KEY_FLOOR = "floor";
     private static final String TAG = "RoomListFragment";
     private static final boolean DEBUG = false;
@@ -52,16 +56,17 @@ public class RoomListFragment extends Fragment {
                 SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(getContext());
                 SQLiteDatabase db = helper.getReadableDatabase();
 
-                ArrayAdapter<String> roomArrayAdapter = new ArrayAdapter<>(
+                ArrayAdapter<String> mAdapter = new ArrayAdapter<>(
                         getContext(),
                         android.R.layout.simple_list_item_1
                 );
                 mRoomList = helper.getRoomList(db, mFloor.getBuildingID(), mFloor.getID());
                 for (Room room : mRoomList){
-                    roomArrayAdapter.add(room.toString());
+                    mAdapter.add(room.toString());
                 }
 
-                mListView.setAdapter(roomArrayAdapter);
+                mListView.setAdapter(mAdapter);
+                mListView.setOnItemLongClickListener(this);
             }
             // getFloorList => arraylist
         }
@@ -99,4 +104,15 @@ public class RoomListFragment extends Fragment {
         }
     }
 
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        Room room = mRoomList.get(position);
+        Intent intent = new Intent(getActivity(), InfoUpdaterActivity.class);
+        intent.putExtra(
+                InfoUpdaterActivity.KEY_INFO_LOCATION,
+                new InfoLocation(room.getName(), InfoLocation.TAG_ROOM, room.getBuildingID(), room.getFloorID(), room.getID())
+        );
+        startActivity(intent);
+        return true;
+    }
 }

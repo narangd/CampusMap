@@ -1,6 +1,5 @@
 package com.example.campusmap.activity;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -32,6 +31,7 @@ import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.fragment.RoomListFragment;
 import com.example.campusmap.fragment.pager.FloorPagerAdapter;
+import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.tree.branch.Floor;
 
 import nl.codesoup.cubicbezier.CubicBezierInterpolator;
@@ -41,7 +41,7 @@ public class DrawerTestActivity extends AppCompatActivity
 
     private static final String TAG = "DrawerTestActivity";
     public static final String KEY_BUILDING_ID = "building_id";
-    public static final String KEY_SEACH_ITEM = "InfoLocation";
+    public static final String KEY_INFO_LOCATION = "InfoLocation";
     private static final boolean DEBUG = false;
 
     private DrawerLayout mDrawer;
@@ -49,7 +49,7 @@ public class DrawerTestActivity extends AppCompatActivity
     private ViewPager mFloorPager;
     private FloorPagerAdapter mFloorAdapter;
     private boolean isTried = false;
-    private InfoLocation mResultItem;
+    private InfoLocation mInfoLocation;
     private TextView mDescTextView;
 
     @Override
@@ -73,16 +73,16 @@ public class DrawerTestActivity extends AppCompatActivity
 
         Intent intent = getIntent();
         int buildingID = intent.getIntExtra(KEY_BUILDING_ID, -1);
-        mResultItem = (InfoLocation)intent.getSerializableExtra(KEY_SEACH_ITEM);
+        mInfoLocation = (InfoLocation)intent.getSerializableExtra(KEY_INFO_LOCATION);
 
-        if (buildingID == -1 && mResultItem == null) {
+        if (buildingID == -1 && mInfoLocation == null) {
             finish();
-            Log.e(TAG, "onCreate: 입력한 값이 없습니다. (ex Building ID or SearchItem");
+            Log.e(TAG, "onCreate: 입력한 값이 없습니다. (ex Building ID or InfoLocation");
             return;
         }
         if (buildingID == -1) {
-            Log.i(TAG, "onCreate: getResultItem" + mResultItem.mBuildingID + "," + mResultItem.mFloorID + "," + mResultItem.mRoomID);
-            buildingID = mResultItem.mBuildingID;
+            Log.i(TAG, "onCreate: getResultItem" + mInfoLocation.mBuildingID + "," + mInfoLocation.mFloorID + "," + mInfoLocation.mRoomID);
+            buildingID = mInfoLocation.mBuildingID;
         }
 
         // ## Get DataBase ##
@@ -90,11 +90,9 @@ public class DrawerTestActivity extends AppCompatActivity
         SQLiteDatabase db = helper.getReadableDatabase();
 
         // ## Get Building Detail ##
-        ContentValues buildingDetailValues = helper.getBuildingDetail(db, buildingID /* 100주년기념관 */);
+        Building building = helper.getBuildingDetail(db, buildingID /* 100주년기념관 */);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(
-                    buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_NAME)
-            );
+            getSupportActionBar().setTitle(building.getName());
 
             if (DEBUG) Log.i(TAG, "onCreate: ToolBar Title : " + getSupportActionBar().getTitle());
         }
@@ -115,8 +113,8 @@ public class DrawerTestActivity extends AppCompatActivity
             // ## Building Title ##
             TextView buildingTitle = (TextView) headerLayout.findViewById(R.id.building_title);
             if (buildingTitle != null) {
-                String title = buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_NAME);
-                int number = buildingDetailValues.getAsInteger(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_NUMBER);
+                String title = building.getName();
+                int number = building.getNumber();
                 title += " - " + number + "번건물";
                 buildingTitle.setText(title);
             }
@@ -124,7 +122,7 @@ public class DrawerTestActivity extends AppCompatActivity
             // ## Building Description ##
             mDescTextView = (TextView) headerLayout.findViewById(R.id.description);
             if (mDescTextView != null) {
-                String desc = buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_DESCRIPTION);
+                String desc = building.getDescription();
                 if (desc == null || desc.length() <= 0) {
                     desc = "여분으로 보여질 텍스트1";
                     desc += "\n여분으로 보여질 텍스트2";
@@ -195,10 +193,10 @@ public class DrawerTestActivity extends AppCompatActivity
         super.onStart();
         if (DEBUG) Log.i(TAG, "onStart: called!!");
 
-        if (mResultItem != null && !isTried) {
+        if (mInfoLocation != null && !isTried) {
             // ## 검색한 결과를 통해 들어오는 경우 ##
-            if (DEBUG) Log.i(TAG, "onStart: focus! : " + mResultItem.mFloorID + ", " + mResultItem.mRoomID);
-            focusRoom(mResultItem.mFloorID, mResultItem.mRoomID);
+            if (DEBUG) Log.i(TAG, "onStart: focus! : " + mInfoLocation.mFloorID + ", " + mInfoLocation.mRoomID);
+            focusRoom(mInfoLocation.mFloorID, mInfoLocation.mRoomID);
             isTried = true;
         } else {
             // ## 정상적인 경로로 들어온 경우 ##

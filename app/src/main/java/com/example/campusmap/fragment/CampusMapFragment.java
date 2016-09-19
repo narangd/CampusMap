@@ -20,14 +20,16 @@ import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.view.TouchImageView;
 
+import java.util.ArrayList;
+
 public class CampusMapFragment extends Fragment implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
     private static final String TAG = "CampusMapFragment";
     public static final int TAP_INDEX = 0;
 
     private Context context;
-    private ArrayAdapter<Building> mAdapter;
     private ListView listView;
     private int prevCheckIndex = 0;
+    private ArrayList<Building> mBuildingList;
 
     public static CampusMapFragment newInstance() {
         return new CampusMapFragment();
@@ -53,13 +55,14 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
 
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
         SQLiteDatabase db = helper.getReadableDatabase();
+        mBuildingList = helper.getBuildingList(db);
 
         if (listView != null) {
             listView.addHeaderView(imageHeader, null, false);
-            mAdapter = new ArrayAdapter<>(
+            ArrayAdapter<Building> mAdapter = new ArrayAdapter<>(
                     context,
                     android.R.layout.simple_list_item_1,
-                    helper.getBuildingList(db)
+                    mBuildingList
             );
             listView.setAdapter(mAdapter);
             listView.setOnItemClickListener(this);
@@ -80,7 +83,7 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         listView.setItemChecked(position, true);
 //        parent.set
 
-        Building building = mAdapter.getItem(position-1);
+        Building building = mBuildingList.get(position-1);
 
         Intent intent = new Intent(context, DrawerTestActivity.class);
         intent.putExtra(DrawerTestActivity.KEY_BUILDING_ID, building.getID()); // id to index
@@ -89,11 +92,11 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        Building building = mAdapter.getItem(position);
+        Building building = mBuildingList.get(position);
         Intent intent = new Intent(getActivity(), InfoUpdaterActivity.class);
         intent.putExtra(
                 InfoUpdaterActivity.KEY_INFO_LOCATION,
-                new InfoLocation(building.getName(), building.getID(), InfoLocation.NONE, InfoLocation.NONE)
+                new InfoLocation(building.getName(), InfoLocation.TAG_BUILDING, building.getID(), InfoLocation.NONE, InfoLocation.NONE)
         );
         startActivity(intent);
         return true;

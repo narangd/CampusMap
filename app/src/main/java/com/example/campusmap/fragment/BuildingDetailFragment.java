@@ -1,6 +1,5 @@
 package com.example.campusmap.fragment;
 
-import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -18,6 +17,7 @@ import android.widget.Toast;
 import com.example.campusmap.R;
 import com.example.campusmap.adapter.MainRoomArrayAdapter;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.tree.branch.Building;
 
 public class BuildingDetailFragment extends Fragment implements AdapterView.OnItemClickListener {
     private static final String BUILDING_ID = "building";
@@ -54,24 +54,20 @@ public class BuildingDetailFragment extends Fragment implements AdapterView.OnIt
 
         Bundle bundle = getArguments();
         if (bundle != null) {
-            int building = bundle.getInt(BUILDING_ID);
+            int buildingID = bundle.getInt(BUILDING_ID);
             SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(getContext());
             SQLiteDatabase db = helper.getReadableDatabase();
 
-            ContentValues buildingDetailValues = helper.getBuildingDetail(db, building);
-            if (buildingDetailValues != null) {
-                toolbar.setTitle(
-                        buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_NAME)
-                );
-                textView.setText(
-                        buildingDetailValues.getAsString(SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_DESCRIPTION)
-                );
+            Building building = helper.getBuildingDetail(db, buildingID);
+            if (building != null) {
+                toolbar.setTitle(building.getName());
+                textView.setText(building.getDescription());
             }
 
             mAdapter = new MainRoomArrayAdapter(
                     getContext(),
                     android.R.layout.simple_list_item_1,
-                    helper.getMainRooms(db, building)
+                    helper.getMainRooms(db, buildingID)
             );
             listView.addHeaderView(detailView, null, false);
             listView.setAdapter(mAdapter);

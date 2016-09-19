@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.XmlResourceParser;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -262,7 +263,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
         int currentBuildingID=0, currentFloorID=0, currentRoomID=0;
 
         int version = 0;
-        int number;
+        int id, number;
         String buildingName, path, roomName;
         String description, main;
 
@@ -278,13 +279,14 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
             for (int buildingIndex=0; buildingIndex<buildings.length(); buildingIndex++) {
 
                 JSONObject building = buildings.getJSONObject(buildingIndex);
+                currentBuildingID = Integer.parseInt( building.getString("id") );
                 number = Integer.parseInt( building.getString("number") );
                 buildingName = building.getString("name");
                 description = building.getString("description");
                 description = description == null ? "" : description;
 
                 helper.insertBuilding(database,
-                        ++currentBuildingID,    // # id #
+                        currentBuildingID,    // # id #
                         number,                 // # number #
                         buildingName,                   // # name #
                         description             // # description #
@@ -301,11 +303,13 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
                 for (int floorIndex=0; floorIndex<floors.length(); floorIndex++) {
 
                     JSONObject floor = floors.getJSONObject(floorIndex);
+                    currentFloorID = Integer.parseInt( floor.getString("id") );
                     number = Integer.parseInt( floor.getString("number") );
+//                    currentBuildingID = Integer.parseInt( floor.getString("building_id") );
 
                     path = buildingName + " / " + String.valueOf(number)+"층";
                     helper.insertFloor(database,
-                            ++currentFloorID,                // # id #
+                            currentFloorID,                // # id #
                             number,                          // # number #
                             currentBuildingID                // # building id #
                     );
@@ -319,13 +323,15 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
                     for (int roomIndex=0; roomIndex<rooms.length(); roomIndex++) {
 
                         JSONObject room = rooms.getJSONObject(roomIndex);
+                        currentRoomID = Integer.parseInt( room.getString("id") );
                         roomName = room.getString("name");
                         description = room.getString("description");
                         description = description == null ? "" : description;
                         main = room.getString("main");
+//                        currentFloorID = Integer.parseInt( building.getstring)
 
                         helper.insertRoom(database,
-                                ++currentRoomID,                  // # id #
+                                currentRoomID,                  // # id #
                                 roomName,                         // # name
                                 description,                             // # description #
                                 path,                             // # path string #
@@ -357,6 +363,10 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
             e.printStackTrace();
             message = json;
             publishProgress(-2);
+        } catch (SQLiteConstraintException e) {
+            e.printStackTrace();
+            Log.e(TAG, "parsingJSON: 실패");
+            return -1;
         }
 
         if (DEBUG) {

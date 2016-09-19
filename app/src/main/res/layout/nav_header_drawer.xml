@@ -6,6 +6,7 @@
     android:gravity="start"
     android:orientation="vertical"
     android:paddingLeft="@dimen/nav_header_vertical_spacing"
+    android:paddingRight="@dimen/nav_header_vertical_spacing"
     android:paddingTop="24dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 

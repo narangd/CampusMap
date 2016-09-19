@@ -3,9 +3,10 @@ package com.example.campusmap.tree.branch;
 import java.io.Serializable;
 
 public class Building implements Serializable {
-    private int mID;
-    private int mNumber;
-    private String mName;
+    private final String mDescription;
+    private final int mID;
+    private final int mNumber;
+    private final String mName;
 
     public int getID() {
         return mID;
@@ -19,10 +20,15 @@ public class Building implements Serializable {
         return mName;
     }
 
-    public Building(int id, int number, String name) {
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public Building(int id, int number, String name, String description) {
         mID = id;
         mNumber = number;
         mName = name;
+        mDescription = description;
     }
 
     @Override
