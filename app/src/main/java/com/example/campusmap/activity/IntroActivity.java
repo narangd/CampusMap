@@ -16,6 +16,7 @@ import com.example.campusmap.R;
 import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
 import com.example.campusmap.fragment.MenuPlannerFragment;
 
+import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -78,9 +79,15 @@ public class IntroActivity extends Activity {
                     editor.putBoolean(getString(R.string.pref_key_today_menu_planner),
                             !preferences.getString(getString(R.string.pref_key_last_skip_date), "-").equals(MenuPlannerFragment.TODAY_DATE)
                     );
+                    if (preferences.getString(getString(R.string.pref_key_app_id), "").equals("")) {
+                        editor.putString(
+                                getString(R.string.pref_key_app_id),
+                                UUID.randomUUID().toString()
+                        );
+                    }
                     editor.apply();
 
-                } catch (CancellationException e) {
+                } catch (CancellationException e) { // time out
                     Log.e(TAG, "doInBackground: task Cancel!");
                 } catch (InterruptedException | ExecutionException | PackageManager.NameNotFoundException e) {
                     e.printStackTrace();

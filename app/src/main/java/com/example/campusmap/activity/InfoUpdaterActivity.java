@@ -1,23 +1,19 @@
 package com.example.campusmap.activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
-import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
+import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -29,8 +25,14 @@ import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.tree.branch.Floor;
 import com.example.campusmap.tree.branch.Room;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class InfoUpdaterActivity extends AppCompatActivity {
 
@@ -38,14 +40,16 @@ public class InfoUpdaterActivity extends AppCompatActivity {
             "foo@example.com:hello", "bar@example.com:world"
     };
     public static final String KEY_INFO_LOCATION = "InfoLocation";
-    private UserLoginTask mAuthTask = null;
-    private String tag = "";
+    private UpdaterTask mAuthTask = null;
+    private InfoLocation mInfoLocation;
 
     // UI references.
-    private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
-    private View mLoginFormView;
+    private EditText mTitle;
+    private EditText mContents;
     private TextView mSubTitleTextView;
+    private ListView mListView;
+    private Button mButton;
+    private int mID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,76 +59,82 @@ public class InfoUpdaterActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ListView listView = (ListView) findViewById(R.id.list_view);
-        ViewGroup imageHeader = (ViewGroup) getLayoutInflater().inflate(R.layout.content_info_updater, listView, false);
-        if (listView != null) {
-            listView.addHeaderView(imageHeader, null, false);
-            listView.setAdapter(new ArrayAdapter<>(
+        mListView = (ListView) findViewById(R.id.list_view);
+        ViewGroup listViewHeader = (ViewGroup) getLayoutInflater().inflate(R.layout.content_info_updater, mListView, false);
+        if (mListView != null) {
+            mListView.addHeaderView(listViewHeader, null, false);
+            mListView.setAdapter(new ArrayAdapter<>(
                     this,
                     android.R.layout.simple_list_item_1,
                     new String[]{"가","가","가","가","가","가","가","가","가","가","가","가","가","가","가"}
             ));
         }
-        mLoginFormView = imageHeader.findViewById(R.id.login_form);
-        mSubTitleTextView = (TextView) imageHeader.findViewById(R.id.sub_title);
-        mEmailView = (AutoCompleteTextView) imageHeader.findViewById(R.id.email);
-        mPasswordView = (EditText) imageHeader.findViewById(R.id.password);
+        mSubTitleTextView = (TextView) listViewHeader.findViewById(R.id.sub_title);
+        mTitle = (EditText) listViewHeader.findViewById(R.id.title);
+        mContents = (EditText) listViewHeader.findViewById(R.id.contents);
+        mButton = (Button) listViewHeader.findViewById(R.id.email_sign_in_button);
 
-        setInfoFromParameter();
+        getInfoFromParameter();
 
-        // Set up the login form.
-        ArrayList<String> list = new ArrayList<>();
-        for (String email : DUMMY_CREDENTIALS) {
-            list.add(email.split(":")[0]);
-        }
-        addEmailsToAutoComplete(list);
+//        // Set up the login form.
+//        ArrayList<String> list = new ArrayList<>();
+//        for (String email : DUMMY_CREDENTIALS) {
+//            list.add(email.split(":")[0]);
+//        }
+//        addEmailsToAutoComplete(list);
 
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//        mContents.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//            @Override
+//            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+//                if (id == EditorInfo.IME_NULL) {
+//                    attemptSubmit();
+//                    return true;
+//                }
+//                return false;
+//            }
+//        });
+        mButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptSubmit();
-                    return true;
-                }
-                return false;
+            public void onClick(View v) {
+                attemptSubmit();
             }
         });
     }
 
-    private void setInfoFromParameter() {
-        Intent intent = getIntent();
-        InfoLocation infoLocation = (InfoLocation) intent.getSerializableExtra(KEY_INFO_LOCATION);
-        if (infoLocation != null) {
-            Log.i("InfoUpdaterActivity", "setInfoFromParameter: info location : " + infoLocation);
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle(infoLocation.toString());
-            }
-
-            SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
-            SQLiteDatabase db = helper.getReadableDatabase();
+    private void resetInfo() {
+        mTitle.setText("");
+        mContents.setText("");
 
 
-            mSubTitleTextView = (TextView) findViewById(R.id.sub_title);
-            if (mSubTitleTextView != null) {
-                String title = "";
-                if (infoLocation.mBuildingID != InfoLocation.NONE) {
-                    Building building = helper.getBuildingDetail(db, infoLocation.mBuildingID);
-                    tag = "building";
-                    title += building.getName();
-                }
-                if (infoLocation.mFloorID != InfoLocation.NONE) {
-                    Floor floor = helper.getFloorDetail(db, infoLocation.mFloorID);
-                    tag = "floor";
-                    title += " / " + floor.toString();
-                }
-                if (infoLocation.mRoomID != InfoLocation.NONE) {
-                    Room room = helper.getRoomDetail(db, infoLocation.mRoomID);
-                    tag = "room";
-                    title += " / " + room.getName();
-                }
-                mSubTitleTextView.setText(title);
-            }
+    }
+
+    private void getInfoFromParameter() {
+        mInfoLocation = (InfoLocation) getIntent().getSerializableExtra(KEY_INFO_LOCATION);
+        Log.i("InfoUpdaterActivity", "getInfoFromParameter: info location : " + mInfoLocation);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(mInfoLocation.toString());
         }
+
+        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
+
+        mSubTitleTextView = (TextView) findViewById(R.id.sub_title);
+        String path = "";
+        if (mInfoLocation.getBuildingID() != InfoLocation.NONE) {
+            Building building = helper.getBuildingDetail(mInfoLocation.getBuildingID());
+            path += building.getName();
+            mID = mInfoLocation.getBuildingID();
+        }
+        if (mInfoLocation.getFloorID() != InfoLocation.NONE) {
+            Floor floor = helper.getFloorDetail(mInfoLocation.getFloorID());
+            path += " / " + floor.toString();
+            mID = mInfoLocation.getFloorID();
+        }
+        if (mInfoLocation.getRoomID() != InfoLocation.NONE) {
+            Room room = helper.getRoomDetail(mInfoLocation.getRoomID());
+            path += " / " + room.getName();
+            mID = mInfoLocation.getRoomID();
+        }
+        mSubTitleTextView.setText(path);
     }
 
     private void attemptSubmit() {
@@ -133,31 +143,27 @@ public class InfoUpdaterActivity extends AppCompatActivity {
         }
 
         // Reset errors.
-        mEmailView.setError(null);
-        mPasswordView.setError(null);
+        mTitle.setError(null);
+        mContents.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        String title = mTitle.getText().toString();
+        String contents = mContents.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
+        // Check for a valid contents, if the user entered one.
+        if (!TextUtils.isEmpty(contents) && !isContentsValid(contents)) {
+            mContents.setError(getString(R.string.error_invalid_password));
+            focusView = mContents;
             cancel = true;
         }
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
+        // Check for a valid title address.
+        if (!TextUtils.isEmpty(title) && !isTitleValid(title)) {
+            mTitle.setError(getString(R.string.error_invalid_email));
+            focusView = mTitle;
             cancel = true;
         }
 
@@ -168,119 +174,117 @@ public class InfoUpdaterActivity extends AppCompatActivity {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+//            showProgress(true);
+            mAuthTask = new UpdaterTask(title, contents);
             mAuthTask.execute((Void) null);
         }
     }
 
-    private boolean isEmailValid(String email) {
-        return email.contains("@");
+    private boolean isTitleValid(String title) {
+        return title.length() > 4;
     }
 
-    private boolean isPasswordValid(String password) {
+    private boolean isContentsValid(String password) {
         return password.length() > 4;
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+    public class UpdaterTask extends AsyncTask<Void, Void, String> {
+        private static final String URL_UPDATER_PAGE = "http://203.232.193.178/campusmap/updater.php";
+        private static final int TIMEOUT = 1000 * 3;
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        private final String mTitle;
+        private final String mContents;
+        private ProgressDialog mProgressDialog;
 
-//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-//            mProgressView.animate().setDuration(shortAnimTime).alpha(
-//                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-//                }
-//            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(InfoUpdaterActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
+        UpdaterTask(String title, String contents) {
+            mTitle = title;
+            mContents = contents;
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgressDialog = new ProgressDialog(InfoUpdaterActivity.this);
+            mProgressDialog.setTitle("업데이터를 등록중입니다");
+            mProgressDialog.setProgress(ProgressDialog.STYLE_SPINNER);
+            mProgressDialog.setIndeterminate(true);
+            mProgressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(InfoUpdaterActivity.this);
+
+            final String uniqueID = preferences.getString(getString(R.string.pref_key_app_id), "");
 
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
-                return false;
+                e.printStackTrace();
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+            try {
+                URL url = new URL(URL_UPDATER_PAGE);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setReadTimeout( TIMEOUT );
+                connection.setConnectTimeout( TIMEOUT );
+                connection.setDoInput(true);
+                connection.setDoOutput(true);
+
+                OutputStream os = connection.getOutputStream();
+                OutputStreamWriter writer = new OutputStreamWriter(os);
+                writer.write("title=" + mTitle);
+                writer.write("&contents=" + mContents);
+                writer.write("&userid=" + uniqueID);
+                writer.write("&tag=" + mInfoLocation.getTag());
+                writer.write("&id=" + mID);
+                writer.close();
+
+                StringBuilder builder = new StringBuilder();
+                String line;
+                InputStream is = connection.getInputStream();
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader reader  = new BufferedReader(isr);
+
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
                 }
+
+                reader.close();
+
+                return builder.toString();
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
-            // TODO: register the new account here.
-            return true;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final String message) {
             mAuthTask = null;
-            showProgress(false);
+            mProgressDialog.dismiss();
+//            showProgress(false);
 
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
+//            if (success) {
+//                finish();
+//            } else {
+//                InfoUpdaterActivity.this.mContents.setError(getString(R.string.error_incorrect_password));
+//                InfoUpdaterActivity.this.mContents.requestFocus();
+//            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(InfoUpdaterActivity.this);
+            builder.setTitle("서버로 보낸 결과");
+            builder.setMessage(message);
+            builder.show();
         }
 
         @Override
         protected void onCancelled() {
             mAuthTask = null;
-            showProgress(false);
+//            showProgress(false);
         }
     }
 }

@@ -2,7 +2,6 @@ package com.example.campusmap.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -43,10 +42,7 @@ public class SearchResultActivity extends AppCompatActivity
         }
 
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
-        SQLiteDatabase db = helper.getReadableDatabase();
-
-        ArrayList<InfoLocation> result = helper.searchResultItems(db, query);
-        db.close();
+        ArrayList<InfoLocation> result = helper.searchResultItems(query);
 
         final ListView listView = (ListView)findViewById(R.id.result_list);
         if (listView != null) {

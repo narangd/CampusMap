@@ -56,12 +56,14 @@ public class SettingsActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         Toast.makeText(SettingsActivity.this, "데이터베이스를 초기화하기위해 다시시작합니다", Toast.LENGTH_SHORT).show();
 
-                        SQLiteHelperCampusInfo sqLiteHelperCampusInfo = SQLiteHelperCampusInfo.getInstance(context);
-                        SQLiteDatabase db = sqLiteHelperCampusInfo.getWritableDatabase();
+                        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
+                        SQLiteDatabase db = helper.getWritableDatabase();
 
-                        sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME);
-                        sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME);
-                        sqLiteHelperCampusInfo.deleteTable(db, SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME);
+                        helper.deleteTable(db, SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME);
+                        helper.deleteTable(db, SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME);
+                        helper.deleteTable(db, SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME);
+
+                        db.close();
 
                         Log.i("SettingActivity", "onClick: Delete Data (building, floor, room)");
 
@@ -101,11 +103,13 @@ public class SettingsActivity extends AppCompatActivity {
 
         private void bringFromSharedPreference() {
             String AppVersionKey = getString(R.string.pref_key_app_version);
+            String AppIDKey = getString(R.string.pref_key_app_id);
             String DBVersionKey = getString(R.string.pref_key_db_version);
-            String TodayKey = getString(R.string.pref_key_today_menu_planner);
+            final String TodayKey = getString(R.string.pref_key_today_menu_planner);
             final String DateKey = getString(R.string.pref_key_last_skip_date);
 
             setPreferenceValue(AppVersionKey, "0.0.0");
+            setPreferenceValue(AppIDKey, "abcd");
             setPreferenceValue(DBVersionKey, 0);
 
             Log.i("SettingsActivity", "onCreate: today_menu_planer : " + sharedPreferences.getBoolean(TodayKey, false) );

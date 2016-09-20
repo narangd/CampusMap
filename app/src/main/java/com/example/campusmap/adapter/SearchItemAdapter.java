@@ -1,7 +1,6 @@
 package com.example.campusmap.adapter;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,11 +39,9 @@ public class SearchItemAdapter extends ArrayAdapter<InfoLocation> {
         text1.setText(currentItem.toString());
 
         // ## Search Database ##
-        if (currentItem.mRoomID != InfoLocation.NONE) { // room
+        if (currentItem.getRoomID() != InfoLocation.NONE) { // room
             SQLiteHelperCampusInfo sqLiteHelperCampusInfo = SQLiteHelperCampusInfo.getInstance(getContext());
-            SQLiteDatabase db = sqLiteHelperCampusInfo.getReadableDatabase();
-            String path = sqLiteHelperCampusInfo.getRoomPath(db, currentItem.mRoomID);
-            db.close();
+            String path = sqLiteHelperCampusInfo.getRoomPath(currentItem.getRoomID());
 
             text2.setText(path);
 

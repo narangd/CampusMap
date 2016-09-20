@@ -1,6 +1,5 @@
 package com.example.campusmap.fragment;
 
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
@@ -56,9 +55,8 @@ public class BuildingDetailFragment extends Fragment implements AdapterView.OnIt
         if (bundle != null) {
             int buildingID = bundle.getInt(BUILDING_ID);
             SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(getContext());
-            SQLiteDatabase db = helper.getReadableDatabase();
 
-            Building building = helper.getBuildingDetail(db, buildingID);
+            Building building = helper.getBuildingDetail(buildingID);
             if (building != null) {
                 toolbar.setTitle(building.getName());
                 textView.setText(building.getDescription());
@@ -67,7 +65,7 @@ public class BuildingDetailFragment extends Fragment implements AdapterView.OnIt
             mAdapter = new MainRoomArrayAdapter(
                     getContext(),
                     android.R.layout.simple_list_item_1,
-                    helper.getMainRooms(db, buildingID)
+                    helper.getMainRooms(buildingID)
             );
             listView.addHeaderView(detailView, null, false);
             listView.setAdapter(mAdapter);

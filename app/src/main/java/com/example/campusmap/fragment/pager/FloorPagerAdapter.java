@@ -1,7 +1,6 @@
 package com.example.campusmap.fragment.pager;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -25,8 +24,7 @@ public class FloorPagerAdapter extends FragmentPagerAdapter {
 
         // ## Get DataBase ##
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
-        SQLiteDatabase db = helper.getReadableDatabase();
-        mFloorList = helper.getFloorList(db, buildingID);
+        mFloorList = helper.getFloorList(buildingID);
     }
 
     @Override

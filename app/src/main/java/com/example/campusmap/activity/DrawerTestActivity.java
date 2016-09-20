@@ -1,7 +1,6 @@
 package com.example.campusmap.activity;
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -81,16 +80,15 @@ public class DrawerTestActivity extends AppCompatActivity
             return;
         }
         if (buildingID == -1) {
-            Log.i(TAG, "onCreate: getResultItem" + mInfoLocation.mBuildingID + "," + mInfoLocation.mFloorID + "," + mInfoLocation.mRoomID);
-            buildingID = mInfoLocation.mBuildingID;
+            Log.i(TAG, "onCreate: getResultItem" + mInfoLocation.getBuildingID() + "," + mInfoLocation.getFloorID() + "," + mInfoLocation.getRoomID());
+            buildingID = mInfoLocation.getBuildingID();
         }
 
         // ## Get DataBase ##
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
-        SQLiteDatabase db = helper.getReadableDatabase();
 
         // ## Get Building Detail ##
-        Building building = helper.getBuildingDetail(db, buildingID /* 100주년기념관 */);
+        Building building = helper.getBuildingDetail(buildingID);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(building.getName());
 
@@ -101,7 +99,7 @@ public class DrawerTestActivity extends AppCompatActivity
         mMainRoomAdapter = new MainRoomArrayAdapter(
                 this,
                 android.R.layout.simple_list_item_1,
-                helper.getMainRooms(db, buildingID /* 100주년기념관 */)
+                helper.getMainRooms(buildingID)
         );
 
         // ## Insert SubMenu Into NavigationView ##
@@ -195,8 +193,8 @@ public class DrawerTestActivity extends AppCompatActivity
 
         if (mInfoLocation != null && !isTried) {
             // ## 검색한 결과를 통해 들어오는 경우 ##
-            if (DEBUG) Log.i(TAG, "onStart: focus! : " + mInfoLocation.mFloorID + ", " + mInfoLocation.mRoomID);
-            focusRoom(mInfoLocation.mFloorID, mInfoLocation.mRoomID);
+            if (DEBUG) Log.i(TAG, "onStart: focus! : " + mInfoLocation.getFloorID() + ", " + mInfoLocation.getRoomID());
+            focusRoom(mInfoLocation.getFloorID(), mInfoLocation.getRoomID());
             isTried = true;
         } else {
             // ## 정상적인 경로로 들어온 경우 ##

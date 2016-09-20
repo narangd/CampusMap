@@ -232,12 +232,13 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         db.delete(tableName, null, null);
     }
 
-    public ArrayList<InfoLocation> searchResultItems(SQLiteDatabase db, String query) {
+    public ArrayList<InfoLocation> searchResultItems(String query) {
+        SQLiteDatabase database = getReadableDatabase();
         ArrayList<InfoLocation> resultList = new ArrayList<>();
         query = "%" + query + "%";
 
         // ## Search Building ##
-        Cursor buildingCursor = db.query(
+        Cursor buildingCursor = database.query(
                 BuildingEntry.TABLE_NAME,
                 new String[]{
                         BuildingEntry.COLUMN_NAME_NAME,
@@ -246,10 +247,12 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 BuildingEntry.COLUMN_NAME_NAME + " LIKE ?",
                 new String[]{query},
                 null, null,
-                BuildingEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING);
+                BuildingEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING
+        );
         while (buildingCursor.moveToNext()) {
             resultList.add(new InfoLocation(
                     buildingCursor.getString(buildingCursor.getColumnIndex(BuildingEntry.COLUMN_NAME_NAME)),
+                    InfoLocation.TAG_BUILDING,
                     buildingCursor.getInt(buildingCursor.getColumnIndex(BuildingEntry._ID)),
                     InfoLocation.NONE,
                     InfoLocation.NONE
@@ -258,7 +261,7 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         buildingCursor.close();
 
         // ## Search Room ##
-        Cursor roomCursor = db.query(
+        Cursor roomCursor = database.query(
                 RoomEntry.TABLE_NAME,
                 new String[]{
                         RoomEntry.COLUMN_NAME_NAME,
@@ -269,25 +272,29 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 RoomEntry.COLUMN_NAME_NAME + " LIKE ?",
                 new String[]{query},
                 null, null,
-                RoomEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING);
+                RoomEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING
+        );
         while (roomCursor.moveToNext()) {
             resultList.add(new InfoLocation(
                     roomCursor.getString(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME)),
+                    InfoLocation.TAG_ROOM,
                     roomCursor.getInt(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_BUILDING_ID)),
                     roomCursor.getInt(roomCursor.getColumnIndex(RoomEntry.COLUMN_NAME_FLOOR_ID)),
                     roomCursor.getInt(roomCursor.getColumnIndex(RoomEntry._ID))
             ));
         }
         roomCursor.close();
+        database.close();
 
         return resultList;
     }
 
-    public String getRoomPath(SQLiteDatabase db, int roomID) {
+    public String getRoomPath(int roomID) {
+        SQLiteDatabase database = getReadableDatabase();
         String hierarchy = "";
 
         // ## Search floor ID from Database ##
-        Cursor cursor = db.query(
+        Cursor cursor = database.query(
                 RoomEntry.TABLE_NAME,
                 new String[]{RoomEntry.COLUMN_NAME_PATH},
                 RoomEntry._ID + "=?",
@@ -300,12 +307,14 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             hierarchy = cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_PATH));
         }
         cursor.close();
+        database.close();
         return hierarchy;
     }
 
-    public ArrayList<Building> getBuildingList(SQLiteDatabase db) {
+    public ArrayList<Building> getBuildingList() {
+        SQLiteDatabase database = getReadableDatabase();
         ArrayList<Building> buildingList = new ArrayList<>();
-        Cursor cursor = db.query(
+        Cursor cursor = database.query(
                 BuildingEntry.TABLE_NAME,
                 new String[]{
                         BuildingEntry._ID,
@@ -325,12 +334,14 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             buildingList.add( new Building(id, number, name, description) );
         }
         cursor.close();
+        database.close();
         return buildingList;
     }
 
-    public ArrayList<Floor> getFloorList(SQLiteDatabase db, int buildingID) {
+    public ArrayList<Floor> getFloorList(int buildingID) {
+        SQLiteDatabase database = getReadableDatabase();
         ArrayList<Floor> floorList = new ArrayList<>();
-        Cursor cursor = db.query(
+        Cursor cursor = database.query(
                 FloorEntry.TABLE_NAME,
                 new String[]{
                         FloorEntry._ID,
@@ -347,12 +358,14 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             floorList.add( new Floor(id, number, buildingID) );
         }
         cursor.close();
+        database.close();
         return floorList;
     }
 
-    public ArrayList<Room> getRoomList(SQLiteDatabase db, int buildingID, int floorID) {
+    public ArrayList<Room> getRoomList(int buildingID, int floorID) {
+        SQLiteDatabase database = getReadableDatabase();
         ArrayList<Room> roomList = new ArrayList<>();
-        Cursor cursor = db.query(
+        Cursor cursor = database.query(
                 RoomEntry.TABLE_NAME,
                 new String[]{
                         RoomEntry._ID,
@@ -371,12 +384,14 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             roomList.add( new Room(id, name, text, buildingID, floorID) );
         }
         cursor.close();
+        database.close();
         return roomList;
     }
 
-    public Building getBuildingDetail(SQLiteDatabase db, int buildingID) {
+    public Building getBuildingDetail(int buildingID) {
+        SQLiteDatabase database = getReadableDatabase();
         Building building = null;
-        Cursor cursor = db.query(
+        Cursor cursor = database.query(
                 BuildingEntry.TABLE_NAME,
                 new String[]{
                         BuildingEntry._ID,
@@ -396,12 +411,14 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             building = new Building(id, number, name, description);
         }
         cursor.close();
+        database.close();
         return building;
     }
 
-    public Floor getFloorDetail(SQLiteDatabase db, int floorID) {
+    public Floor getFloorDetail(int floorID) {
+        SQLiteDatabase database = getReadableDatabase();
         Floor floor = null;
-        Cursor cursor = db.query(
+        Cursor cursor = database.query(
                 FloorEntry.TABLE_NAME,
                 new String[]{
                         FloorEntry._ID,
@@ -419,12 +436,14 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             floor = new Floor(id, number, building_id);
         }
         cursor.close();
+        database.close();
         return floor;
     }
 
-    public Room getRoomDetail(SQLiteDatabase db, int roomID) {
+    public Room getRoomDetail(int roomID) {
+        SQLiteDatabase database = getReadableDatabase();
         Room room = null;
-        Cursor cursor = db.query(
+        Cursor cursor = database.query(
                 RoomEntry.TABLE_NAME,
                 new String[]{
                         RoomEntry._ID,
@@ -446,12 +465,14 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             room = new Room(id, name, description, building_id, floor_id);
         }
         cursor.close();
+        database.close();
         return room;
     }
 
-    public ArrayList<Pair<String,Integer[]>> getMainRooms(SQLiteDatabase db, int buildingID) {
+    public ArrayList<Pair<String,Integer[]>> getMainRooms(int buildingID) {
+        SQLiteDatabase database = getReadableDatabase();
         ArrayList<Pair<String,Integer[]>> mainRooms = new ArrayList<>();
-        Cursor cursor = db.query(
+        Cursor cursor = database.query(
                 RoomEntry.TABLE_NAME,
                 new String[]{
                         RoomEntry.COLUMN_NAME_NAME,
@@ -475,27 +496,8 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
             ));
         }
         cursor.close();
+        database.close();
         return mainRooms;
-    }
-
-    public ContentValues getRoomDetail(int roomID) {
-        ContentValues values = null;
-        Cursor cursor = getReadableDatabase().query(
-                RoomEntry.TABLE_NAME,
-                new String[]{RoomEntry.COLUMN_NAME_NAME, RoomEntry.COLUMN_NAME_DESCRIPTION},
-                RoomEntry._ID + "=?",
-                new String[]{String.valueOf(roomID)},
-                null, null, null
-        );
-        if (cursor.moveToNext()) {
-            values = new ContentValues();
-            values.put(RoomEntry.COLUMN_NAME_NAME,
-                    cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME)));
-            values.put(RoomEntry.COLUMN_NAME_DESCRIPTION,
-                    cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_DESCRIPTION)));
-        }
-        cursor.close();
-        return values;
     }
 
 

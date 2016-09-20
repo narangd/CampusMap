@@ -2,7 +2,6 @@ package com.example.campusmap.fragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -54,8 +53,7 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         }
 
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
-        SQLiteDatabase db = helper.getReadableDatabase();
-        mBuildingList = helper.getBuildingList(db);
+        mBuildingList = helper.getBuildingList();
 
         if (listView != null) {
             listView.addHeaderView(imageHeader, null, false);

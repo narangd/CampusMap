@@ -2,7 +2,6 @@ package com.example.campusmap.fragment;
 
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -54,13 +53,12 @@ public class RoomListFragment extends Fragment implements AdapterView.OnItemLong
 
                 // ## Get DataBase ##
                 SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(getContext());
-                SQLiteDatabase db = helper.getReadableDatabase();
 
                 ArrayAdapter<String> mAdapter = new ArrayAdapter<>(
                         getContext(),
                         android.R.layout.simple_list_item_1
                 );
-                mRoomList = helper.getRoomList(db, mFloor.getBuildingID(), mFloor.getID());
+                mRoomList = helper.getRoomList(mFloor.getBuildingID(), mFloor.getID());
                 for (Room room : mRoomList){
                     mAdapter.add(room.toString());
                 }

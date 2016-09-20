@@ -1,7 +1,6 @@
 package com.example.campusmap.tree;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -107,8 +106,6 @@ public class ListViewTree {
     }
 
     private void buildListView() {
-        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
-        SQLiteDatabase db = helper.getReadableDatabase();
 
         if (mBuildingAdapter == null) {
             mBuildingAdapter = new ArrayAdapter<>(
@@ -117,10 +114,11 @@ public class ListViewTree {
             );
         }
         mBuildingAdapter.clear();
-        mBuildingAdapter.addAll(helper.getBuildingList(db));
+
+        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
+        mBuildingAdapter.addAll(helper.getBuildingList());
 
         mListViews.get(0).setAdapter(mBuildingAdapter);
-        db.close();
     }
 
     /**
@@ -213,7 +211,6 @@ public class ListViewTree {
 
     private void pushBranchItem(int deeps, int position) {
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
-        SQLiteDatabase db = helper.getReadableDatabase();
 
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(
                 context,
@@ -230,7 +227,7 @@ public class ListViewTree {
                 }
                 mFloorAdapter.clear();
                 Building currentBuilding = mBuildingAdapter.getItem(position);
-                mFloorAdapter.addAll(helper.getFloorList(db, currentBuilding.getID()));
+                mFloorAdapter.addAll(helper.getFloorList(currentBuilding.getID()));
                 for (int i=0; i<mFloorAdapter.getCount(); i++) {
                     Floor floor = mFloorAdapter.getItem(i);
                     dataAdapter.add(floor.toString());
@@ -245,7 +242,7 @@ public class ListViewTree {
                 }
                 mRoomAdapter.clear();
                 Floor currentFloor = mFloorAdapter.getItem(position);
-                mRoomAdapter.addAll( helper.getRoomList(db, currentFloor.getBuildingID(), currentFloor.getID()) );
+                mRoomAdapter.addAll( helper.getRoomList(currentFloor.getBuildingID(), currentFloor.getID()) );
                 for (int i=0; i<mRoomAdapter.getCount(); i++) {
                     Room room = mRoomAdapter.getItem(i);
                     dataAdapter.add(room.toString());

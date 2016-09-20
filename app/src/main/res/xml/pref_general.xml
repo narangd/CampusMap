@@ -21,6 +21,11 @@
             android:title="@string/pref_title_app_version"
             android:summary="0.0.0" />
 
+        <Preference
+            android:key="@string/pref_key_app_id"
+            android:title="@string/pref_title_app_id"
+            android:summary="abcd" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

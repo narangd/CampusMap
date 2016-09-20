@@ -183,15 +183,15 @@
 
     <!-- Strings related to login -->
     <string name="action_sign_in_short">Sign in</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_invalid_email">제목이 너무 잛습니다</string>
+    <string name="error_invalid_password">내용이 너무 짧습니다</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="title_type">종류</string>
-    <string name="title_name">이름</string>
+    <string name="title_type">제목</string>
+    <string name="title_contents">내용</string>
 
     <string-array name="info_type">
         <item>건물</item>
@@ -199,4 +199,7 @@
         <item>방</item>
     </string-array>
     <string name="title_activity_spinner">SpinnerActivity</string>
+    <string name="title_update_list" >업데이트 리스트</string>
+    <string name="pref_key_app_id">app_id</string>
+    <string name="pref_title_app_id">어플 고유문자열</string>
 </resources>

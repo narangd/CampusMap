@@ -9,10 +9,10 @@ public class InfoLocation implements Serializable {
     public static final int NONE = -1;
 
     private final String mName;
-    public final String mTag;
-    public final int mBuildingID;
-    public final int mFloorID;
-    public final int mRoomID;
+    private final String mTag;
+    private final int mBuildingID;
+    private final int mFloorID;
+    private final int mRoomID;
 
     public InfoLocation(String name, String tag, int buildingID, int floorID, int roomID) {
         mName = name;
@@ -20,6 +20,26 @@ public class InfoLocation implements Serializable {
         mBuildingID = buildingID;
         mFloorID = floorID;
         mRoomID = roomID;
+    }
+
+    public int getRoomID() {
+        return mRoomID;
+    }
+
+    public int getFloorID() {
+        return mFloorID;
+    }
+
+    public int getBuildingID() {
+        return mBuildingID;
+    }
+
+    public String getTag() {
+        return mTag;
+    }
+
+    public String getName() {
+        return mName;
     }
 
     @Override
