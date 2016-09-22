@@ -1,6 +1,8 @@
 package com.example.campusmap.activity;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,100 +14,101 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.campusmap.Internet;
 import com.example.campusmap.R;
+import com.example.campusmap.adapter.UpdaterAdapter;
+import com.example.campusmap.data.branch.Building;
+import com.example.campusmap.data.branch.Floor;
+import com.example.campusmap.data.branch.Room;
 import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
-import com.example.campusmap.tree.branch.Building;
-import com.example.campusmap.tree.branch.Floor;
-import com.example.campusmap.tree.branch.Room;
+import com.example.campusmap.form.Updater;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class InfoUpdaterActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
+public class InfoUpdaterActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     public static final String KEY_INFO_LOCATION = "InfoLocation";
-    private UpdaterTask mAuthTask = null;
-    private InfoLocation mInfoLocation;
 
-    // UI references.
+    private AsyncTask mAsyncTask = null;
+    private ProgressDialog mProgressDialog;
+
+    private InfoLocation mInfoLocation;
+    private List<Updater> mUpdaterList;
+    private int mID;
+
     private EditText mTitle;
     private EditText mContents;
     private TextView mSubTitleTextView;
     private ListView mListView;
-    private Button mButton;
-    private int mID;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (!Internet.isInternetConnect(this)) {
+            finish();
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info_updater);
+
+        mProgressDialog = new ProgressDialog(InfoUpdaterActivity.this);
+        mProgressDialog.setProgress(ProgressDialog.STYLE_SPINNER);
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setCancelable(false);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         mListView = (ListView) findViewById(R.id.list_view);
         ViewGroup listViewHeader = (ViewGroup) getLayoutInflater().inflate(R.layout.content_info_updater, mListView, false);
-        if (mListView != null) {
-            mListView.addHeaderView(listViewHeader, null, false);
-            mListView.setAdapter(new ArrayAdapter<>(
-                    this,
-                    android.R.layout.simple_list_item_1,
-                    new String[]{"가","가","가","가","가","가","가","가","가","가","가","가","가","가","가"}
-            ));
-        }
+        mListView.addHeaderView(listViewHeader, null, false);
+        mListView.setOnItemClickListener(this);
+
         mSubTitleTextView = (TextView) listViewHeader.findViewById(R.id.sub_title);
         mTitle = (EditText) listViewHeader.findViewById(R.id.title);
         mContents = (EditText) listViewHeader.findViewById(R.id.contents);
-        mButton = (Button) listViewHeader.findViewById(R.id.email_sign_in_button);
 
-        getInfoFromParameter();
-
-//        // Set up the login form.
-//        ArrayList<String> list = new ArrayList<>();
-//        for (String email : DUMMY_CREDENTIALS) {
-//            list.add(email.split(":")[0]);
-//        }
-//        addEmailsToAutoComplete(list);
-
-//        mContents.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-//                if (id == EditorInfo.IME_NULL) {
-//                    attemptSubmit();
-//                    return true;
-//                }
-//                return false;
-//            }
-//        });
-        mButton.setOnClickListener(new View.OnClickListener() {
+        Button button = (Button) listViewHeader.findViewById(R.id.email_sign_in_button);
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 attemptSubmit();
             }
         });
+
+        getInfoFromParameter();
+        resetInfo();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mProgressDialog.dismiss();
+
+        if (mAsyncTask != null) {
+            mAsyncTask.cancel(true);
+        }
     }
 
     private void resetInfo() {
         mTitle.setText("");
         mContents.setText("");
 
-
+        loadingUpdaterList();
     }
 
     private void getInfoFromParameter() {
@@ -137,14 +140,85 @@ public class InfoUpdaterActivity extends AppCompatActivity {
         mSubTitleTextView.setText(path);
     }
 
+    private void loadingUpdaterList() {
+        mAsyncTask = new AsyncTask<Void,Void,List<Updater>>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                mProgressDialog.setTitle("목록을 불러오는 중입니다");
+                mProgressDialog.show();
+            }
+
+            @Override
+            protected List<Updater> doInBackground(Void... params) {
+                ArrayList<Updater> updaters = new ArrayList<>();
+
+                HashMap<String,String> dataMap = new HashMap<>();
+                dataMap.put("tag", mInfoLocation.getTag());
+                dataMap.put("id", String.valueOf(mID));
+
+                String result = Internet.connectHttpPage(
+                        "http://203.232.193.178/campusmap/updater_list.php",
+                        Internet.CONNECTION_METHOD_GET,
+                        dataMap
+                );
+
+                try {
+                    JSONArray updaterArray = new JSONArray(result);
+                    for (int i=0; i<updaterArray.length(); i++) {
+                        JSONObject updaterObject = updaterArray.getJSONObject(i);
+
+                        String title = updaterObject.getString("title");
+                        String contents = updaterObject.getString("contents");
+                        int vote = updaterObject.getInt("vote");
+
+                        updaters.add( new Updater(title, contents, vote) );
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                Log.i("InfoUpdaterActivity", "onPostExecute: " + dataMap);
+                Log.i("InfoUpdaterActivity", "onPostExecute: " + result);
+
+                return updaters;
+            }
+
+            @Override
+            protected void onPostExecute(List<Updater> updaterList) {
+                super.onPostExecute(updaterList);
+                mAsyncTask = null;
+                mProgressDialog.hide();
+                mUpdaterList = updaterList;
+
+                mListView.setAdapter(new UpdaterAdapter(
+                        InfoUpdaterActivity.this,
+                        updaterList
+                ));
+//                mListView.setAdapter(new ArrayAdapter<>(
+//                        InfoUpdaterActivity.this,
+//                        android.R.layout.simple_list_item_1,
+//                        new String[]{"1","2","3","4"}
+//                ));
+            }
+        }.execute();
+    }
+
     private void attemptSubmit() {
-        if (mAuthTask != null) {
+        if (mAsyncTask != null) {
             return;
         }
 
         // Reset errors.
         mTitle.setError(null);
         mContents.setError(null);
+
+        // Hide Keyboard
+        View view = getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
 
         // Store values at the time of the login attempt.
         String title = mTitle.getText().toString();
@@ -154,14 +228,14 @@ public class InfoUpdaterActivity extends AppCompatActivity {
         View focusView = null;
 
         // Check for a valid contents, if the user entered one.
-        if (!TextUtils.isEmpty(contents) && !isContentsValid(contents)) {
+        if (TextUtils.isEmpty(contents) && !isContentsValid(contents)) {
             mContents.setError(getString(R.string.error_invalid_password));
             focusView = mContents;
             cancel = true;
         }
 
         // Check for a valid title address.
-        if (!TextUtils.isEmpty(title) && !isTitleValid(title)) {
+        if (TextUtils.isEmpty(title) && !isTitleValid(title)) {
             mTitle.setError(getString(R.string.error_invalid_email));
             focusView = mTitle;
             cancel = true;
@@ -175,9 +249,61 @@ public class InfoUpdaterActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
 //            showProgress(true);
-            mAuthTask = new UpdaterTask(title, contents);
-            mAuthTask.execute((Void) null);
+            sendUpdater(title, contents);
         }
+    }
+
+    private void sendUpdater(final String title, final String contents) {
+
+        mAsyncTask = new AsyncTask<Void,Void,String>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                mProgressDialog.setTitle("업데이터를 등록중입니다");
+                mProgressDialog.show();
+            }
+
+            @Override
+            protected String doInBackground(Void[] params) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(InfoUpdaterActivity.this);
+
+                String uniqueID = preferences.getString(getString(R.string.pref_key_app_id), "");
+
+                HashMap<String,String> dataMap = new HashMap<>();
+                dataMap.put("title", title);
+                dataMap.put("contents", contents);
+                dataMap.put("userid", uniqueID);
+                dataMap.put("tag", mInfoLocation.getTag());
+                dataMap.put("id", String.valueOf(mID));
+
+                return Internet.connectHttpPage(
+                        "http://203.232.193.178/campusmap/updater.php",
+                        Internet.CONNECTION_METHOD_POST,
+                        dataMap
+                );
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                super.onPostExecute(result);
+                mAsyncTask = null;
+                mProgressDialog.hide();
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(InfoUpdaterActivity.this);
+                builder.setTitle("서버로 보낸 결과");
+                builder.setMessage(result);
+                builder.show();
+
+                resetInfo();
+            }
+
+            @Override
+            protected void onCancelled() {
+                super.onCancelled();
+                mAsyncTask = null;
+                mProgressDialog.hide();
+            }
+        }.execute();
     }
 
     private boolean isTitleValid(String title) {
@@ -188,104 +314,26 @@ public class InfoUpdaterActivity extends AppCompatActivity {
         return password.length() > 4;
     }
 
-    public class UpdaterTask extends AsyncTask<Void, Void, String> {
-        private static final String URL_UPDATER_PAGE = "http://203.232.193.178/campusmap/updater.php";
-        private static final int TIMEOUT = 1000 * 3;
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Updater updater = mUpdaterList.get(position-1); // Header reason
 
-        private final String mTitle;
-        private final String mContents;
-        private ProgressDialog mProgressDialog;
-
-        UpdaterTask(String title, String contents) {
-            mTitle = title;
-            mContents = contents;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mProgressDialog = new ProgressDialog(InfoUpdaterActivity.this);
-            mProgressDialog.setTitle("업데이터를 등록중입니다");
-            mProgressDialog.setProgress(ProgressDialog.STYLE_SPINNER);
-            mProgressDialog.setIndeterminate(true);
-            mProgressDialog.show();
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(InfoUpdaterActivity.this);
-
-            final String uniqueID = preferences.getString(getString(R.string.pref_key_app_id), "");
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(updater.getTitle());
+        builder.setMessage(updater.getContents());
+        builder.setPositiveButton("공감", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO: 2016-09-22 Like Processing
             }
-
-            try {
-                URL url = new URL(URL_UPDATER_PAGE);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setReadTimeout( TIMEOUT );
-                connection.setConnectTimeout( TIMEOUT );
-                connection.setDoInput(true);
-                connection.setDoOutput(true);
-
-                OutputStream os = connection.getOutputStream();
-                OutputStreamWriter writer = new OutputStreamWriter(os);
-                writer.write("title=" + mTitle);
-                writer.write("&contents=" + mContents);
-                writer.write("&userid=" + uniqueID);
-                writer.write("&tag=" + mInfoLocation.getTag());
-                writer.write("&id=" + mID);
-                writer.close();
-
-                StringBuilder builder = new StringBuilder();
-                String line;
-                InputStream is = connection.getInputStream();
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader reader  = new BufferedReader(isr);
-
-                while ((line = reader.readLine()) != null) {
-                    builder.append(line);
-                }
-
-                reader.close();
-
-                return builder.toString();
-
-            } catch (IOException e) {
-                e.printStackTrace();
+        });
+        builder.setNegativeButton("비공감", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO: 2016-09-22 Unlike Processing
             }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(final String message) {
-            mAuthTask = null;
-            mProgressDialog.dismiss();
-//            showProgress(false);
-
-//            if (success) {
-//                finish();
-//            } else {
-//                InfoUpdaterActivity.this.mContents.setError(getString(R.string.error_incorrect_password));
-//                InfoUpdaterActivity.this.mContents.requestFocus();
-//            }
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(InfoUpdaterActivity.this);
-            builder.setTitle("서버로 보낸 결과");
-            builder.setMessage(message);
-            builder.show();
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-//            showProgress(false);
-        }
+        });
+        builder.show();
     }
 }
 

@@ -42,7 +42,7 @@ public class IntroActivity extends Activity {
 
         if (DEBUG) Log.i(TAG, "onStart: DataBase Check");
 
-        if (Internet.isIntetnetConnect(this)) {
+        if (Internet.isInternetConnect(this)) {
             Log.i(TAG, "onStart: 인터넷에 연결되어 있습니다");
 
             waitAsyncTask(

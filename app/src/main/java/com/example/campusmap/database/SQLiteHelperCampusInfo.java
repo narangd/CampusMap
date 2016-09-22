@@ -9,9 +9,9 @@ import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.Pair;
 
-import com.example.campusmap.tree.branch.Building;
-import com.example.campusmap.tree.branch.Floor;
-import com.example.campusmap.tree.branch.Room;
+import com.example.campusmap.data.branch.Building;
+import com.example.campusmap.data.branch.Floor;
+import com.example.campusmap.data.branch.Room;
 
 import java.util.ArrayList;
 

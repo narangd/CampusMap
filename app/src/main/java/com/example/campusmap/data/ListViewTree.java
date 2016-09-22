@@ -1,4 +1,4 @@
-package com.example.campusmap.tree;
+package com.example.campusmap.data;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -13,10 +13,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.campusmap.R;
+import com.example.campusmap.data.branch.Building;
+import com.example.campusmap.data.branch.Floor;
+import com.example.campusmap.data.branch.Room;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
-import com.example.campusmap.tree.branch.Building;
-import com.example.campusmap.tree.branch.Floor;
-import com.example.campusmap.tree.branch.Room;
 
 import java.util.ArrayList;
 

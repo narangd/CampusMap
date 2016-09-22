@@ -14,9 +14,9 @@ import android.widget.ListView;
 import com.example.campusmap.R;
 import com.example.campusmap.activity.DrawerTestActivity;
 import com.example.campusmap.activity.InfoUpdaterActivity;
+import com.example.campusmap.data.branch.Building;
 import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
-import com.example.campusmap.tree.branch.Building;
 import com.example.campusmap.view.TouchImageView;
 
 import java.util.ArrayList;
@@ -77,8 +77,8 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         listView.setItemChecked(prevCheckIndex, false);
-        prevCheckIndex = position;
         listView.setItemChecked(position, true);
+        prevCheckIndex = position;
 //        parent.set
 
         Building building = mBuildingList.get(position-1);
@@ -90,7 +90,8 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        Building building = mBuildingList.get(position);
+
+        Building building = mBuildingList.get(position-1); // 0 is header
         Intent intent = new Intent(getActivity(), InfoUpdaterActivity.class);
         intent.putExtra(
                 InfoUpdaterActivity.KEY_INFO_LOCATION,

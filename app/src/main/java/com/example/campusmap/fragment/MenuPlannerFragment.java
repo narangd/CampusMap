@@ -40,6 +40,7 @@ public class MenuPlannerFragment extends Fragment {
 
     private SharedPreferences preferences;
     private ViewPager viewPager;
+    private AsyncTask mAsyncTask;
 
     public MenuPlannerFragment() {
     }
@@ -62,8 +63,8 @@ public class MenuPlannerFragment extends Fragment {
 
         viewPager = (ViewPager) rootView.findViewById(R.id.view_pager);
 
-        if (Internet.isIntetnetConnect(getContext())) {
-            new MenuPlannerAsyncTask().execute();
+        if (Internet.isInternetConnect(getContext())) {
+            mAsyncTask = new MenuPlannerAsyncTask().execute();
         } else {
             Log.e(TAG, "onCreateView: 인터넷에 연결이 되어 있지 않습니다...");
         }
@@ -71,51 +72,13 @@ public class MenuPlannerFragment extends Fragment {
         return rootView;
     }
 
-    private Pair<Integer,ArrayList<MenuPlanner>> parseGNTechMenuPlaner() {
-        ArrayList<MenuPlanner> menuPlanners = new ArrayList<>();
-        int today_index = 0;
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
 
-        try {
-            Document document = Jsoup.connect(GNTechURL).get();
-            Elements tags = document.select("table");
-            Elements ths = tags.get(1).select("thead>tr>th");
-            ths.remove(0); // 구분 삭제
-            ths.remove(ths.size()-1); // 비고 삭제
-
-            Log.i(TAG, "parseGNTechMenuPlaner: ths : " + ths.size());
-            for (int i=0; i<ths.size(); i++) {
-                // date
-                menuPlanners.add(
-                        new MenuPlanner(ths.get(i).ownText())
-                );
-
-                if (ths.get(i).ownText().equals(TODAY_DATE)) {
-                    today_index = i;
-                }
-            }
-
-            Element tbody = tags.get(1).select("tbody").first();
-            // 조, 중, 석, 교
-            for (int meal_index=0; meal_index<tbody.children().size(); meal_index++) {
-
-                Elements tr_days = tbody.children().get(meal_index).children();
-                // 구분 일 (월 화 수 목 금) 토
-                for (int day_index=1; day_index<tr_days.size(); day_index++) {
-                    String menu = tr_days.get(day_index).html().replace("&amp;","&").replace("\n", "").replace(" ", "");
-                    menuPlanners.get(day_index-1).addMeal(
-                            meal_index,
-                            tr_days.get(0).ownText(),
-                            menu.split("<br>")
-                    );
-
-                }
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (mAsyncTask != null) {
+            mAsyncTask.cancel(true);
         }
-
-        return new Pair<>(today_index, menuPlanners);
     }
 
     private class MenuPlannerAsyncTask extends AsyncTask<Void, String, Pair<Integer, ArrayList<MenuPlanner>>> {
@@ -138,13 +101,57 @@ public class MenuPlannerFragment extends Fragment {
         }
 
         @Override
-        protected Pair<Integer,ArrayList<MenuPlanner>> doInBackground(Void... params) {
-            return parseGNTechMenuPlaner();
+        protected Pair<Integer,ArrayList<MenuPlanner>> doInBackground(Void... params) {ArrayList<MenuPlanner> menuPlanners = new ArrayList<>();
+            int today_index = 0;
+
+            try {
+                Document document = Jsoup.connect(GNTechURL).get();
+                Elements tags = document.select("table");
+                Elements ths = tags.get(1).select("thead>tr>th");
+                ths.remove(0); // 구분 삭제
+                ths.remove(ths.size()-1); // 비고 삭제
+
+                Log.i(TAG, "parseGNTechMenuPlaner: ths : " + ths.size());
+                for (int i=0; i<ths.size(); i++) {
+                    // date
+                    menuPlanners.add(
+                            new MenuPlanner(ths.get(i).ownText())
+                    );
+
+                    if (ths.get(i).ownText().equals(TODAY_DATE)) {
+                        today_index = i;
+                    }
+                }
+
+                Element tbody = tags.get(1).select("tbody").first();
+                // 조, 중, 석, 교
+                for (int meal_index=0; meal_index<tbody.children().size(); meal_index++) {
+
+                    Elements tr_days = tbody.children().get(meal_index).children();
+                    // 구분 일 (월 화 수 목 금) 토
+                    for (int day_index=1; day_index<tr_days.size(); day_index++) {
+                        String menu = tr_days.get(day_index).html().replace("&amp;","&").replace("\n", "").replace(" ", "");
+                        menuPlanners.get(day_index-1).addMeal(
+                                meal_index,
+                                tr_days.get(0).ownText(),
+                                menu.split("<br>")
+                        );
+
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return new Pair<>(today_index, menuPlanners);
         }
 
         @Override
         protected void onPostExecute(Pair<Integer,ArrayList<MenuPlanner>> result) {
             super.onPostExecute(result);
+
+            mAsyncTask = null;
 
             if (result.first == null || result.second == null) {
                 return;

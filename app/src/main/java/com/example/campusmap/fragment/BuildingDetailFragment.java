@@ -15,8 +15,8 @@ import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.adapter.MainRoomArrayAdapter;
+import com.example.campusmap.data.branch.Building;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
-import com.example.campusmap.tree.branch.Building;
 
 public class BuildingDetailFragment extends Fragment implements AdapterView.OnItemClickListener {
     private static final String BUILDING_ID = "building";

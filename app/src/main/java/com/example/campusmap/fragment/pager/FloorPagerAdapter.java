@@ -7,9 +7,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import com.example.campusmap.data.branch.Floor;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.fragment.RoomListFragment;
-import com.example.campusmap.tree.branch.Floor;
 
 import java.util.ArrayList;
 

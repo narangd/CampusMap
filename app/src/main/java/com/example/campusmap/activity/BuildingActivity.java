@@ -6,8 +6,8 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.example.campusmap.R;
-import com.example.campusmap.tree.branch.Building;
-import com.example.campusmap.tree.branch.Room;
+import com.example.campusmap.data.branch.Building;
+import com.example.campusmap.data.branch.Room;
 
 public class BuildingActivity extends AppCompatActivity {
     private static final String TAG = "BuildingActivity";

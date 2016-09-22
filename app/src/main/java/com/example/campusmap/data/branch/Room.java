@@ -1,4 +1,4 @@
-package com.example.campusmap.tree.branch;
+package com.example.campusmap.data.branch;
 
 import java.io.Serializable;
 

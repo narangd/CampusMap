@@ -79,9 +79,9 @@ public class MainActivity extends AppCompatActivity
             case  R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
-            case  R.id.action_only_test:
-                startActivity(new Intent(this, InfoUpdaterActivity.class));
-                return true;
+//            case  R.id.action_only_test:
+//                startActivity(new Intent(this, InfoUpdaterActivity.class));
+//                return true;
         }
 
         return super.onOptionsItemSelected(item);

@@ -26,12 +26,12 @@ import android.widget.TextView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.adapter.MainRoomArrayAdapter;
+import com.example.campusmap.data.branch.Building;
+import com.example.campusmap.data.branch.Floor;
 import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.fragment.RoomListFragment;
 import com.example.campusmap.fragment.pager.FloorPagerAdapter;
-import com.example.campusmap.tree.branch.Building;
-import com.example.campusmap.tree.branch.Floor;
 
 import nl.codesoup.cubicbezier.CubicBezierInterpolator;
 
@@ -74,6 +74,7 @@ public class DrawerTestActivity extends AppCompatActivity
         int buildingID = intent.getIntExtra(KEY_BUILDING_ID, -1);
         mInfoLocation = (InfoLocation)intent.getSerializableExtra(KEY_INFO_LOCATION);
 
+        // Check Intent
         if (buildingID == -1 && mInfoLocation == null) {
             finish();
             Log.e(TAG, "onCreate: 입력한 값이 없습니다. (ex Building ID or InfoLocation");

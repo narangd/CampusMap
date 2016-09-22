@@ -10,7 +10,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ListView;
 
 import com.example.campusmap.R;
-import com.example.campusmap.tree.ListViewTree;
+import com.example.campusmap.data.ListViewTree;
 
 public class BuildingInfoFragment extends Fragment {
     public static final int TAP_INDEX = 1;

@@ -202,4 +202,6 @@
     <string name="title_update_list" >업데이트 리스트</string>
     <string name="pref_key_app_id">app_id</string>
     <string name="pref_title_app_id">어플 고유문자열</string>
+    <string name="action_send">보내기</string>
+    <string name="desc_list_item">리스트</string>
 </resources>
