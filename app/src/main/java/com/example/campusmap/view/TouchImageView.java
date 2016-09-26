@@ -896,10 +896,10 @@ public class TouchImageView extends ImageView {
             mScaleDetector.onTouchEvent(event);
             mGestureDetector.onTouchEvent(event);
             boolean result = mScaleDetector.onTouchEvent(event);
-            // result is always true here, so we need another way to check scalling gesture progress.
+            // result is always true here, so we need another way to requestPermission scalling gesture progress.
             boolean isScaling = result = mScaleDetector.isInProgress();
             if (!isScaling) {
-                // if no scaling is performed check for other gestures (fling, long tab, etc.)
+                // if no scaling is performed requestPermission for other gestures (fling, long tab, etc.)
                 mGestureDetector.onTouchEvent(event);
             }
             PointF curr = new PointF(event.getX(), event.getY());

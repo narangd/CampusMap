@@ -92,7 +92,7 @@ public class ListViewTree {
      * 이벤트와 데이터를 로드한다.
      */
     public void complete() {
-        // check animation
+        // requestPermission animation
         if (appear==null || darkking==null)
             throw  new NullPointerException("appear Animation or darking Animation is null");
         //

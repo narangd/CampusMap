@@ -1,10 +1,12 @@
 package com.example.campusmap.activity;
 
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -15,10 +17,13 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -27,7 +32,9 @@ import com.example.campusmap.R;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.fragment.MenuPlannerFragment;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+    private static final int REQUEST_CODE_READ_SMS = 100;
+    private GeneralPreferenceFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +47,7 @@ public class SettingsActivity extends AppCompatActivity {
         Fragment fragment_v4 = null; // for this
 
 
-        GeneralPreferenceFragment fragment = (GeneralPreferenceFragment) getFragmentManager().findFragmentById(R.id.fragment);
+        fragment = (GeneralPreferenceFragment) getFragmentManager().findFragmentById(R.id.fragment);
 
         Preference button = fragment.findPreference(getString(R.string.pref_key_db_reset));
         button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -86,6 +93,17 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CODE_READ_SMS) {
+            if (grantResults.length >= 1 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // success
+                fragment.bringPhoneNumber();
+            }
+        }
+    }
+
     public static class GeneralPreferenceFragment extends PreferenceFragment {
         private SharedPreferences sharedPreferences = null;
 
@@ -112,8 +130,15 @@ public class SettingsActivity extends AppCompatActivity {
             setPreferenceValue(AppIDKey, "abcd");
             setPreferenceValue(DBVersionKey, 0);
 
-            Log.i("SettingsActivity", "onCreate: today_menu_planer : " + sharedPreferences.getBoolean(TodayKey, false) );
-            Log.i("SettingsActivity", "onCreate: today_menu_planer : " + sharedPreferences.getBoolean(TodayKey, true) );
+            if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_SMS) == PackageManager.PERMISSION_DENIED) {
+                ActivityCompat.requestPermissions(
+                        getActivity(),
+                        new String[]{Manifest.permission.READ_SMS},
+                        REQUEST_CODE_READ_SMS
+                );
+            } else {
+                bringPhoneNumber();
+            }
 
             final Preference today = findPreference(TodayKey);
             today.setSummary( sharedPreferences.getString(DateKey, "-") );
@@ -145,6 +170,12 @@ public class SettingsActivity extends AppCompatActivity {
         private void setPreferenceValue(String key, int defaultValue) {
             Preference preference = findPreference(key);
             preference.setSummary( String.valueOf(sharedPreferences.getInt(key, defaultValue)) );
+        }
+
+        private void bringPhoneNumber() {
+            TelephonyManager tMgr = (TelephonyManager) getActivity().getSystemService(Context.TELEPHONY_SERVICE);
+            Preference phoneNumberPreference = findPreference(getString(R.string.pref_key_phone_number));
+            phoneNumberPreference.setSummary(tMgr.getLine1Number());
         }
     }
 

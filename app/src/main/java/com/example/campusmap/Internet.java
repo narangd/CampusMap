@@ -33,18 +33,20 @@ public class Internet {
         }
 
         String parameter = "";
-        boolean first = true;
-        Set keySet = data.keySet();
-        for (Object key : keySet) {
-            Object value = data.get(key);
+        if (data != null) {
+            boolean first = true;
+            Set keySet = data.keySet();
+            for (Object key : keySet) {
+                Object value = data.get(key);
 
-            if (first) {
-                first = false;
-            } else {
-                parameter += "&";
+                if (first) {
+                    first = false;
+                } else {
+                    parameter += "&";
+                }
+
+                parameter += key + "=" + value;
             }
-
-            parameter += key + "=" + value;
         }
 
         try {
@@ -85,5 +87,13 @@ public class Internet {
         }
 
         return null;
+    }
+
+    public static void delay500ms() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

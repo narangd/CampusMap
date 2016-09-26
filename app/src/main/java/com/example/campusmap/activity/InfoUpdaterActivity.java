@@ -120,6 +120,7 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
 
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
 
+        // Set SubTitle
         mSubTitleTextView = (TextView) findViewById(R.id.sub_title);
         String path = "";
         if (mInfoLocation.getBuildingID() != InfoLocation.NONE) {
@@ -152,9 +153,12 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
             @Override
             protected List<Updater> doInBackground(Void... params) {
                 ArrayList<Updater> updaters = new ArrayList<>();
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(InfoUpdaterActivity.this);
+                String userid = preferences.getString(getString(R.string.pref_key_app_id), "");
 
                 HashMap<String,String> dataMap = new HashMap<>();
                 dataMap.put("tag", mInfoLocation.getTag());
+                dataMap.put("userid", userid);
                 dataMap.put("id", String.valueOf(mID));
 
                 String result = Internet.connectHttpPage(
@@ -168,18 +172,17 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
                     for (int i=0; i<updaterArray.length(); i++) {
                         JSONObject updaterObject = updaterArray.getJSONObject(i);
 
+                        int id = updaterObject.getInt("id");
                         String title = updaterObject.getString("title");
                         String contents = updaterObject.getString("contents");
-                        int vote = updaterObject.getInt("vote");
+                        int votes = updaterObject.getInt("votes");
+                        boolean voted = updaterObject.getBoolean("voted");
 
-                        updaters.add( new Updater(title, contents, vote) );
+                        updaters.add( new Updater(id, title, contents, votes, voted) );
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-                Log.i("InfoUpdaterActivity", "onPostExecute: " + dataMap);
-                Log.i("InfoUpdaterActivity", "onPostExecute: " + result);
 
                 return updaters;
             }
@@ -254,7 +257,6 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
     }
 
     private void sendUpdater(final String title, final String contents) {
-
         mAsyncTask = new AsyncTask<Void,Void,String>() {
             @Override
             protected void onPreExecute() {
@@ -295,6 +297,9 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
                 builder.show();
 
                 resetInfo();
+
+                // 빠른 반복 전송을 막기위함.
+                Internet.delay500ms();
             }
 
             @Override
@@ -316,21 +321,14 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Updater updater = mUpdaterList.get(position-1); // Header reason
+        final Updater updater = mUpdaterList.get(position-1); // Header reason
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(updater.getTitle());
         builder.setMessage(updater.getContents());
-        builder.setPositiveButton("공감", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("닫기", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TODO: 2016-09-22 Like Processing
-            }
-        });
-        builder.setNegativeButton("비공감", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // TODO: 2016-09-22 Unlike Processing
             }
         });
         builder.show();

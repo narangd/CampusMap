@@ -26,6 +26,11 @@
             android:title="@string/pref_title_app_id"
             android:summary="abcd" />
 
+        <Preference
+            android:key="@string/pref_key_phone_number"
+            android:title="@string/pref_title_phone_number"
+            android:summary="010-0000-0000" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -17,4 +17,6 @@
     <color name="drawer_item_checked">#e0e0e0</color>
 
     <color name="recyclerview_background">#F5F5F5</color>
+    <color name="Red500">#FFF44336</color>
+    <color name="Gray400">#FFBDBDBD</color>
 </resources>
