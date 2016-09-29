@@ -15,8 +15,8 @@ import com.example.campusmap.R;
 import com.example.campusmap.activity.DrawerTestActivity;
 import com.example.campusmap.activity.InfoUpdaterActivity;
 import com.example.campusmap.data.branch.Building;
-import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.form.InfoLocation;
 import com.example.campusmap.view.TouchImageView;
 
 import java.util.ArrayList;
@@ -84,7 +84,11 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         Building building = mBuildingList.get(position-1);
 
         Intent intent = new Intent(context, DrawerTestActivity.class);
-        intent.putExtra(DrawerTestActivity.KEY_BUILDING_ID, building.getID()); // id to index
+        intent.putExtra(
+                DrawerTestActivity.KEY_INFO_LOCATION,
+                new InfoLocation(building.getName(), InfoLocation.TAG_BUILDING, building.getID(), InfoLocation.NONE, InfoLocation.NONE)
+        );
+//        intent.putExtra(DrawerTestActivity.KEY_BUILDING_ID, building.getID()); // id to index
         startActivity(intent);
     }
 

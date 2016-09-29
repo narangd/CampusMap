@@ -19,7 +19,7 @@ import java.util.Set;
 public class Internet {
     public static final String CONNECTION_METHOD_POST = "POST";
     public static final String CONNECTION_METHOD_GET = "GET";
-    private static final int TIMEOUT = 1000 * 3;
+    private static final int TIMEOUT = 1000 * 5;
 
     public static boolean isInternetConnect(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

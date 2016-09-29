@@ -1,4 +1,4 @@
-package com.example.campusmap.database;
+package com.example.campusmap.form;
 
 import java.io.Serializable;
 

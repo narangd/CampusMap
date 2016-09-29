@@ -16,7 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.campusmap.R;
-import com.example.campusmap.database.InfoLocation;
+import com.example.campusmap.form.InfoLocation;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.MenuPlannerFragment;
 import com.example.campusmap.fragment.PathFindingFragment;
@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity
 
     private class MainContentsPagerAdapter extends FragmentPagerAdapter {
 
-        public MainContentsPagerAdapter(FragmentManager fm) {
+        MainContentsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 

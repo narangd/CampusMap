@@ -4,40 +4,23 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
-import android.util.Pair;
 
 import com.example.campusmap.data.branch.Building;
 import com.example.campusmap.data.branch.Floor;
 import com.example.campusmap.data.branch.Room;
+import com.example.campusmap.form.InfoLocation;
 
 import java.util.ArrayList;
 
-public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
+public class SQLiteHelperCampusInfo extends com.example.campusmap.database.SQLiteOpenHelper {
     private static final String TAG = "SQLiteHelperCampusInfo";
     private static final boolean DEBUG = true;
     private static final String ns = null;
     private static final int DATABACE_VERSION = 16;
     private static final String DATABACE_NAME = "CampusInfo.db";
     private static SQLiteHelperCampusInfo instance;
-
-    public static final String CREATE_TABLE_HEAD = "CREATE TABLE ";
-    public static final String DELETE_TABLE_HEAD = "DROP TABLE ";
-    public static final String IF_EXISTS = "IF EXISTS ";
-    public static final String TYPE_INTEGER = " INTEGER";
-    public static final String TYPE_CHARACTER = " CHAR(20)";
-    public static final String TYPE_CHARACTER2 = " CHAR(100)";
-    public static final String TYPE_TEXT = " TEXT";
-    public static final String UNIQUE = " UNIQUE";
-    public static final String PRIMARY_KEY = " PRIMARY KEY";
-    public static final String FOREIGN_KEY = " FOREIGN KEY";
-    public static final String REFERENCES = " REFERENCES ";
-    public static final String COMMA_SEP = ",";
-    public static final String COLUMN_START = " (";
-    public static final String COLUMN_END = ")";
-    public static final String ORDER_BY_ASCENDING = " ASC";
 
     public static final int TRUE = 1;
     public static final int FALSE = 0;
@@ -469,9 +452,9 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
         return room;
     }
 
-    public ArrayList<Pair<String,Integer[]>> getMainRooms(int buildingID) {
+    public ArrayList<InfoLocation> getMainRooms(int buildingID) {
         SQLiteDatabase database = getReadableDatabase();
-        ArrayList<Pair<String,Integer[]>> mainRooms = new ArrayList<>();
+        ArrayList<InfoLocation> mainRooms = new ArrayList<>();
         Cursor cursor = database.query(
                 RoomEntry.TABLE_NAME,
                 new String[]{
@@ -486,13 +469,14 @@ public class SQLiteHelperCampusInfo extends SQLiteOpenHelper {
                 RoomEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING
         );
         while (cursor.moveToNext()) {
-            mainRooms.add(new Pair<>(
-                    cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME)),
-                    new Integer[]{
-                            cursor.getInt(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_BUILDING_ID)),
-                            cursor.getInt(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_FLOOR_ID)),
-                            cursor.getInt(cursor.getColumnIndex(RoomEntry._ID))
-                    }
+            String name = cursor.getString(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_NAME));
+            int bid = cursor.getInt(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_BUILDING_ID));
+            int fid = cursor.getInt(cursor.getColumnIndex(RoomEntry.COLUMN_NAME_FLOOR_ID));
+            int rid = cursor.getInt(cursor.getColumnIndex(RoomEntry._ID));
+            mainRooms.add(new InfoLocation(
+                    name,
+                    InfoLocation.TAG_ROOM,
+                    bid, fid, rid
             ));
         }
         cursor.close();

@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.campusmap.Internet;
 import com.example.campusmap.R;
@@ -27,8 +28,8 @@ import com.example.campusmap.adapter.UpdaterAdapter;
 import com.example.campusmap.data.branch.Building;
 import com.example.campusmap.data.branch.Floor;
 import com.example.campusmap.data.branch.Room;
-import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.form.InfoLocation;
 import com.example.campusmap.form.Updater;
 
 import org.json.JSONArray;
@@ -58,6 +59,7 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (!Internet.isInternetConnect(this)) {
+            Toast.makeText(this, "인터넷에 연결되어 있지 않습니다.", Toast.LENGTH_SHORT).show();
             finish();
         }
 
@@ -251,7 +253,6 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-//            showProgress(true);
             sendUpdater(title, contents);
         }
     }

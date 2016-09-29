@@ -35,7 +35,7 @@ public class MenuPlannerPagerAdapter extends FragmentPagerAdapter {
         return list.size();
     }
 
-    private static class MenuPlannerFragment extends Fragment {
+    public static class MenuPlannerFragment extends Fragment {
         private static final String KEY_PLANNER = "menu_planner";
 
         private MenuPlanner menuPlanner;

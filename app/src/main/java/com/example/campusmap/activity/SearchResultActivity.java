@@ -14,8 +14,8 @@ import android.widget.ListView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.adapter.SearchItemAdapter;
-import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.form.InfoLocation;
 
 import java.util.ArrayList;
 

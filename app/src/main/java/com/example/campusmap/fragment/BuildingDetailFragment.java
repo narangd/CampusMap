@@ -11,10 +11,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.campusmap.R;
-import com.example.campusmap.adapter.MainRoomArrayAdapter;
 import com.example.campusmap.data.branch.Building;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 
@@ -62,13 +60,13 @@ public class BuildingDetailFragment extends Fragment implements AdapterView.OnIt
                 textView.setText(building.getDescription());
             }
 
-            mAdapter = new MainRoomArrayAdapter(
-                    getContext(),
-                    android.R.layout.simple_list_item_1,
-                    helper.getMainRooms(buildingID)
-            );
+//            mAdapter = new MainRoomArrayAdapter(
+//                    getContext(),
+//                    android.R.layout.simple_list_item_1,
+//                    helper.getMainRooms(buildingID)
+//            );
             listView.addHeaderView(detailView, null, false);
-            listView.setAdapter(mAdapter);
+//            listView.setAdapter(mAdapter);
             listView.setOnItemClickListener(this);
         } else {
             textView.setText("설명들...");
@@ -84,11 +82,11 @@ public class BuildingDetailFragment extends Fragment implements AdapterView.OnIt
     // ## For ListView ##
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Pair<String,Integer[]> item = mAdapter.getItem(position);
-        Toast.makeText(
-                getContext(),
-                "건물ID:"+item.second[0]+", 층ID:"+item.second[1]+", 방ID:"+item.second[2],
-                Toast.LENGTH_SHORT).
-                show();
+//        Pair<String,Integer[]> item = mAdapter.getItem(position);
+//        Toast.makeText(
+//                getContext(),
+//                "건물ID:"+item.second[0]+", 층ID:"+item.second[1]+", 방ID:"+item.second[2],
+//                Toast.LENGTH_SHORT).
+//                show();
     }
 }

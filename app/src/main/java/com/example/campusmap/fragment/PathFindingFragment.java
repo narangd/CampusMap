@@ -1,5 +1,6 @@
 package com.example.campusmap.fragment;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -7,8 +8,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -16,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.campusmap.R;
+import com.example.campusmap.activity.NMTestActivity;
 import com.example.campusmap.asynctask.loader.DrawingLoader;
 import com.example.campusmap.pathfinding.Drawing;
 
@@ -35,6 +40,8 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
     private ProgressBar mProgressBar;
 
     private AsyncTask pathFindAsyncTask;
+
+    private boolean triggerLongPress = false;
 
     public static PathFindingFragment newInstance() {
         return new PathFindingFragment();
@@ -60,27 +67,61 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
                              Bundle savedInstanceState) {
         if (DEBUG) Log.i(TAG, "+++ onCreateView() called! +++");
 
+        toast = Toast.makeText(getContext(), "토스트", Toast.LENGTH_SHORT);
+
         View rootView = inflater.inflate(R.layout.fragment_path_finding, container, false);
 
         mImageView = (ImageView) rootView.findViewById(R.id.path_imageview);
-
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
-        mProgressBar.setIndeterminate(true);
-        toast = Toast.makeText(getContext(), "토스트", Toast.LENGTH_SHORT);
+        final FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
 
-        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        mProgressBar.setIndeterminate(true);
+
         fab.setVisibility(View.VISIBLE);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mDrawing != null) {
-
-                    runPathFindingAsyncTask();
-
+                Log.i(TAG, "onClick: detected");
+                if (triggerLongPress) {
+                    // open
+                    Intent intent = new Intent(
+                            getContext(), NMTestActivity.class
+                    );
+                    startActivity(intent);
                 } else {
-                    toast.setText("로딩중입니다\n잠시 후 다시시도해주세요");
-                    toast.show();
+                    if (mDrawing != null) {
+                        runPathFindingAsyncTask();
+                    } else {
+                        toast.setText("로딩중입니다\n잠시 후 다시시도해주세요");
+                        toast.show();
+                    }
                 }
+            }
+        });
+        final GestureDetectorCompat gestureDetector = new GestureDetectorCompat(getContext(), new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public void onLongPress(MotionEvent e) {
+                Log.i(TAG, "onLongPress: detected");
+                triggerLongPress = true;
+                fab.setImageResource(R.drawable.ic_zoom_out_map_white);
+            }
+        });
+        fab.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    Log.i(TAG, "onTouch: ACTION_UP detected");
+                    fab.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            triggerLongPress = false;
+                        }
+                    }, 100);
+//                    triggerLongPress = false;
+                    fab.setImageResource(R.drawable.ic_navigation_white);
+                }
+//                Log.i(TAG, "onTouch: detected");
+                return gestureDetector.onTouchEvent(event);
             }
         });
 

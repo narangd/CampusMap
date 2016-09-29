@@ -6,7 +6,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.example.campusmap.database.SQLiteHelperOstacle;
+import com.example.campusmap.database.SQLiteHelperObstacle;
 import com.example.campusmap.pathfinding.Drawing;
 import com.example.campusmap.pathfinding.Map;
 import com.example.campusmap.pathfinding.Polygon;
@@ -36,7 +36,7 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
         Map map = drawing.getMap();
 
         ArrayList<Polygon> polygons = new ArrayList<>();
-        Cursor cursor = SQLiteHelperOstacle.getInstance(getContext()).select();
+        Cursor cursor = SQLiteHelperObstacle.getInstance(getContext()).select();
 
         while (cursor.moveToNext()) {
             Polygon polygon = new Polygon(map, cursor.getString(cursor.getColumnIndex("polygon")));

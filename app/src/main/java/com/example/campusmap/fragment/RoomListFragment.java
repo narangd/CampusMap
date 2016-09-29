@@ -16,8 +16,8 @@ import com.example.campusmap.R;
 import com.example.campusmap.activity.InfoUpdaterActivity;
 import com.example.campusmap.data.branch.Floor;
 import com.example.campusmap.data.branch.Room;
-import com.example.campusmap.database.InfoLocation;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.form.InfoLocation;
 
 import java.util.ArrayList;
 

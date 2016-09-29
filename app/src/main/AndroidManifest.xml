@@ -60,10 +60,15 @@
             android:name=".activity.InfoUpdaterActivity"
             android:label="@string/title_activity_info_updater"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.NMTestActivity"
+            android:label="@string/title_activity_info_updater"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="d49e3a0cd5cad7b6c7eada6a1f35a85907f1cbca" />
+            android:value="d49e3a0cd5cad7b6c7eada6a1f35a85907f1cbca" /><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
 
     </application>
 
