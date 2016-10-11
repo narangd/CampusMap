@@ -30,7 +30,7 @@ public class NMTestActivity extends NMapActivity {
 
     private NMapResourceProvider mMapResourceProvider;
     private NMapOverlayManager mOverlayManager;
-    private PolygonDataManager manager;
+    private PolygonDataManager mPolygonDataManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,8 +65,10 @@ public class NMTestActivity extends NMapActivity {
         mOverlayManager = new NMapOverlayManager(this, mMapView, mMapResourceProvider);
 
 //        new NMapOverlayManager(this, mMapView, mMap)
+        mPolygonDataManager = new PolygonDataManager(this);
 
         displayPolygon();
+        displayBaseRectangles();
 
     }
     private NMapView.OnMapStateChangeListener onMapViewStateChangeListener = new NMapView.OnMapStateChangeListener() {
@@ -132,10 +134,15 @@ public class NMTestActivity extends NMapActivity {
         }
     };
 
-    // TODO: 2016-09-28 다각형의 갯수가 10000개정도 일때 속도가 정상적으로 나오는지 테스트
     private void displayPolygon() {
-        manager = new PolygonDataManager(this);
-        List<NMapPathData> pathDates = manager.toNMapPathData();
+        List<NMapPathData> pathDates = mPolygonDataManager.toNMapPathData();
         mOverlayManager.createPathDataOverlay(pathDates);
+    }
+
+    // TODO: 2016-09-28 다각형의 갯수가 10000개정도 일때 속도가 정상적으로 나오는지 테스트 (100*100) 22100
+    private void displayBaseRectangles() {
+        List<NMapPathData> pathDates = mPolygonDataManager.getBaseRectangles();
+        mOverlayManager.createPathDataOverlay(pathDates);
+
     }
 }

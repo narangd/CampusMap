@@ -8,6 +8,7 @@ import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.Pair;
 
+import com.example.campusmap.form.PointD;
 import com.example.campusmap.form.Polygon;
 
 import java.util.ArrayList;
@@ -361,5 +362,25 @@ public class SQLiteHelperObstacle extends com.example.campusmap.database.SQLiteO
 
         cursor.close();
         return polygons;
+    }
+
+    public Pair<PointD,PointD> getMinMax() {
+        Cursor cursor = getReadableDatabase().query(
+                ObstacleEntry.TABLE_NAME,
+                new String[]{"MIN(x) AS min_x", "MIN(y) AS min_y", "MAX(x) AS max_x", "MAX(y) AS max_y"},
+                null, null,
+                null, null, null
+        );
+        Log.i("SQLiteHelperObstacle", "getMinMax: count : " + cursor.getColumnCount());
+        double min_y = cursor.getDouble(cursor.getColumnIndex("min_x"));
+        double min_x = cursor.getDouble(1);
+        double max_x = cursor.getDouble(3);
+        double max_y = cursor.getDouble(4);
+        cursor.close();
+
+        return new Pair<>(
+                new PointD(min_x, min_y),
+                new PointD(max_x, max_y)
+        );
     }
 }

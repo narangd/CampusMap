@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 public class Drawing implements View.OnLongClickListener{
-    private static final String TAG = "ADP_Drawing";
+    private static final String TAG = "Drawing";
     private static final boolean DEBUG = false;
 
     private Context mContext;
@@ -20,8 +20,6 @@ public class Drawing implements View.OnLongClickListener{
 
     private Map map;
     private BitmapDrawable back;
-
-    private Progress progress;
 
     public Drawing(Context context, ImageView imageView) {
         mContext = context;
@@ -61,10 +59,6 @@ public class Drawing implements View.OnLongClickListener{
             imageView.setImageBitmap(copyBitmap);
             imageView.invalidate();
         }
-    }
-
-    public void setOnProgressUpdate(Progress progress) {
-        this.progress = progress;
     }
 
     @Override
