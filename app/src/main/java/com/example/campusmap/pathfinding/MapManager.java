@@ -7,12 +7,10 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-public class Drawing implements View.OnLongClickListener{
-    private static final String TAG = "Drawing";
+public class MapManager {
+    private static final String TAG = "MapManager";
     private static final boolean DEBUG = false;
 
     private Context mContext;
@@ -21,11 +19,10 @@ public class Drawing implements View.OnLongClickListener{
     private Map map;
     private BitmapDrawable back;
 
-    public Drawing(Context context, ImageView imageView) {
+    public MapManager(Context context, ImageView imageView) {
         mContext = context;
 
         imageView.setLongClickable(true);
-        imageView.setOnLongClickListener(this);
 
         paint = new Paint();
         paint.setColor(0xaaffffff);
@@ -61,25 +58,16 @@ public class Drawing implements View.OnLongClickListener{
         }
     }
 
-    @Override
-    public boolean onLongClick(View v) {
-        Toast.makeText(mContext, v.getX() + "," + v.getY(), Toast.LENGTH_LONG)
-                .show();
-        return true;
-    }
-
     public Map getMap() {
-        return this.map;
+        return map;
     }
 
     public int getWallCount() {
         int count = 0;
         Tile[][] tiles = map.getTiles();
 
-        for(int h = 0; h<map.yTileSIZE; h++)
-        {
-            for(int w = 0; w<map.xTileSIZE; w++)
-            {
+        for(int h = 0; h<map.yTileSIZE; h++) {
+            for(int w = 0; w<map.xTileSIZE; w++) {
                 if (tiles[h][w].getState() == Tile.State.WALL) {
                     count++;
                 }
@@ -87,10 +75,5 @@ public class Drawing implements View.OnLongClickListener{
         }
 
         return count;
-    }
-
-    public interface Progress {
-        void onProgressUpdate();
-
     }
 }

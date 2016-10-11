@@ -3,11 +3,8 @@ package com.example.campusmap.fragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.view.GestureDetectorCompat;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -21,22 +18,20 @@ import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.activity.NMTestActivity;
-import com.example.campusmap.asynctask.loader.DrawingLoader;
-import com.example.campusmap.pathfinding.Drawing;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 
-public class PathFindingFragment extends Fragment implements LoaderManager.LoaderCallbacks<Drawing> {
+public class PathFindingFragment extends Fragment { //  implements LoaderManager.LoaderCallbacks<MapManager>
     private static final String TAG = "PathFindingFragment";
     private static final boolean DEBUG = false;
     public static final int TAP_INDEX = 2;
 
     private Toast toast;
     private ImageView mImageView;
-    private Drawing mDrawing;
+//    private MapManager mMapManager;
     private ProgressBar mProgressBar;
 
     private AsyncTask pathFindAsyncTask;
@@ -50,17 +45,17 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
     public PathFindingFragment() {
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        getLoaderManager().initLoader(
-                0,    // Loader 를 구분하기 위한 ID 값
-                null, // 추가 인자
-                this  // Loader 로 부터 콜백을 받기 위해서 LoaderManager.LoaderCallbacks 를 구현한 객체를 넘겨준다.
-        );
-
-    }
+//    @Override
+//    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+//        super.onActivityCreated(savedInstanceState);
+//
+//        getLoaderManager().initLoader(
+//                0,    // Loader 를 구분하기 위한 ID 값
+//                null, // 추가 인자
+//                this  // Loader 로 부터 콜백을 받기 위해서 LoaderManager.LoaderCallbacks 를 구현한 객체를 넘겨준다.
+//        );
+//
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -89,12 +84,12 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
                     );
                     startActivity(intent);
                 } else {
-                    if (mDrawing != null) {
-                        runPathFindingAsyncTask();
-                    } else {
-                        toast.setText("로딩중입니다\n잠시 후 다시시도해주세요");
-                        toast.show();
-                    }
+//                    if (mMapManager != null) {
+//                        runPathFindingAsyncTask();
+//                    } else {
+//                        toast.setText("로딩중입니다\n잠시 후 다시시도해주세요");
+//                        toast.show();
+//                    }
                 }
             }
         });
@@ -128,6 +123,9 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
         // for test
 //        TreeSet<Tile>
 
+        mProgressBar.setIndeterminate(false);
+        mProgressBar.setVisibility(View.GONE);
+
         return rootView;
     }
 
@@ -145,14 +143,14 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
 //                        e.printStackTrace();
 //                    }
 
-                    mDrawing.resetPath();
+//                    mMapManager.resetPath();
                     return null;
                 }
 
                 @Override
                 protected void onPostExecute(Void aVoid) {
                     super.onPostExecute(aVoid);
-                    mDrawing.drawOnImageView(mImageView);
+//                    mMapManager.drawOnImageView(mImageView);
                     pathFindAsyncTask = null;
                 }
             }.execute();
@@ -177,34 +175,34 @@ public class PathFindingFragment extends Fragment implements LoaderManager.Loade
         }
     }
 
-    // ## Polygon Loader (( LoaderManager.LoaderCallbacks )) ##
-    @Override
-    public Loader<Drawing> onCreateLoader(int id, Bundle args) {
-        if (DEBUG) Log.i(TAG, "+++ onCreateLoader() called! +++");
-        toast.setText("로딩중입니다...");
-        toast.show();
-
-        return new DrawingLoader(getActivity(), mImageView);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Drawing> loader, Drawing drawing) {
-        if (DEBUG) Log.i(TAG, "+++ onLoadFinished() called! +++");
-
-        mDrawing = drawing;
-        drawing.resetPath();
-        drawing.drawOnImageView(mImageView);
-
-        mProgressBar.setIndeterminate(false);
-        mProgressBar.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Drawing> loader) {
-        if (DEBUG) Log.i(TAG, "+++ onLoaderReset() called! +++");
-        mDrawing.getMap().resetPolygon();
-
-        Log.i("PathFindingFragment", "onLoaderReset!!");
-    }
+//    // ## Polygon Loader (( LoaderManager.LoaderCallbacks )) ##
+//    @Override
+//    public Loader<MapManager> onCreateLoader(int id, Bundle args) {
+//        if (DEBUG) Log.i(TAG, "+++ onCreateLoader() called! +++");
+//        toast.setText("로딩중입니다...");
+//        toast.show();
+//
+//        return new DrawingLoader(getActivity(), mImageView);
+//    }
+//
+//    @Override
+//    public void onLoadFinished(Loader<MapManager> loader, MapManager drawing) {
+//        if (DEBUG) Log.i(TAG, "+++ onLoadFinished() called! +++");
+//
+//        mMapManager = drawing;
+//        drawing.resetPath();
+//        drawing.drawOnImageView(mImageView);
+//
+//        mProgressBar.setIndeterminate(false);
+//        mProgressBar.setVisibility(View.GONE);
+//    }
+//
+//    @Override
+//    public void onLoaderReset(Loader<MapManager> loader) {
+//        if (DEBUG) Log.i(TAG, "+++ onLoaderReset() called! +++");
+//        mMapManager.getMap().resetPolygon();
+//
+//        Log.i("PathFindingFragment", "onLoaderReset!!");
+//    }
 
 }

@@ -7,19 +7,19 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.example.campusmap.database.SQLiteHelperObstacle;
-import com.example.campusmap.pathfinding.Drawing;
 import com.example.campusmap.pathfinding.Map;
+import com.example.campusmap.pathfinding.MapManager;
 import com.example.campusmap.pathfinding.Polygon;
 
 import java.util.ArrayList;
 
-public class DrawingLoader extends AsyncTaskLoader<Drawing> {
+public class DrawingLoader extends AsyncTaskLoader<MapManager> {
     private static final String TAG = "DrawingLoader";
     private static final boolean DEBUG = false;
 
     private Context context;
     private ImageView imageView;
-    private Drawing drawing;
+    private MapManager mapManager;
 
     public DrawingLoader(Context context, ImageView imageView) {
         super(context);
@@ -28,12 +28,12 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
     }
 
     @Override
-    public Drawing loadInBackground() {
+    public MapManager loadInBackground() {
         if (DEBUG) Log.i(TAG, "+++ loadInBackground() called! +++");
 
         if (DEBUG) Log.i(TAG, "+++ create new Map +++");
-        Drawing drawing = new Drawing(context, imageView);
-        Map map = drawing.getMap();
+        MapManager mapManager = new MapManager(context, imageView);
+        Map map = mapManager.getMap();
 
         ArrayList<Polygon> polygons = new ArrayList<>();
         Cursor cursor = SQLiteHelperObstacle.getInstance(getContext()).select();
@@ -49,47 +49,47 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
         Log.i("PolygonLoader", "cursor size : " + cursor.getCount());
         Log.i("PolygonLoader", "polygons size : " + polygons.size());
 
-        return drawing;
+        return mapManager;
     }
 
     @Override
-    public void deliverResult(Drawing drawing) {
+    public void deliverResult(MapManager mapManager) {
         if (isReset()) {
             if (DEBUG) Log.w(TAG, "+++ Warning! An async query came in while the Loader was reset! +++");
 
-            if (drawing != null) {
+            if (mapManager != null) {
                 if (DEBUG) Log.w(TAG, "+++ polygons.clear() called! +++");
-                drawing.getMap().resetPolygon();
+                mapManager.getMap().resetPolygon();
                 return;
             }
         }
 
-        Drawing oldDrawing = this.drawing;
-        this.drawing = drawing;
+        MapManager oldMapManager = this.mapManager;
+        this.mapManager = mapManager;
 
         if (isStarted()) {
             if (DEBUG) Log.i(TAG, "+++ Delivering results to the LoaderManager for" +
                     " the Fragment to display! +++");
 
-            super.deliverResult(drawing);
+            super.deliverResult(mapManager);
         }
 
-        if (oldDrawing != null && oldDrawing != drawing) {
+        if (oldMapManager != null && oldMapManager != mapManager) {
             if (DEBUG) Log.i(TAG, "+++ Releasing any old data associated with this Loader. +++");
             if (DEBUG) Log.w(TAG, "+++ oldMap.resetPolygon() called! +++");
-            oldDrawing.getMap().resetPolygon();
+            oldMapManager.getMap().resetPolygon();
         }
 
-        super.deliverResult(drawing);
+        super.deliverResult(mapManager);
     }
 
     @Override
     protected void onStartLoading() {
         if (DEBUG) Log.i(TAG, "+++ onStartLoading() called! +++");
 
-        if (drawing != null) {
+        if (mapManager != null) {
             if (DEBUG) Log.i(TAG, "+++ Delivering previously loaded data to the client...");
-            deliverResult(drawing);
+            deliverResult(mapManager);
         } else {
             if (DEBUG) Log.i(TAG, "+++ The current data is data is null... so force load! +++");
             forceLoad();
@@ -109,21 +109,21 @@ public class DrawingLoader extends AsyncTaskLoader<Drawing> {
 
         onStopLoading();
 
-        if (drawing != null) {
+        if (mapManager != null) {
             if (DEBUG) Log.w(TAG, "+++ mMap.resetPolygon() called! +++");
-            drawing.getMap().resetPolygon(); // release map
-            drawing = null;
+            mapManager.getMap().resetPolygon(); // release map
+            mapManager = null;
         }
     }
 
     @Override
-    public void onCanceled(Drawing drawing) {
+    public void onCanceled(MapManager mapManager) {
         if (DEBUG) Log.i(TAG, "+++ onCanceled() called! +++");
 
-        super.onCanceled(drawing);
+        super.onCanceled(mapManager);
 
-        if (drawing != null)
-            drawing.getMap().resetPolygon();
+        if (mapManager != null)
+            mapManager.getMap().resetPolygon();
     }
 
     @Override

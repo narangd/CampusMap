@@ -21,9 +21,9 @@ public class PolygonDataManager {
 
     private Context mContext;
     private List<Polygon> polygons;
-    private PointD min = new PointD();
+    public PointD min = new PointD();
     private PointD max = new PointD();
-    private final double rect_size = 0.00004;
+    public final double rect_size = 0.0004;
 
     public PolygonDataManager(Context context) {
         mContext = context;
@@ -132,7 +132,6 @@ public class PolygonDataManager {
 
                 count ++;
             }
-
         }
         Log.i(TAG, "getBaseRectangles: Count : + " + count);
 

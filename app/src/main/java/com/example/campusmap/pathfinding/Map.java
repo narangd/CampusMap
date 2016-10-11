@@ -37,8 +37,6 @@ public class Map {
     public Tile goal;
     Path path = new Path();
 
-    private Drawing.Progress progress;
-
     // canvas
     public Map(int width, int height) {
         Tile.width = width/XSIZE;
@@ -207,10 +205,6 @@ public class Map {
             path.lineTo(point.x, point.y);
         }
         canvas.drawPath(path, paint);
-    }
-
-    public void setOnProgressUpdate(Drawing.Progress progress) {
-        this.progress = progress;
     }
 
     public Tile getTile(int x, int y)

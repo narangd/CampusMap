@@ -12,8 +12,11 @@ import com.nhn.android.maps.NMapController;
 import com.nhn.android.maps.NMapView;
 import com.nhn.android.maps.maplib.NGeoPoint;
 import com.nhn.android.maps.nmapmodel.NMapError;
+import com.nhn.android.maps.overlay.NMapCircleData;
+import com.nhn.android.maps.overlay.NMapCircleStyle;
 import com.nhn.android.maps.overlay.NMapPathData;
 import com.nhn.android.mapviewer.overlay.NMapOverlayManager;
+import com.nhn.android.mapviewer.overlay.NMapPathDataOverlay;
 import com.nhn.android.mapviewer.overlay.NMapResourceProvider;
 
 import java.util.List;
@@ -69,6 +72,7 @@ public class NMTestActivity extends NMapActivity {
 
         displayPolygon();
         displayBaseRectangles();
+
 
     }
     private NMapView.OnMapStateChangeListener onMapViewStateChangeListener = new NMapView.OnMapStateChangeListener() {
@@ -130,7 +134,7 @@ public class NMTestActivity extends NMapActivity {
 
         @Override
         public void onSingleTapUp(NMapView nMapView, MotionEvent motionEvent) {
-
+            displayPoint();
         }
     };
 
@@ -139,10 +143,27 @@ public class NMTestActivity extends NMapActivity {
         mOverlayManager.createPathDataOverlay(pathDates);
     }
 
-    // TODO: 2016-09-28 다각형의 갯수가 10000개정도 일때 속도가 정상적으로 나오는지 테스트 (100*100) 22100
     private void displayBaseRectangles() {
         List<NMapPathData> pathDates = mPolygonDataManager.getBaseRectangles();
+
         mOverlayManager.createPathDataOverlay(pathDates);
+    }
+
+    private void displayPoint() {
+        displayBaseRectangles();
+
+        NMapCircleData circleData = new NMapCircleData(1);
+        circleData.addCirclePoint(mPolygonDataManager.min.x, mPolygonDataManager.min.y, 10f);
+
+        NMapCircleStyle style = new NMapCircleStyle(this);
+        style.setStrokeColor(0xffffff, 0x00);
+        style.setFillColor(0xA04DD2, 0x88);
+        circleData.setCircleStyle(style);
+
+        mOverlayManager.clearOverlays();
+        NMapPathDataOverlay overlay = mOverlayManager.createPathDataOverlay();
+        overlay.addCircleData(circleData);
+        mOverlayManager.insertOverlay(overlay);
 
     }
 }
