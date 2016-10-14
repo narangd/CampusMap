@@ -22,7 +22,7 @@ public class PolygonDataManager {
     private Context mContext;
     private List<Polygon> polygons;
     public PointD min = new PointD();
-    private PointD max = new PointD();
+    public PointD max = new PointD();
     public final double rect_size = 0.0004;
 
     public PolygonDataManager(Context context) {
@@ -113,6 +113,10 @@ public class PolygonDataManager {
         );
         Random random = new Random();
         int count = 0;
+        NMapPathLineStyle cellLineStyle = new NMapPathLineStyle(mContext);
+        cellLineStyle.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
+        cellLineStyle.setLineColor(0xffffff, 0x00);
+        cellLineStyle.setFillColor(random.nextInt(0xffffff), 0x20);
 
         for (double x=min.x; x<=max.x; x+=rect_size) {
             for (double y=min.y; y<=max.y; y+=rect_size) {
@@ -121,12 +125,6 @@ public class PolygonDataManager {
                 cell.addPathPoint(x, y+rect_size, NMapPathLineStyle.TYPE_SOLID);
                 cell.addPathPoint(x+rect_size, y+rect_size, NMapPathLineStyle.TYPE_SOLID);
                 cell.addPathPoint(x+rect_size, y, NMapPathLineStyle.TYPE_SOLID);
-
-
-                NMapPathLineStyle cellLineStyle = new NMapPathLineStyle(mContext);
-                cellLineStyle.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
-                cellLineStyle.setLineColor(0xffffff, 0x00);
-                cellLineStyle.setFillColor(random.nextInt(0xffffff), 0x20);
                 cell.setPathLineStyle(cellLineStyle);
                 pathDates.add(cell);
 

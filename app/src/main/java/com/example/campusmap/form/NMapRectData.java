@@ -6,7 +6,7 @@ import com.nhn.android.maps.overlay.NMapPathLineStyle;
 public class NMapRectData extends NMapPathData {
     private double width;
     private double height;
-    private PointD center = new PointD();
+    private PointD point = new PointD();
 
     public NMapRectData() {
         super(4);
@@ -14,10 +14,10 @@ public class NMapRectData extends NMapPathData {
 
     private void reset() {
         initPathData();
-        addPathPoint(center.x - width/2, center.y - height/2, NMapPathLineStyle.TYPE_SOLID);
-        addPathPoint(center.x + width/2, center.y - height/2, NMapPathLineStyle.TYPE_SOLID);
-        addPathPoint(center.x + width/2, center.y + height/2, NMapPathLineStyle.TYPE_SOLID);
-        addPathPoint(center.x - width/2, center.y + height/2, NMapPathLineStyle.TYPE_SOLID);
+        addPathPoint(point.x, point.y, NMapPathLineStyle.TYPE_SOLID);
+        addPathPoint(point.x, point.y + height, NMapPathLineStyle.TYPE_SOLID);
+        addPathPoint(point.x + width, point.y + height, NMapPathLineStyle.TYPE_SOLID);
+        addPathPoint(point.x + width, point.y, NMapPathLineStyle.TYPE_SOLID);
     }
 
     public double getHeight() {
@@ -38,12 +38,12 @@ public class NMapRectData extends NMapPathData {
         reset();
     }
 
-    public PointD getCenter() {
-        return center;
+    public PointD getPoint() {
+        return point;
     }
 
-    public void setCenter(PointD center) {
-        this.center = center;
+    public void setPoint(PointD point) {
+        this.point = point;
         reset();
     }
 }

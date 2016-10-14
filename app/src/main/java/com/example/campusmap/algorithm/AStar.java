@@ -82,10 +82,10 @@ public class AStar {
 
     private static LinkedList<Point> reconstructPath(HashMap<Tile,Tile> cameFrom, Tile current) {
         LinkedList<Point> path = new LinkedList<>();
-        path.add(current.getPoint());
+        path.add(current.getIndex());
         while (cameFrom.containsKey(current)) {
             current = cameFrom.get(current);
-            path.add(current.getPoint());
+            path.add(current.getIndex());
         }
         cameFrom.clear();
         return path;

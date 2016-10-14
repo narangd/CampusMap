@@ -4,10 +4,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.util.Log;
 
 import com.example.campusmap.algorithm.AStar;
+import com.example.campusmap.form.PointD;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,49 +16,39 @@ import java.util.Random;
 public class Map {
     private static final String TAG = "ADP_Drawing";
     private static final boolean DEBUG = false;
+    public final double rect_size = 0.0004;
 
-    /** Width Tile Count */
-    public static final int XSIZE = 120; // before120
-    /** Height Tile Count */
-    public static final int YSIZE = 90; // before 90
+    private final int xTileCount;
+    private final int yTileCount;
 
-    /** Tile 2D Array */
     private Tile[][] tiles;
     ArrayList<Polygon> obstacle = new ArrayList<>();
 
-    /** Width Tile Size */
-    public int xTileSIZE;
-    /** Height Tile Size */
-    public int yTileSIZE;
-
     private Random random = new Random();
+    private Path path = new Path();
+    private PointD min;
+    private PointD max;
 
     public Tile start;
     public Tile goal;
-    Path path = new Path();
 
-    // canvas
-    public Map(int width, int height) {
-        Tile.width = width/XSIZE;
-        Tile.height = height/YSIZE;
-        xTileSIZE = width/Tile.width;
-        if (width%Tile.width > 0)
-            this.xTileSIZE++;
-        yTileSIZE = height/Tile.height;
-        if (height%Tile.height > 0)
-            this.yTileSIZE++;
+    public Map(PointD min, PointD max) {
+        xTileCount = (int)((max.x - min.x)/rect_size)+1;
+        yTileCount = (int)((max.y - min.y)/rect_size)+1;
 
-        // add polygon.
-//        obstacle.add(new Polygon(this, "POLYGON((1.677 3.277,2.048 3.277,2.048 4.236,1.679 4.236,1.677 3.277))"));
-//        obstacle.add(new Polygon(this, "POLYGON((2.288 3.281,2.288 4.069,2.364 4.069,2.364 4.109,2.298 4.191,2.298 4.284,2.397 4.407,2.545 4.407,2.623 4.309,2.649 4.191,2.546 4.063,2.653 4.063,2.653 3.281,2.288 3.281))"));
+        this.min = min;
+        this.max = max;
 
-        // create tiles...
-        tiles = new Tile[yTileSIZE][xTileSIZE];
-        for(int h = 0; h< yTileSIZE; h++)
+        tiles = new Tile[yTileCount][xTileCount];
+
+        int xIndex, yIndex=0;
+
+        for(double y=min.y; y<=max.y; y+=rect_size,yIndex++)
         {
-            for(int w = 0; w< xTileSIZE; w++)
+            xIndex = 0;
+            for(double x = min.x; x<max.x; x+=rect_size,xIndex++)
             {
-                tiles[h][w] = new Tile(w*Tile.width, h*Tile.height);
+                tiles[yIndex][xIndex] = new Tile(x, y, xIndex, yIndex);
             }
         }
 
@@ -66,8 +56,8 @@ public class Map {
     }
 
     public void initTiles() {
-        for(int h = 0; h< yTileSIZE; h++) {
-            for(int w = 0; w< xTileSIZE; w++) {
+        for(int h = 0; h< yTileCount; h++) {
+            for(int w = 0; w< xTileCount; w++) {
                 tiles[h][w].init();
             }
         }
@@ -80,10 +70,10 @@ public class Map {
             goal.state = Tile.State.NONE;
 
         do {
-            start = tiles[random.nextInt(yTileSIZE)][random.nextInt(xTileSIZE)];
+            start = tiles[random.nextInt(yTileCount)][random.nextInt(xTileCount)];
         } while (start.state == Tile.State.WALL);
         do {
-            goal = tiles[random.nextInt(yTileSIZE)][random.nextInt(xTileSIZE)];
+            goal = tiles[random.nextInt(yTileCount)][random.nextInt(xTileCount)];
         } while (goal.state == Tile.State.WALL);
     }
 
@@ -94,16 +84,16 @@ public class Map {
             obstacle.add(polygon);
         }
 
-        for (int h = 0; h< yTileSIZE; h++) {
-            for (int w = 0; w< xTileSIZE; w++) {
-                for (Polygon polygon : polygonList) {
-                    Rect rect = tiles[h][w].getRect();
-                    if ( polygon.contain(new Point(rect.centerX(), rect.centerY())) ) {
-                        tiles[h][w].state = Tile.State.WALL;
-                    }
-                }
-            }
-        }
+//        for (int h = 0; h< yTileCount; h++) {
+//            for (int w = 0; w< xTileCount; w++) {
+//                for (Polygon polygon : polygonList) {
+//                    Rect rect = tiles[h][w].getRect();
+//                    if ( polygon.contain(new Point(rect.centerX(), rect.centerY())) ) {
+//                        tiles[h][w].state = Tile.State.WALL;
+//                    }
+//                }
+//            }
+//        }
         if (DEBUG) Log.i(TAG, "obstacle size : " + polygonList.size());
     }
 
@@ -116,9 +106,9 @@ public class Map {
 
         for (int x=-1; x<=1; x++) {
             for (int y=-1; y<=1; y++) {
-                int checkX = tile.getX()/Tile.width + x;
-                int checkY = tile.getY()/Tile.height + y;
-                if (checkX >= 0 && checkX < xTileSIZE && checkY >= 0 && checkY < yTileSIZE) {
+                int checkX = tile.getX() + x;
+                int checkY = tile.getY() + y;
+                if (checkX >= 0 && checkX < xTileCount && checkY >= 0 && checkY < yTileCount) {
                     neighbor.add(tiles[checkY][checkX]);
                 }
             }
@@ -127,25 +117,25 @@ public class Map {
 //
 //        checkX = tile.getX()/Tile.width + 1;
 //        checkY = tile.getY()/Tile.height;
-//        if (checkX >= 0 && checkX < xTileSIZE && checkY >= 0 && checkY < yTileSIZE) {
+//        if (checkX >= 0 && checkX < xTileCount && checkY >= 0 && checkY < yTileCount) {
 //            neighbor.add(tiles[checkY][checkX]);
 //        }
 //
 //        checkX = tile.getX()/Tile.width - 1;
 //        checkY = tile.getY()/Tile.height;
-//        if (checkX >= 0 && checkX < xTileSIZE && checkY >= 0 && checkY < yTileSIZE) {
+//        if (checkX >= 0 && checkX < xTileCount && checkY >= 0 && checkY < yTileCount) {
 //            neighbor.add(tiles[checkY][checkX]);
 //        }
 //
 //        checkX = tile.getX()/Tile.width;
 //        checkY = tile.getY()/Tile.height + 1;
-//        if (checkX >= 0 && checkX < xTileSIZE && checkY >= 0 && checkY < yTileSIZE) {
+//        if (checkX >= 0 && checkX < xTileCount && checkY >= 0 && checkY < yTileCount) {
 //            neighbor.add(tiles[checkY][checkX]);
 //        }
 //
 //        checkX = tile.getX()/Tile.width;
 //        checkY = tile.getY()/Tile.height - 1;
-//        if (checkX >= 0 && checkX < xTileSIZE && checkY >= 0 && checkY < yTileSIZE) {
+//        if (checkX >= 0 && checkX < xTileCount && checkY >= 0 && checkY < yTileCount) {
 //            neighbor.add(tiles[checkY][checkX]);
 //        }
 
@@ -153,8 +143,8 @@ public class Map {
     }
 
     public int getDistance(Tile one, Tile another) {
-        int xDistance = Math.abs(one.getX()-another.getX())/ Tile.width;
-        int yDistance = Math.abs(one.getY()-another.getY())/ Tile.height;
+        int xDistance = Math.abs(one.getX() - another.getX());
+        int yDistance = Math.abs(one.getY()-another.getY());
 //        return 10*Math.abs((one.getX() - another.getX())/Tile.width +
 //                ((one.getY() - another.getY())/Tile.height)) ;
         if (xDistance > yDistance)
@@ -164,11 +154,11 @@ public class Map {
     }
 
     private void updateFromPath(Tile.State state) {
-        if(path == null)
-            return;
-        for(Point point : path.getPath()) {
-            getTile(point.x, point.y).state = state;
-        }
+//        if(path == null)
+//            return;
+////        for(Point point : path.getPath()) {
+////            getTile(point.x, point.y).state = state;
+////        }
     }
 
     public void pathFinding() {
@@ -181,11 +171,11 @@ public class Map {
     }
 
     public void drawTiles(Canvas canvas, Paint paint) {
-        for (Tile[] tiles : this.tiles) {
-            for (Tile tile : tiles) {
-                tile.draw(canvas, paint);
-            }
-        }
+//        for (Tile[] tiles : this.tiles) {
+//            for (Tile tile : tiles) {
+//                tile.draw(canvas, paint);
+//            }
+//        }
     }
 
     public void drawPath(Canvas canvas, Paint paint) {
@@ -207,22 +197,23 @@ public class Map {
         canvas.drawPath(path, paint);
     }
 
-    public Tile getTile(int x, int y)
-    {
-        if(x<0 || x>= xTileSIZE*Tile.width || y<0 || y>= yTileSIZE*Tile.height)
+    public Tile getTile(double x, double y) {
+        double delta_x = x - min.x;
+        double delta_y = y - min.y;
+        if (delta_x < 0 || delta_y < 0 || delta_x > max.x-min.x || delta_y > max.y-min.y) {
             return null;
-        return tiles[y/Tile.height][x/Tile.width];
+        }
+        return tiles[(int)(delta_y/rect_size)][(int)(delta_x/rect_size)];
+    }
+    public Tile getTile(int x, int y) {
+        return tiles[y][x];
     }
 
-    public int getxTileSIZE() {
-        return xTileSIZE;
+    public int getXTileCount() {
+        return xTileCount;
     }
-    public int getyTileSIZE() {
-        return yTileSIZE;
-    }
-
-    public Tile[][] getTiles() {
-        return tiles;
+    public int getYTileCount() {
+        return yTileCount;
     }
 
 }

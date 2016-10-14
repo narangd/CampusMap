@@ -1,17 +1,11 @@
 package com.example.campusmap.asynctask.loader;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.example.campusmap.database.SQLiteHelperObstacle;
-import com.example.campusmap.pathfinding.Map;
 import com.example.campusmap.pathfinding.MapManager;
-import com.example.campusmap.pathfinding.Polygon;
-
-import java.util.ArrayList;
 
 public class DrawingLoader extends AsyncTaskLoader<MapManager> {
     private static final String TAG = "DrawingLoader";
@@ -32,22 +26,22 @@ public class DrawingLoader extends AsyncTaskLoader<MapManager> {
         if (DEBUG) Log.i(TAG, "+++ loadInBackground() called! +++");
 
         if (DEBUG) Log.i(TAG, "+++ create new Map +++");
-        MapManager mapManager = new MapManager(context, imageView);
-        Map map = mapManager.getMap();
-
-        ArrayList<Polygon> polygons = new ArrayList<>();
-        Cursor cursor = SQLiteHelperObstacle.getInstance(getContext()).select();
-
-        while (cursor.moveToNext()) {
-            Polygon polygon = new Polygon(map, cursor.getString(cursor.getColumnIndex("polygon")));
-            polygons.add(polygon);
-        }
-
-        map.resetPolygon();
-        map.register(polygons);
-
-        Log.i("PolygonLoader", "cursor size : " + cursor.getCount());
-        Log.i("PolygonLoader", "polygons size : " + polygons.size());
+//        MapManager mapManager = new MapManager(context, imageView);
+//        Map map = mapManager.getMap();
+//
+//        ArrayList<Polygon> polygons = new ArrayList<>();
+//        Cursor cursor = SQLiteHelperObstacle.getInstance(getContext()).select();
+//
+//        while (cursor.moveToNext()) {
+//            Polygon polygon = new Polygon(map, cursor.getString(cursor.getColumnIndex("polygon")));
+//            polygons.add(polygon);
+//        }
+//
+//        map.resetPolygon();
+//        map.register(polygons);
+//
+//        Log.i("PolygonLoader", "cursor size : " + cursor.getCount());
+//        Log.i("PolygonLoader", "polygons size : " + polygons.size());
 
         return mapManager;
     }
@@ -59,7 +53,7 @@ public class DrawingLoader extends AsyncTaskLoader<MapManager> {
 
             if (mapManager != null) {
                 if (DEBUG) Log.w(TAG, "+++ polygons.clear() called! +++");
-                mapManager.getMap().resetPolygon();
+//                mapManager.getMap().resetPolygon();
                 return;
             }
         }
@@ -77,7 +71,7 @@ public class DrawingLoader extends AsyncTaskLoader<MapManager> {
         if (oldMapManager != null && oldMapManager != mapManager) {
             if (DEBUG) Log.i(TAG, "+++ Releasing any old data associated with this Loader. +++");
             if (DEBUG) Log.w(TAG, "+++ oldMap.resetPolygon() called! +++");
-            oldMapManager.getMap().resetPolygon();
+//            oldMapManager.getMap().resetPolygon();
         }
 
         super.deliverResult(mapManager);
@@ -111,7 +105,7 @@ public class DrawingLoader extends AsyncTaskLoader<MapManager> {
 
         if (mapManager != null) {
             if (DEBUG) Log.w(TAG, "+++ mMap.resetPolygon() called! +++");
-            mapManager.getMap().resetPolygon(); // release map
+//            mapManager.getMap().resetPolygon(); // release map
             mapManager = null;
         }
     }
@@ -122,8 +116,9 @@ public class DrawingLoader extends AsyncTaskLoader<MapManager> {
 
         super.onCanceled(mapManager);
 
-        if (mapManager != null)
-            mapManager.getMap().resetPolygon();
+        if (mapManager != null) {
+//            mapManager.getMap().resetPolygon();
+        }
     }
 
     @Override

@@ -12,6 +12,11 @@ public class PointD {
         this.y = y;
     }
 
+    public PointD(PointD other) {
+        x = other.x;
+        y = other.y;
+    }
+
     @Override
     public String toString() {
         return hashCode() + " {x:" + x + ", y:" + y + "}";

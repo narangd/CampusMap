@@ -29,8 +29,8 @@ public class Polygon {
 
         for(String point : points) {
             String[] xy = point.split(" ");
-            float x = (Float.parseFloat(xy[0])/70) * (map.getxTileSIZE() * Tile.width);
-            float y = (Float.parseFloat(xy[1])/70) * (map.getyTileSIZE() * Tile.height) ;
+            float x = (Float.parseFloat(xy[0])/70) * (map.getXTileCount() * Tile.SIZE);
+            float y = (Float.parseFloat(xy[1])/70) * (map.getYTileCount() * Tile.SIZE) ;
             Point p = new Point((int)x, (int)y);
             this.points.add(p);
             //Log.d("Polygon", p.toString());
