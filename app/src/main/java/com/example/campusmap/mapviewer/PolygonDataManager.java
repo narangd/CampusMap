@@ -1,7 +1,6 @@
 package com.example.campusmap.mapviewer;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.example.campusmap.database.SQLiteHelperObstacle;
 import com.example.campusmap.form.NMapRectData;
@@ -12,7 +11,6 @@ import com.nhn.android.maps.overlay.NMapPathLineStyle;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class PolygonDataManager {
     private static final String TAG = "PolygonDataManager";
@@ -111,27 +109,29 @@ public class PolygonDataManager {
         pathDates.add(
                 rectData
         );
-        Random random = new Random();
-        int count = 0;
-        NMapPathLineStyle cellLineStyle = new NMapPathLineStyle(mContext);
-        cellLineStyle.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
-        cellLineStyle.setLineColor(0xffffff, 0x00);
-        cellLineStyle.setFillColor(random.nextInt(0xffffff), 0x20);
-
-        for (double x=min.x; x<=max.x; x+=rect_size) {
-            for (double y=min.y; y<=max.y; y+=rect_size) {
-                NMapRectData cell = new NMapRectData();
-                cell.addPathPoint(x, y, NMapPathLineStyle.TYPE_SOLID);
-                cell.addPathPoint(x, y+rect_size, NMapPathLineStyle.TYPE_SOLID);
-                cell.addPathPoint(x+rect_size, y+rect_size, NMapPathLineStyle.TYPE_SOLID);
-                cell.addPathPoint(x+rect_size, y, NMapPathLineStyle.TYPE_SOLID);
-                cell.setPathLineStyle(cellLineStyle);
-                pathDates.add(cell);
-
-                count ++;
-            }
-        }
-        Log.i(TAG, "getBaseRectangles: Count : + " + count);
+//        Random random = new Random();
+//        int count = 0;
+//
+//        for (double x=min.x; x<=max.x; x+=rect_size) {
+//            for (double y=min.y; y<=max.y; y+=rect_size) {
+//                NMapRectData cell = new NMapRectData();
+//                cell.addPathPoint(x, y, NMapPathLineStyle.TYPE_SOLID);
+//                cell.addPathPoint(x, y+rect_size, NMapPathLineStyle.TYPE_SOLID);
+//                cell.addPathPoint(x+rect_size, y+rect_size, NMapPathLineStyle.TYPE_SOLID);
+//                cell.addPathPoint(x+rect_size, y, NMapPathLineStyle.TYPE_SOLID);
+//
+//                NMapPathLineStyle cellLineStyle = new NMapPathLineStyle(mContext);
+//                cellLineStyle.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
+//                cellLineStyle.setLineColor(0xffffff, 0x00);
+//                cellLineStyle.setFillColor(random.nextInt(0xffffff), 0x20);
+//                cell.setPathLineStyle(cellLineStyle);
+//
+//                pathDates.add(cell);
+//
+//                count ++;
+//            }
+//        }
+//        Log.i(TAG, "getBaseRectangles: Count : + " + count);
 
         return pathDates;
     }

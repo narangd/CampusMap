@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,7 +16,12 @@ import com.crashlytics.android.Crashlytics;
 import com.example.campusmap.Internet;
 import com.example.campusmap.R;
 import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
+import com.example.campusmap.database.SQLiteHelperObstacle;
 import com.example.campusmap.fragment.MenuPlannerFragment;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
@@ -58,6 +64,55 @@ public class IntroActivity extends Activity {
         try {
             mAsyncTask = new CampusInfoInsertAsyncTask(IntroActivity.this) {
                 @Override
+                protected Integer doInBackground(String... URLs) {
+                    String json = Internet.connectHttpPage(
+                            "http://203.232.193.178/android/obstacle/make.php",
+                            Internet.CONNECTION_METHOD_GET,
+                            null
+                    );
+
+                    SQLiteHelperObstacle helper = SQLiteHelperObstacle.getInstance(IntroActivity.this);
+                    SQLiteDatabase database = helper.getWritableDatabase();
+                    database.beginTransaction();
+                    int obstacle_index = 0;
+
+                    helper.removeObstacle(database);
+                    try {
+                        JSONObject jsonObject = new JSONObject(json);
+
+                        JSONArray buildingArray = jsonObject.getJSONArray("building");
+                        for (int bi=0; bi<buildingArray.length(); bi++) {
+                            JSONObject building = buildingArray.getJSONObject(bi);
+
+                            JSONArray obstacleArray = building.getJSONArray("obstacle");
+                            for (int oi=0; oi<obstacleArray.length(); oi++) {
+                                JSONObject obstacle = obstacleArray.getJSONObject(oi);
+                                int number = obstacle.getInt("building_id");
+                                double longitude = obstacle.getDouble("longitude");
+                                double latitude = obstacle.getDouble("latitude");
+                                helper.insertObstacle(
+                                        database,
+                                        ++obstacle_index,
+                                        number,
+                                        longitude,
+                                        latitude
+                                );
+                                ++obstacle_index;
+
+                            }
+                        }
+                        database.setTransactionSuccessful();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } finally {
+                        database.endTransaction();
+                    }
+                    Log.i(TAG, "doInBackground: obstacle insert " + obstacle_index);
+
+                    return super.doInBackground(URLs);
+                }
+
+                @Override
                 protected void onPostExecute(Integer version) {
                     super.onPostExecute(version);
 
@@ -86,7 +141,7 @@ public class IntroActivity extends Activity {
 
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             editor.putString(getString(R.string.pref_key_app_version), pInfo.versionName);
-            editor.putBoolean(getString(R.string.pref_key_today_menu_planner),
+            editor.putBoolean(getString(R.string.pref_key_download_recent_app),
                     !preferences.getString(getString(R.string.pref_key_last_skip_date), "-").equals(MenuPlannerFragment.TODAY_DATE)
             );
             if (preferences.getString(getString(R.string.pref_key_app_id), "").equals("")) {

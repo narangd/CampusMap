@@ -1,9 +1,7 @@
 package com.example.campusmap.pathfinding;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.util.Log;
 
 import com.example.campusmap.algorithm.AStar;
@@ -16,7 +14,7 @@ import java.util.Random;
 public class Map {
     private static final String TAG = "ADP_Drawing";
     private static final boolean DEBUG = false;
-    public final double rect_size = 0.0004;
+    public final double rect_size = 0.00005;
 
     private final int xTileCount;
     private final int yTileCount;
@@ -161,13 +159,14 @@ public class Map {
 ////        }
     }
 
-    public void pathFinding() {
+    public List<PointD> pathFinding() {
 //        updateFromPath(Tile.State.NONE);
 //        path.replacePath( findPath(start, goal) );
         path.replacePath(AStar.findPath(this, start, goal));
 //        updateFromPath(Tile.State.WAY);
         start.state = Tile.State.START;
         goal.state = Tile.State.GOAL;
+        return path.simplify();
     }
 
     public void drawTiles(Canvas canvas, Paint paint) {
@@ -178,24 +177,24 @@ public class Map {
 //        }
     }
 
-    public void drawPath(Canvas canvas, Paint paint) {
-        if (path == null || path.size() <= 0) {
-            return;
-        }
-
-        paint.setColor(Color.CYAN);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(10);
-
-        android.graphics.Path path = new android.graphics.Path();
-
-        Point prevPoint = this.path.getPath().pollFirst();
-        path.moveTo(prevPoint.x, prevPoint.y);
-        for (Point point : this.path.getPath()) {
-            path.lineTo(point.x, point.y);
-        }
-        canvas.drawPath(path, paint);
-    }
+//    public void drawPath(Canvas canvas, Paint paint) {
+//        if (path == null || path.size() <= 0) {
+//            return;
+//        }
+//
+//        paint.setColor(Color.CYAN);
+//        paint.setStyle(Paint.Style.STROKE);
+//        paint.setStrokeWidth(10);
+//
+//        android.graphics.Path path = new android.graphics.Path();
+//
+//        Point prevPoint = this.path.getPath().pollFirst();
+//        path.moveTo(prevPoint.x, prevPoint.y);
+//        for (Point point : this.path.getPath()) {
+//            path.lineTo(point.x, point.y);
+//        }
+//        canvas.drawPath(path, paint);
+//    }
 
     public Tile getTile(double x, double y) {
         double delta_x = x - min.x;

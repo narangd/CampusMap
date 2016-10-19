@@ -21,7 +21,6 @@ public class Tile implements Comparable<Tile> {
     public int G; // G:시작점에서 새로운 지점까지 이동비용.
     public int H; // 얻어진 사각형으로 부터 최종목적지점 까지 예상 이동 비용.
     public int F; // F:총비용
-    public Tile parent;
 
     public Tile(double x, double y, int xi, int yi) {
         index = new Point(xi, yi);
@@ -34,7 +33,6 @@ public class Tile implements Comparable<Tile> {
         G = 0;
         H = 0;
         F = 0;
-        parent = null;
         state = (state==State.WALL? State.WALL : State.NONE);
     }
 

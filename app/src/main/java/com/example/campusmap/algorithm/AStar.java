@@ -20,7 +20,7 @@ public class AStar {
      * @param goal goal Tile in Tiles
      * @return List Path
      */
-    public static LinkedList<Point> findPath(Map map, Tile start, Tile goal) {
+    public static LinkedList<Tile> findPath(Map map, Tile start, Tile goal) {
         if(start == null || goal == null)
             return null;
 
@@ -58,7 +58,7 @@ public class AStar {
                     continue;       // This is not a better path.
 
                 // This path is the best until now. Record it!
-                neighbor.parent = current;
+//                neighbor.parent = current;
                 neighbor.G = tentative_gScore;
                 neighbor.H = map.getDistance(goal, neighbor);
                 neighbor.F = neighbor.G + neighbor.H; // F = G + H.
@@ -80,14 +80,18 @@ public class AStar {
         return reconstructPath(cameFrom, goal);
     }
 
-    private static LinkedList<Point> reconstructPath(HashMap<Tile,Tile> cameFrom, Tile current) {
-        LinkedList<Point> path = new LinkedList<>();
-        path.add(current.getIndex());
+    private static LinkedList<Tile> reconstructPath(HashMap<Tile,Tile> cameFrom, Tile current) {
+        LinkedList<Tile> path = new LinkedList<>();
+        path.add(current);
         while (cameFrom.containsKey(current)) {
             current = cameFrom.get(current);
-            path.add(current.getIndex());
+            path.add(current);
         }
         cameFrom.clear();
         return path;
+    }
+
+    interface Serchable {
+        Point getLocation();
     }
 }

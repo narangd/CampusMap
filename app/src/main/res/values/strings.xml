@@ -171,11 +171,11 @@
     <string name="pref_title_app_version">어플 버전</string>
     <string name="pref_description_android_version">v1.11.11</string>
     <string name="pref_category_info">정보</string>
-    <string name="pref_title_today_menu_planer_skip">시작시 오늘의 메뉴 보기</string>
+    <string name="pref_title_download_recent_app">최신버전 다운로드</string>
     <string name="pref_title_db_version">데이터베이스 버전</string>
     <string name="pref_key_db_version">db_version</string>
     <string name="pref_key_app_version">app_version</string>
-    <string name="pref_key_today_menu_planner">today_menu_planner</string>
+    <string name="pref_key_download_recent_app">download_recent_app</string>
     <string name="pref_key_last_skip_date">LastSkipDate</string>
     <string name="pref_key_db_reset">db_reset</string>
     <string name="pref_title_db_reset">데이터베이스 초기화</string>

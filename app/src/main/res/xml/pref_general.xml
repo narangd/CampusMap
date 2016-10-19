@@ -1,8 +1,8 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <SwitchPreference
-        android:key="@string/pref_key_today_menu_planner"
-        android:title="@string/pref_title_today_menu_planer_skip" />
+    <Preference
+        android:key="@string/pref_key_download_recent_app"
+        android:title="@string/pref_title_download_recent_app" />
 
     <Preference
         android:key="@string/pref_key_db_reset"

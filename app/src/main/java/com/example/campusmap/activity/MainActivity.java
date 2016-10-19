@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.campusmap.R;
+import com.example.campusmap.database.SQLiteHelperObstacle;
 import com.example.campusmap.form.InfoLocation;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.MenuPlannerFragment;
@@ -79,9 +80,11 @@ public class MainActivity extends AppCompatActivity
             case  R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
-//            case  R.id.action_only_test:
+            case  R.id.action_only_test:
 //                startActivity(new Intent(this, InfoUpdaterActivity.class));
-//                return true;
+                SQLiteHelperObstacle helper = SQLiteHelperObstacle.getInstance(this);
+                helper.removeObstacle(helper.getWritableDatabase());
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

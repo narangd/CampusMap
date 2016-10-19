@@ -19,4 +19,5 @@
     <color name="recyclerview_background">#F5F5F5</color>
     <color name="Red500">#FFF44336</color>
     <color name="Gray400">#FFBDBDBD</color>
+    <color name="Amber400">#FFFFCA28</color>
 </resources>

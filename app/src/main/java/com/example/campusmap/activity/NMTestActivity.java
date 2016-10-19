@@ -1,6 +1,7 @@
 package com.example.campusmap.activity;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -9,11 +10,17 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.campusmap.R;
+import com.example.campusmap.data.branch.Building;
+import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.form.PointD;
 import com.example.campusmap.mapviewer.NMapPOIflagType;
 import com.example.campusmap.mapviewer.NMapViewerResourceProvider;
@@ -42,6 +49,7 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
     private static final String CLIENT_ID = "4vY170qiGQL_GaGL1BL4";
     private static final String TAG = "NMTestActivity";
     private static final int REQUEST_CODE_GPS = 200;
+    private static final boolean DEBUG = false;
 
     private final NGeoPoint startPoint = new NGeoPoint(128.09389828957734, 35.18079876226641 /*126.978371, 37.5666091*/ /*127.108099, 37.366034*/);
 
@@ -52,18 +60,24 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
     private NMapResourceProvider mMapResourceProvider;
     private NMapOverlayManager mOverlayManager;
     private PolygonDataManager mPolygonDataManager;
+    private LocationManager locationManager;
     private Map map;
 
-    private LocationManager locationManager;
     private NMapPOIitem currentPOI;
     private PointD currentLocation = new PointD();
     private Toast mToast;
+    private ArrayAdapter<Building> mBuildingAdapter;
+    private int destination_building_number;
+    private AlertDialog pathfinding_dialog;
+    private AlertDialog select_dialog;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nmtest);
 
+        createAlertDialog();
         mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
 
         mMapView = (NMapView) findViewById(R.id.map_view);
@@ -122,21 +136,39 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
             criteria.setAltitudeRequired(false);
             criteria.setBearingRequired(false);
 
-            locationManager.getBestProvider(criteria, true);
-            Location locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            Location location = locationNet;
-            if (location == null) {
-                location = locationGPS;
-            }
+            String best_provider = locationManager.getBestProvider(criteria, true);
+            Log.i(TAG, "onCreate: Best Provider : " + best_provider);
+//            Location locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+//            Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            Location location = locationManager.getLastKnownLocation(best_provider);
+//            if (locationGPS != null) {
+//                location = locationGPS;
+//                Log.i(TAG, "onCreate: GPS : " + locationGPS.getAccuracy() + ", " + locationGPS.getLongitude() + ", " + locationGPS.getLatitude());
+//            } else if (locationNet != null){
+//                location = locationNet;
+//                Log.i(TAG, "onCreate: NET : " + locationNet.getAccuracy() + ", " + locationNet.getLongitude() + ", " + locationNet.getLatitude());
+//            }
             if (location != null) {
                 currentLocation.x = location.getLongitude();
                 currentLocation.y = location.getLatitude();
 
                 displayLocation(location.getLongitude(), location.getLatitude());
             } else {
+                currentLocation.x = startPoint.longitude;
+                currentLocation.y = startPoint.latitude;
+
                 displayLocation(startPoint.longitude, startPoint.latitude);
             }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.removeUpdates(locationListener);
         }
     }
 
@@ -170,6 +202,8 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
                     currentLocation.x = finalLoc.getLongitude();
                     currentLocation.y = finalLoc.getLatitude();
                     displayLocation(finalLoc.getLongitude(), finalLoc.getLatitude());
+                } else {
+
                 }
             }
         }
@@ -209,7 +243,6 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
     private NMapView.OnMapViewTouchEventListener onMapViewTouchEventListener = new NMapView.OnMapViewTouchEventListener() {
         @Override
         public void onLongPress(NMapView nMapView, MotionEvent motionEvent) {
-
         }
 
         @Override
@@ -234,7 +267,8 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
 
         @Override
         public void onSingleTapUp(NMapView nMapView, MotionEvent motionEvent) {
-            displayPoint();
+//            displayPoint();
+            pathfinding_dialog.show();
         }
     };
 
@@ -267,6 +301,86 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
         }
     };
 
+    private void createAlertDialog() {
+        View dialog_layout = getLayoutInflater().inflate(R.layout.dialog_select_destination, null);
+        final Button button = (Button) dialog_layout.findViewById(R.id.destination);
+        // Button Click Listener
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                select_dialog.show();
+            }
+        });
+
+        pathfinding_dialog = new AlertDialog.Builder(NMTestActivity.this)
+                .setView(dialog_layout)
+                .setTitle("도착지를 선택해주세요")
+                .setNegativeButton("취소", null)
+                .setPositiveButton("경로찾기", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Random random = new Random();
+
+                        Tile goal = map.getTile(currentLocation.x, currentLocation.y);
+                        map.start = goal;
+                        Log.e(TAG, "onClick: " + currentLocation);
+                        if (goal == null) {
+                            return;
+                        }
+                        Log.e(TAG, "onClick: " + goal.getPoint());
+
+                        Tile tile = map.getTile(random.nextInt(map.getXTileCount()), random.nextInt(map.getYTileCount()));
+                        map.goal = tile;
+
+                        List<PointD> wayPoints = map.pathFinding();
+                        mOverlayManager.clearOverlays();
+                        displayBaseRectangles();
+                        displayLocation(currentLocation.x, currentLocation.y);
+
+                        PointD pointD = tile.getPoint();
+                        NMapPathData pathData = new NMapPathData(4);
+                        pathData.addPathPoint(pointD.x, pointD.y, NMapPathLineStyle.TYPE_SOLID);
+                        pathData.addPathPoint(pointD.x, pointD.y+map.rect_size, NMapPathLineStyle.TYPE_SOLID);
+                        pathData.addPathPoint(pointD.x+map.rect_size, pointD.y+map.rect_size, NMapPathLineStyle.TYPE_SOLID);
+                        pathData.addPathPoint(pointD.x+map.rect_size, pointD.y, NMapPathLineStyle.TYPE_SOLID);
+
+                        NMapPathLineStyle style = new NMapPathLineStyle(NMTestActivity.this);
+                        style.setLineColor(0xffffff, 0x00);
+                        style.setFillColor(0xff0000, 0xaa);
+                        style.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
+                        pathData.setPathLineStyle(style);
+                        mOverlayManager.createPathDataOverlay(pathData);
+
+                        displayPath(wayPoints);
+
+        //                    displayPath();
+                    }
+                })
+                .create();
+
+        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
+        mBuildingAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_list_item_1,
+                helper.getBuildingList()
+        );
+        
+        select_dialog = new AlertDialog.Builder(NMTestActivity.this)
+                .setTitle("리스트에서 도착지를 선택해주세요")
+                .setAdapter(mBuildingAdapter, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Building building = mBuildingAdapter.getItem(which);
+                        if (building != null) {
+                            button.setText(building.getName());
+                            destination_building_number = building.getNumber();
+                        }
+                        dialog.cancel();
+                    }
+                })
+                .create();
+    }
+
     private void displayLocation(double longitude, double latitude) {
         // set POI data
         NMapPOIdata poiData = new NMapPOIdata(1, mMapResourceProvider);
@@ -281,12 +395,30 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
         if (tile == null) {
             mToast.setText("경남과학기술대학교 주위를 벗어난듯 합니다.");
             mToast.show();
-            return;
+            if (longitude < mPolygonDataManager.min.x) {
+                currentLocation.x = mPolygonDataManager.min.x;
+            }
+            if (longitude > mPolygonDataManager.max.x) {
+                currentLocation.x = mPolygonDataManager.max.x;
+            }
+            if (latitude < mPolygonDataManager.min.y) {
+                currentLocation.y = mPolygonDataManager.min.y;
+            }
+            if (latitude > mPolygonDataManager.max.y) {
+                currentLocation.y = mPolygonDataManager.max.y;
+            }
+            tile = map.getTile(currentLocation.x, currentLocation.y);
+            if (tile == null) {
+                return;
+            }
         }
+        map.start = tile;
         PointD pointD = tile.getPoint();
 
-        mToast.setText("타일 인덱스 : " + tile.getX() + "," + tile.getY());
-        mToast.show();
+        if (DEBUG) {
+            mToast.setText("타일 인덱스 : " + tile.getX() + "," + tile.getY());
+            mToast.show();
+        }
 
         NMapPathData pathData = new NMapPathData(4);
         pathData.addPathPoint(pointD.x, pointD.y, NMapPathLineStyle.TYPE_SOLID);
@@ -299,6 +431,15 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
         style.setFillColor(0x00ff00, 0xaa);
         style.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
         pathData.setPathLineStyle(style);
+        mOverlayManager.createPathDataOverlay(pathData);
+    }
+
+    private void displayPath(List<PointD> path) {
+        NMapPathData pathData = new NMapPathData(path.size());
+        for (PointD pointD : path) {
+            pathData.addPathPoint(pointD.x, pointD.y, NMapPathLineStyle.TYPE_SOLID);
+        }
+        pathData.endPathData();
         mOverlayManager.createPathDataOverlay(pathData);
     }
 

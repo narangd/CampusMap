@@ -30,7 +30,6 @@ import android.widget.Toast;
 
 import com.example.campusmap.R;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
-import com.example.campusmap.fragment.MenuPlannerFragment;
 
 public class SettingsActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
     private static final int REQUEST_CODE_READ_SMS = 100;
@@ -91,6 +90,15 @@ public class SettingsActivity extends AppCompatActivity implements ActivityCompa
                 return false;
             }
         });
+        Preference download_button = fragment.findPreference(getString(R.string.pref_key_download_recent_app));
+        download_button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://203.232.193.178/download/android/newest.php"));
+                startActivity(browserIntent);
+                return true;
+            }
+        });
     }
 
     @Override
@@ -107,7 +115,6 @@ public class SettingsActivity extends AppCompatActivity implements ActivityCompa
     public static class GeneralPreferenceFragment extends PreferenceFragment {
         private SharedPreferences sharedPreferences = null;
 
-
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -123,8 +130,8 @@ public class SettingsActivity extends AppCompatActivity implements ActivityCompa
             String AppVersionKey = getString(R.string.pref_key_app_version);
             String AppIDKey = getString(R.string.pref_key_app_id);
             String DBVersionKey = getString(R.string.pref_key_db_version);
-            final String TodayKey = getString(R.string.pref_key_today_menu_planner);
-            final String DateKey = getString(R.string.pref_key_last_skip_date);
+//            final String TodayKey = getString(R.string.pref_key_download_recent_app);
+//            final String DateKey = getString(R.string.pref_key_last_skip_date);
 
             setPreferenceValue(AppVersionKey, "0.0.0");
             setPreferenceValue(AppIDKey, "abcd");
@@ -140,26 +147,26 @@ public class SettingsActivity extends AppCompatActivity implements ActivityCompa
                 bringPhoneNumber();
             }
 
-            final Preference today = findPreference(TodayKey);
-            today.setSummary( sharedPreferences.getString(DateKey, "-") );
-            today.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    if (newValue instanceof Boolean) {
-                        boolean today_menu = (boolean) newValue;
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        if (today_menu) {
-                            editor.putString(DateKey, "-");
-                        } else {
-                            editor.putString(DateKey, MenuPlannerFragment.TODAY_DATE);
-                        }
-                        editor.apply();
-                        today.setSummary(sharedPreferences.getString(DateKey, "-"));
-                        return true;
-                    }
-                    return false;
-                }
-            });
+//            final Preference today = findPreference(TodayKey);
+//            today.setSummary( sharedPreferences.getString(DateKey, "-") );
+//            today.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+//                @Override
+//                public boolean onPreferenceChange(Preference preference, Object newValue) {
+//                    if (newValue instanceof Boolean) {
+//                        boolean today_menu = (boolean) newValue;
+//                        SharedPreferences.Editor editor = sharedPreferences.edit();
+//                        if (today_menu) {
+//                            editor.putString(DateKey, "-");
+//                        } else {
+//                            editor.putString(DateKey, MenuPlannerFragment.TODAY_DATE);
+//                        }
+//                        editor.apply();
+//                        today.setSummary(sharedPreferences.getString(DateKey, "-"));
+//                        return true;
+//                    }
+//                    return false;
+//                }
+//            });
         }
 
         private void setPreferenceValue(String key, String defaultValue) {
