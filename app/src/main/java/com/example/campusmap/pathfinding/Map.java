@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.example.campusmap.algorithm.AStar;
 import com.example.campusmap.form.PointD;
+import com.example.campusmap.form.PolygonD;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +15,12 @@ import java.util.Random;
 public class Map {
     private static final String TAG = "ADP_Drawing";
     private static final boolean DEBUG = false;
-    public final double rect_size = 0.00005;
+    public static final double rect_size = 0.00005;
 
     private final int xTileCount;
     private final int yTileCount;
 
     private Tile[][] tiles;
-    ArrayList<Polygon> obstacle = new ArrayList<>();
 
     private Random random = new Random();
     private Path path = new Path();
@@ -75,28 +75,28 @@ public class Map {
         } while (goal.state == Tile.State.WALL);
     }
 
-    public void register(List<Polygon> polygonList) {
+    public void register(List<PolygonD> polygonList) {
         if (DEBUG) Log.i(TAG, "+++ register() called! +++");
         if (DEBUG) Log.i(TAG, "polygonList size : " + polygonList.size());
-        for (Polygon polygon : polygonList) {
-            obstacle.add(polygon);
-        }
-
-//        for (int h = 0; h< yTileCount; h++) {
-//            for (int w = 0; w< xTileCount; w++) {
-//                for (Polygon polygon : polygonList) {
-//                    Rect rect = tiles[h][w].getRect();
-//                    if ( polygon.contain(new Point(rect.centerX(), rect.centerY())) ) {
-//                        tiles[h][w].state = Tile.State.WALL;
-//                    }
-//                }
-//            }
+//        for (PolygonD polygon : polygonList) {
+//            obstacle.add(polygon);
 //        }
+
+        for (int h = 0; h< yTileCount; h++) {
+            for (int w = 0; w< xTileCount; w++) {
+                for (PolygonD polygon : polygonList) {
+                    Tile tile = tiles[h][w];
+                    if ( polygon.contain(tile.getPoint()) ) {
+                        tiles[h][w].state = Tile.State.WALL;
+                    }
+                }
+            }
+        }
         if (DEBUG) Log.i(TAG, "obstacle size : " + polygonList.size());
     }
 
     public void resetPolygon() {
-        obstacle.clear();
+//        obstacle.clear();
     }
 
     public List<Tile> getNeighborOfTile(Tile tile) {
@@ -164,8 +164,8 @@ public class Map {
 //        path.replacePath( findPath(start, goal) );
         path.replacePath(AStar.findPath(this, start, goal));
 //        updateFromPath(Tile.State.WAY);
-        start.state = Tile.State.START;
-        goal.state = Tile.State.GOAL;
+//        start.state = Tile.State.START;
+//        goal.state = Tile.State.GOAL;
         return path.simplify();
     }
 

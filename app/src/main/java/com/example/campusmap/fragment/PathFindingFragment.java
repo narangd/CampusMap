@@ -175,7 +175,7 @@ public class PathFindingFragment extends Fragment { //  implements LoaderManager
         }
     }
 
-//    // ## Polygon Loader (( LoaderManager.LoaderCallbacks )) ##
+//    // ## PolygonD Loader (( LoaderManager.LoaderCallbacks )) ##
 //    @Override
 //    public Loader<MapManager> onCreateLoader(int id, Bundle args) {
 //        if (DEBUG) Log.i(TAG, "+++ onCreateLoader() called! +++");

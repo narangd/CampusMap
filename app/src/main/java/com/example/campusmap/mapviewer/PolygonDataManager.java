@@ -5,7 +5,9 @@ import android.content.Context;
 import com.example.campusmap.database.SQLiteHelperObstacle;
 import com.example.campusmap.form.NMapRectData;
 import com.example.campusmap.form.PointD;
-import com.example.campusmap.form.Polygon;
+import com.example.campusmap.form.PolygonD;
+import com.example.campusmap.pathfinding.Map;
+import com.example.campusmap.pathfinding.Tile;
 import com.nhn.android.maps.overlay.NMapPathData;
 import com.nhn.android.maps.overlay.NMapPathLineStyle;
 
@@ -18,7 +20,7 @@ public class PolygonDataManager {
 
 
     private Context mContext;
-    private List<Polygon> polygons;
+    private List<PolygonD> polygons;
     public PointD min = new PointD();
     public PointD max = new PointD();
     public final double rect_size = 0.0004;
@@ -35,7 +37,7 @@ public class PolygonDataManager {
         boolean first = true;
 
         // get left top location and right bottom location!
-        for (Polygon polygon : polygons) {
+        for (PolygonD polygon : polygons) {
             for (PointD point : polygon.getPoints()) {
                 if (first) {
                     min.x =  point.x;
@@ -67,7 +69,7 @@ public class PolygonDataManager {
 
     public List<NMapPathData> toNMapPathData() {
         ArrayList<NMapPathData> pathDates = new ArrayList<>();
-        for (Polygon polygon : polygons) {
+        for (PolygonD polygon : polygons) {
             List<PointD> pointDs = polygon.getPoints();
 
             NMapPathData pathData = new NMapPathData(pointDs.size());
@@ -134,5 +136,21 @@ public class PolygonDataManager {
 //        Log.i(TAG, "getBaseRectangles: Count : + " + count);
 
         return pathDates;
+    }
+
+    public NMapPathData getMapTile(Tile tile, NMapPathLineStyle style) {
+        PointD pointD = tile.getPoint();
+        NMapPathData pathData = new NMapPathData(4);
+        pathData.addPathPoint(pointD.x, pointD.y, NMapPathLineStyle.TYPE_SOLID);
+        pathData.addPathPoint(pointD.x, pointD.y+Map.rect_size, NMapPathLineStyle.TYPE_SOLID);
+        pathData.addPathPoint(pointD.x+Map.rect_size, pointD.y+Map.rect_size, NMapPathLineStyle.TYPE_SOLID);
+        pathData.addPathPoint(pointD.x+Map.rect_size, pointD.y, NMapPathLineStyle.TYPE_SOLID);
+        pathData.setPathLineStyle(style);
+
+        return pathData;
+    }
+
+    public List<PolygonD> getPolygons() {
+        return polygons;
     }
 }

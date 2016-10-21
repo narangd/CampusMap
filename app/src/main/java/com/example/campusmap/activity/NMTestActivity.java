@@ -3,6 +3,7 @@ package com.example.campusmap.activity;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -42,6 +43,7 @@ import com.nhn.android.mapviewer.overlay.NMapOverlayManager;
 import com.nhn.android.mapviewer.overlay.NMapPathDataOverlay;
 import com.nhn.android.mapviewer.overlay.NMapResourceProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -70,6 +72,7 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
     private int destination_building_number;
     private AlertDialog pathfinding_dialog;
     private AlertDialog select_dialog;
+    private ArrayList<NMapPathData> basePolygonDatas;
 
 
     @Override
@@ -111,13 +114,10 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
 //        new NMapOverlayManager(this, mMapView, mMap)
         mPolygonDataManager = new PolygonDataManager(this);
 
-        displayPolygon();
-        displayBaseRectangles();
-
 //        MapManager mMapManager = new MapManager(mPolygonDataManager.min, mPolygonDataManager.max);
 //        mMapManager.
         map = new Map(mPolygonDataManager.min, mPolygonDataManager.max);
-
+        map.register(mPolygonDataManager.getPolygons());
 
         // Here, thisActivity is the current activity
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -127,38 +127,38 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_CODE_GPS);
         } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+            setBestLocation();
+        }
 
-            Criteria criteria = new Criteria();
-            criteria.setAccuracy(Criteria.ACCURACY_LOW);
-            criteria.setPowerRequirement(Criteria.POWER_LOW);
-            criteria.setAltitudeRequired(false);
-            criteria.setBearingRequired(false);
+        displayPolygon();
+        displayBaseRectangles();
+    }
 
-            String best_provider = locationManager.getBestProvider(criteria, true);
-            Log.i(TAG, "onCreate: Best Provider : " + best_provider);
-//            Location locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-//            Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            Location location = locationManager.getLastKnownLocation(best_provider);
-//            if (locationGPS != null) {
-//                location = locationGPS;
-//                Log.i(TAG, "onCreate: GPS : " + locationGPS.getAccuracy() + ", " + locationGPS.getLongitude() + ", " + locationGPS.getLatitude());
-//            } else if (locationNet != null){
-//                location = locationNet;
-//                Log.i(TAG, "onCreate: NET : " + locationNet.getAccuracy() + ", " + locationNet.getLongitude() + ", " + locationNet.getLatitude());
-//            }
-            if (location != null) {
-                currentLocation.x = location.getLongitude();
-                currentLocation.y = location.getLatitude();
+    @SuppressWarnings("MissingPermission")
+    private void setBestLocation() {
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 
-                displayLocation(location.getLongitude(), location.getLatitude());
-            } else {
-                currentLocation.x = startPoint.longitude;
-                currentLocation.y = startPoint.latitude;
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_LOW);
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
 
-                displayLocation(startPoint.longitude, startPoint.latitude);
-            }
+        String best_provider = locationManager.getBestProvider(criteria, true);
+        Log.i(TAG, "onCreate: Best Provider : " + best_provider);
+
+        Location location = locationManager.getLastKnownLocation(best_provider);
+        if (location != null) {
+            currentLocation.x = location.getLongitude();
+            currentLocation.y = location.getLatitude();
+
+            displayLocation(location.getLongitude(), location.getLatitude());
+        } else {
+            currentLocation.x = startPoint.longitude;
+            currentLocation.y = startPoint.latitude;
+
+            displayLocation(startPoint.longitude, startPoint.latitude);
         }
     }
 
@@ -177,34 +177,7 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
         if (requestCode == REQUEST_CODE_GPS && grantResults.length >= 2) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                     ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-
-                boolean gps_enabled;
-                boolean network_enabled;
-
-                gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-                Location net_loc = null, gps_loc = null, finalLoc;
-
-                if (gps_enabled)
-                    gps_loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                if (network_enabled)
-                    net_loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
-                if (gps_loc != null && net_loc != null) {
-
-                    if (gps_loc.getAccuracy() >= net_loc.getAccuracy())
-                        finalLoc = gps_loc;
-                    else
-                        finalLoc = net_loc;
-
-                    currentLocation.x = finalLoc.getLongitude();
-                    currentLocation.y = finalLoc.getLatitude();
-                    displayLocation(finalLoc.getLongitude(), finalLoc.getLatitude());
-                } else {
-
-                }
+                setBestLocation();
             }
         }
     }
@@ -277,10 +250,12 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
         public void onLocationChanged(Location location) {
             currentLocation.x = location.getLongitude();
             currentLocation.y = location.getLatitude();
-//            currentPOI.setPoint(new NGeoPoint(location.getLongitude(), location.getLatitude()));
+            map.start = map.getTile(location.getLongitude(), location.getLatitude());
 
             mOverlayManager.clearOverlays();
             displayBaseRectangles();
+            displayPolygon();
+            displayPath(map.pathFinding());
             displayLocation(location.getLongitude(), location.getLatitude());
             Log.i(TAG, "onLocationChanged()");
         }
@@ -321,39 +296,28 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
                     public void onClick(DialogInterface dialog, int which) {
                         Random random = new Random();
 
-                        Tile goal = map.getTile(currentLocation.x, currentLocation.y);
-                        map.start = goal;
+                        Tile start = map.getTile(currentLocation.x, currentLocation.y);
                         Log.e(TAG, "onClick: " + currentLocation);
-                        if (goal == null) {
+                        if (start == null) {
                             return;
                         }
-                        Log.e(TAG, "onClick: " + goal.getPoint());
+                        Log.e(TAG, "onClick: " + start.getPoint());
 
-                        Tile tile = map.getTile(random.nextInt(map.getXTileCount()), random.nextInt(map.getYTileCount()));
-                        map.goal = tile;
-
-                        List<PointD> wayPoints = map.pathFinding();
-                        mOverlayManager.clearOverlays();
-                        displayBaseRectangles();
-                        displayLocation(currentLocation.x, currentLocation.y);
-
-                        PointD pointD = tile.getPoint();
-                        NMapPathData pathData = new NMapPathData(4);
-                        pathData.addPathPoint(pointD.x, pointD.y, NMapPathLineStyle.TYPE_SOLID);
-                        pathData.addPathPoint(pointD.x, pointD.y+map.rect_size, NMapPathLineStyle.TYPE_SOLID);
-                        pathData.addPathPoint(pointD.x+map.rect_size, pointD.y+map.rect_size, NMapPathLineStyle.TYPE_SOLID);
-                        pathData.addPathPoint(pointD.x+map.rect_size, pointD.y, NMapPathLineStyle.TYPE_SOLID);
+                        map.initRandomToStartGoalTile();
+                        map.start = start;
 
                         NMapPathLineStyle style = new NMapPathLineStyle(NMTestActivity.this);
                         style.setLineColor(0xffffff, 0x00);
                         style.setFillColor(0xff0000, 0xaa);
                         style.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
-                        pathData.setPathLineStyle(style);
+                        NMapPathData pathData = mPolygonDataManager.getMapTile(map.goal, style);
+
+                        mOverlayManager.clearOverlays();
                         mOverlayManager.createPathDataOverlay(pathData);
-
-                        displayPath(wayPoints);
-
-        //                    displayPath();
+                        displayBaseRectangles();
+                        displayPolygon();
+                        displayPath(map.pathFinding());
+                        displayLocation(currentLocation.x, currentLocation.y);
                     }
                 })
                 .create();
@@ -413,24 +377,17 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
             }
         }
         map.start = tile;
-        PointD pointD = tile.getPoint();
 
         if (DEBUG) {
             mToast.setText("타일 인덱스 : " + tile.getX() + "," + tile.getY());
             mToast.show();
         }
 
-        NMapPathData pathData = new NMapPathData(4);
-        pathData.addPathPoint(pointD.x, pointD.y, NMapPathLineStyle.TYPE_SOLID);
-        pathData.addPathPoint(pointD.x, pointD.y+map.rect_size, NMapPathLineStyle.TYPE_SOLID);
-        pathData.addPathPoint(pointD.x+map.rect_size, pointD.y+map.rect_size, NMapPathLineStyle.TYPE_SOLID);
-        pathData.addPathPoint(pointD.x+map.rect_size, pointD.y, NMapPathLineStyle.TYPE_SOLID);
-
-        NMapPathLineStyle style = new NMapPathLineStyle(this);
+        NMapPathLineStyle style = new NMapPathLineStyle(NMTestActivity.this);
         style.setLineColor(0xffffff, 0x00);
         style.setFillColor(0x00ff00, 0xaa);
         style.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
-        pathData.setPathLineStyle(style);
+        NMapPathData pathData = mPolygonDataManager.getMapTile(tile, style);
         mOverlayManager.createPathDataOverlay(pathData);
     }
 
@@ -455,6 +412,28 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
             pathDates = mPolygonDataManager.getBaseRectangles();
         }
         mOverlayManager.createPathDataOverlay(pathDates);
+
+        if (basePolygonDatas == null) {
+            basePolygonDatas = new ArrayList<>();
+
+            NMapPathLineStyle style = new NMapPathLineStyle(this);
+            style.setLineColor(0xffffff, 0x00);
+            style.setFillColor(Color.YELLOW, 0xaa);
+            style.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
+
+            for (int h=0; h<map.getYTileCount(); h++) {
+                for (int w=0; w<map.getXTileCount(); w++) {
+                    Tile tile = map.getTile(w, h);
+                    if (tile.state == Tile.State.WALL) {
+                        NMapPathData pathData = mPolygonDataManager.getMapTile(tile, style);
+                        basePolygonDatas.add(pathData);
+                    }
+                }
+            }
+        }
+//        if (DEBUG) {
+            mOverlayManager.createPathDataOverlay(basePolygonDatas);
+//        }
     }
 
     private void displayPoint() {

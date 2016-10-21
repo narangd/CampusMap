@@ -29,11 +29,11 @@ public class DrawingLoader extends AsyncTaskLoader<MapManager> {
 //        MapManager mapManager = new MapManager(context, imageView);
 //        Map map = mapManager.getMap();
 //
-//        ArrayList<Polygon> polygons = new ArrayList<>();
+//        ArrayList<PolygonD> polygons = new ArrayList<>();
 //        Cursor cursor = SQLiteHelperObstacle.getInstance(getContext()).select();
 //
 //        while (cursor.moveToNext()) {
-//            Polygon polygon = new Polygon(map, cursor.getString(cursor.getColumnIndex("polygon")));
+//            PolygonD polygon = new PolygonD(map, cursor.getString(cursor.getColumnIndex("polygon")));
 //            polygons.add(polygon);
 //        }
 //

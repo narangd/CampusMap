@@ -23,8 +23,9 @@ android {
         applicationId "com.example.campusmap"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 24
+        versionCode 29
         versionName "1.4.9"
+        setProperty("archivesBaseName", "campusmap(v$versionName)")
     }
     buildTypes {
         release {

@@ -38,8 +38,8 @@ public class PolygonLoader extends AsyncTaskLoader<ArrayList<Polygon>> {
             polygons.add(polygon);
         }
 
-        map.resetPolygon();
-        map.register(polygons);
+//        map.resetPolygon();
+//        map.register(polygons);
 
         Log.i("PolygonLoader", "cursor size : " + cursor.getCount());
         Log.i("PolygonLoader", "polygons size : " + polygons.size());

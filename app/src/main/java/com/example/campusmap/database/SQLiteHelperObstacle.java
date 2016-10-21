@@ -9,7 +9,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.example.campusmap.form.PointD;
-import com.example.campusmap.form.Polygon;
+import com.example.campusmap.form.PolygonD;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -132,8 +132,8 @@ public class SQLiteHelperObstacle extends com.example.campusmap.database.SQLiteO
         return headers;
     }
 
-    public List<Polygon> getObstacleList() {
-        LinkedList<Polygon> polygons = new LinkedList<>();
+    public List<PolygonD> getObstacleList() {
+        LinkedList<PolygonD> polygons = new LinkedList<>();
         Cursor cursor = getReadableDatabase().query(
                 ObstacleEntry.TABLE_NAME,
                 null, null, null, null, null,
@@ -145,7 +145,7 @@ public class SQLiteHelperObstacle extends com.example.campusmap.database.SQLiteO
             int number = cursor.getInt(cursor.getColumnIndex(ObstacleEntry.COLUMN_NAME_BUILDING_NUMBER));
 
             if (number != prevNumber) {
-                polygons.add( new Polygon(number) );
+                polygons.add( new PolygonD(number) );
             }
 
             polygons.getLast().addPoint(
