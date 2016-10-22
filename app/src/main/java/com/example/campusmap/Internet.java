@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,7 @@ public class Internet {
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
-    public static String connectHttpPage(String urlString, String method, Map data) {
+    public static String connectHttpPage(String urlString, String method, Map data) throws SocketTimeoutException {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new IllegalThreadStateException("메인 쓰레드에서 인터넷에 접속할 수 없습니다.");
         }
@@ -82,11 +83,15 @@ public class Internet {
 
             return result.toString();
 
+        } catch (SocketTimeoutException e) {
+            throw new SocketTimeoutException();
+            // 함수 외부에서 이것을 받게 하기위함
+            // 이것을 하지 않는다면 IOException 에서 가져감.
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return null;
+        return "";
     }
 
     public static void delay500ms() {

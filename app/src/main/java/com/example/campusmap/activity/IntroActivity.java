@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.SocketTimeoutException;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 
@@ -65,11 +66,16 @@ public class IntroActivity extends Activity {
             mAsyncTask = new CampusInfoInsertAsyncTask(IntroActivity.this) {
                 @Override
                 protected Integer doInBackground(String... URLs) {
-                    String json = Internet.connectHttpPage(
-                            "http://203.232.193.178/android/obstacle/make.php",
-                            Internet.CONNECTION_METHOD_GET,
-                            null
-                    );
+                    String json = null;
+                    try {
+                        json = Internet.connectHttpPage(
+                                "http://203.232.193.178/android/obstacle/make.php",
+                                Internet.CONNECTION_METHOD_GET,
+                                null
+                        );
+                    } catch (SocketTimeoutException e) {
+                        json = "";
+                    }
 
                     SQLiteHelperObstacle helper = SQLiteHelperObstacle.getInstance(IntroActivity.this);
                     SQLiteDatabase database = helper.getWritableDatabase();
@@ -103,7 +109,7 @@ public class IntroActivity extends Activity {
                         }
                         database.setTransactionSuccessful();
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "doInBackground: JSONException(" + e.getMessage() + "), \"" + json + "\"");
                     } finally {
                         database.endTransaction();
                     }
@@ -118,6 +124,14 @@ public class IntroActivity extends Activity {
 
                     mAsyncTask = null;
                     postExecute(version);
+                }
+
+                @Override
+                protected void onCancelled() {
+                    super.onCancelled();
+
+                    mHandler = new Handler();
+                    mHandler.postDelayed(startMainActivity, 500);
                 }
             }.execute(
                     "http://203.232.193.178/download/android/campusmap.php"

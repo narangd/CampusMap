@@ -2,7 +2,6 @@ package com.example.campusmap.activity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -36,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -163,14 +163,19 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
                 dataMap.put("userid", userid);
                 dataMap.put("id", String.valueOf(mID));
 
-                String result = Internet.connectHttpPage(
-                        "http://203.232.193.178/campusmap/updater_list.php",
-                        Internet.CONNECTION_METHOD_GET,
-                        dataMap
-                );
+                String json = null;
+                try {
+                    json = Internet.connectHttpPage(
+                            "http://203.232.193.178/campusmap/updater_list.php",
+                            Internet.CONNECTION_METHOD_GET,
+                            dataMap
+                    );
+                } catch (SocketTimeoutException e) {
+                    json = "";
+                }
 
                 try {
-                    JSONArray updaterArray = new JSONArray(result);
+                    JSONArray updaterArray = new JSONArray(json);
                     for (int i=0; i<updaterArray.length(); i++) {
                         JSONObject updaterObject = updaterArray.getJSONObject(i);
 
@@ -183,7 +188,7 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
                         updaters.add( new Updater(id, title, contents, votes, voted) );
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Log.e("InfoUpdaterActivity", "doInBackground: JSONException(" + e.getMessage() + "), \"" + json + "\"");
                 }
 
                 return updaters;
@@ -279,11 +284,16 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
                 dataMap.put("tag", mInfoLocation.getTag());
                 dataMap.put("id", String.valueOf(mID));
 
-                return Internet.connectHttpPage(
-                        "http://203.232.193.178/campusmap/updater.php",
-                        Internet.CONNECTION_METHOD_POST,
-                        dataMap
-                );
+                try {
+                    return Internet.connectHttpPage(
+                            "http://203.232.193.178/campusmap/updater.php",
+                            Internet.CONNECTION_METHOD_POST,
+                            dataMap
+                    );
+                } catch (SocketTimeoutException e) {
+                    e.printStackTrace();
+                    return "";
+                }
             }
 
             @Override
@@ -327,11 +337,7 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(updater.getTitle());
         builder.setMessage(updater.getContents());
-        builder.setPositiveButton("닫기", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
+        builder.setPositiveButton("닫기", null);
         builder.show();
     }
 }

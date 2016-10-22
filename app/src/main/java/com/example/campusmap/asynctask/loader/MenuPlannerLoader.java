@@ -36,6 +36,7 @@ public class MenuPlannerLoader extends AsyncTaskLoader<Pair<Integer,ArrayList<Me
         }
 
         try {
+            // 네트워크가 않좋거나 끊어졌을시 발생할 가능성이 있는 Exception : UnknownHostException ("www1.gntech.ac.kr")
             Document document = Jsoup.connect(MenuPlannerFragment.GNTechURL).get();
             Elements tags = document.select("table");
             Elements ths = tags.get(1).select("thead>tr>th");

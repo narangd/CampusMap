@@ -18,6 +18,7 @@ import com.example.campusmap.Internet;
 import com.example.campusmap.R;
 import com.example.campusmap.form.Updater;
 
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -81,16 +82,22 @@ public class UpdaterAdapter extends ArrayAdapter<Updater> {
                         data.put("userid", userid);
                         data.put("vote", currentUpdater.isVoted() ? "1" : "0"); // true : 사용자가 이미 공감한 상태
 
-                        String result = Internet.connectHttpPage(
-                                "http://203.232.193.178/campusmap/updater_vote.php",
-                                Internet.CONNECTION_METHOD_POST,
-                                data
-                        );
+                        String result = null;
+                        try {
+                            result = Internet.connectHttpPage(
+                                    "http://203.232.193.178/campusmap/updater_vote.php",
+                                    Internet.CONNECTION_METHOD_POST,
+                                    data
+                            );
+                        } catch (SocketTimeoutException e) {
+                            result = null;
+                        }
 
 //                        Log.i(TAG, "doInBackground: result : " + result);
                         if (result != null && result.equals("true")) {
                             currentUpdater.setVoted(!currentUpdater.isVoted());
                         }
+                        // 실패하면(네트워크상의에러. 서버에러, ...) 그대로 유지
 
                         // 빠른 반복 전송을 막기위함.
                         Internet.delay500ms();
