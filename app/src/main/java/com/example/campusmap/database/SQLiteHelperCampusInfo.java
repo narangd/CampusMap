@@ -484,5 +484,30 @@ public class SQLiteHelperCampusInfo extends com.example.campusmap.database.SQLit
         return mainRooms;
     }
 
+    public Cursor searchBuildingInfoName(String newText) {
+        SQLiteDatabase database = getReadableDatabase();
+        newText = "%" + newText + "%";
 
+        /* (SELECT id, name, 0 floor_id, 0 room_id
+            FROM `building`
+            WHERE name LIKE "%1%"
+            ORDER BY name ASC)
+            UNION
+            (SELECT room.id, room.name, floor_id, room.id room_id
+            FROM room
+            WHERE name LIKE "%1%"
+            ORDER BY room.name ASC)
+        */
+        return database.rawQuery("SELECT " +
+                BuildingEntry._ID + COMMA_SEP + BuildingEntry.COLUMN_NAME_NAME +
+                " FROM " + BuildingEntry.TABLE_NAME +
+                " WHERE " + BuildingEntry.COLUMN_NAME_NAME + " LIKE ?" +
+                " UNION ALL SELECT " +
+                RoomEntry._ID + COMMA_SEP + RoomEntry.COLUMN_NAME_NAME +
+                " FROM " + RoomEntry.TABLE_NAME +
+                " WHERE " + RoomEntry.COLUMN_NAME_NAME + " LIKE ?" +
+                " ORDER BY " + RoomEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING + "",
+                new String[]{newText, newText}
+        );
+    }
 }

@@ -20,11 +20,27 @@ public class SQLiteHelperObstacle extends com.example.campusmap.database.SQLiteO
     private static final String DATABASE_NAME = "campus.db";
     private static SQLiteHelperObstacle instance;
 
-    private static final int VERSION = 8;
+    private static final int VERSION = 9;
     private static final String TABLE_NAME = "CompusOstacle";
 
     public static class ObstacleEntry implements BaseColumns {
         public static final String TABLE_NAME = "Polygon";
+        public static final String COLUMN_NAME_BUILDING_NUMBER = "bnumber";
+        public static final String COLUMN_NAME_X = "x";
+        public static final String COLUMN_NAME_Y = "y";
+        private static final String SQL_CREATE_TABLE =
+                CREATE_TABLE_HEAD + TABLE_NAME + COLUMN_START +
+                        _ID + TYPE_INTEGER + PRIMARY_KEY + COMMA_SEP +
+                        COLUMN_NAME_BUILDING_NUMBER + TYPE_INTEGER + COMMA_SEP +
+                        COLUMN_NAME_X + TYPE_FLOAT + COMMA_SEP +
+                        COLUMN_NAME_Y + TYPE_FLOAT +
+                        COLUMN_END;
+        private static final String SQL_DELETE_TABLE =
+                DELETE_TABLE_HEAD + IF_EXISTS + TABLE_NAME;
+    }
+
+    public static class EntranceEntry implements BaseColumns {
+        public static final String TABLE_NAME = "Entrance";
         public static final String COLUMN_NAME_BUILDING_NUMBER = "bnumber";
         public static final String COLUMN_NAME_X = "x";
         public static final String COLUMN_NAME_Y = "y";
@@ -68,6 +84,7 @@ public class SQLiteHelperObstacle extends com.example.campusmap.database.SQLiteO
 
         //
         db.execSQL( ObstacleEntry.SQL_CREATE_TABLE );
+        db.execSQL( EntranceEntry.SQL_CREATE_TABLE );
     }
 
     @Override
@@ -79,6 +96,8 @@ public class SQLiteHelperObstacle extends com.example.campusmap.database.SQLiteO
         // Obstacle
 //        db.delete(ObstacleEntry.TABLE_NAME, "", null);
         db.execSQL(ObstacleEntry.SQL_DELETE_TABLE);
+        db.execSQL(EntranceEntry.SQL_DELETE_TABLE);
+
         onCreate(db);
     }
 
@@ -103,8 +122,21 @@ public class SQLiteHelperObstacle extends com.example.campusmap.database.SQLiteO
         return db.insert(ObstacleEntry.TABLE_NAME, null, values);
     }
 
+    public long insertEntrance(SQLiteDatabase db, int id, int number, double x, double y) {
+        ContentValues values = new ContentValues();
+        values.put(EntranceEntry._ID, id);
+        values.put(EntranceEntry.COLUMN_NAME_BUILDING_NUMBER, number);
+        values.put(EntranceEntry.COLUMN_NAME_X, x);
+        values.put(EntranceEntry.COLUMN_NAME_Y, y);
+        return db.insert(EntranceEntry.TABLE_NAME, null, values);
+    }
+
     public int removeObstacle(SQLiteDatabase db) {
         return db.delete(ObstacleEntry.TABLE_NAME, null, null);
+    }
+
+    public int removeEntrance(SQLiteDatabase db) {
+        return db.delete(EntranceEntry.TABLE_NAME, null, null);
     }
 
     public List<Pair<Integer, Integer>> getObstacleHeader() {
@@ -158,6 +190,31 @@ public class SQLiteHelperObstacle extends com.example.campusmap.database.SQLiteO
 
         cursor.close();
         return polygons;
+    }
+
+    public PointD getEntrance(int building_number) {
+        PointD pointD;
+        Cursor cursor = getReadableDatabase().query(
+                EntranceEntry.TABLE_NAME,
+                null,
+                EntranceEntry.COLUMN_NAME_BUILDING_NUMBER + "=?",
+                new String[]{String.valueOf(building_number)},
+                null, null,
+                EntranceEntry.COLUMN_NAME_BUILDING_NUMBER + ORDER_BY_ASCENDING + COMMA_SEP +
+                        ObstacleEntry._ID + ORDER_BY_ASCENDING
+        );
+
+        if (cursor.moveToNext()) {
+            double x = cursor.getDouble(cursor.getColumnIndex(ObstacleEntry.COLUMN_NAME_X));
+            double y = cursor.getDouble(cursor.getColumnIndex(ObstacleEntry.COLUMN_NAME_Y));
+            pointD = new PointD(x, y);
+        } else {
+            return null;
+        }
+
+        cursor.close();
+
+        return pointD;
     }
 
     public Pair<PointD,PointD> getMinMax() {

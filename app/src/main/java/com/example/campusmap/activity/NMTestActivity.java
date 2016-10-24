@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.example.campusmap.R;
 import com.example.campusmap.data.branch.Building;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.database.SQLiteHelperObstacle;
 import com.example.campusmap.form.PointD;
 import com.example.campusmap.mapviewer.NMapPOIflagType;
 import com.example.campusmap.mapviewer.NMapViewerResourceProvider;
@@ -281,6 +282,7 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
     };
 
     private void createAlertDialog() {
+        final SQLiteHelperObstacle helperObstacle = SQLiteHelperObstacle.getInstance(this);
         View dialog_layout = getLayoutInflater().inflate(R.layout.dialog_select_destination, null);
         final Button button = (Button) dialog_layout.findViewById(R.id.destination);
         // Button Click Listener
@@ -307,7 +309,15 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
                         }
                         Log.e(TAG, "onClick: " + start.getPoint());
 
-                        map.initRandomToStartGoalTile();
+//                        map.initRandomToStartGoalTile();
+                        PointD dest = helperObstacle.getEntrance(destination_building_number);
+                        Log.i(TAG, "pathfinding onClick: number:" + destination_building_number);
+                        if (dest == null) {
+                            map.initRandomToStartGoalTile();
+                        } else {
+                            map.goal = map.getTile(dest.x, dest.y);
+                            Log.i(TAG, "pathfinding onClick: goal:"+map.goal);
+                        }
                         map.start = start;
 
                         NMapPathLineStyle style = new NMapPathLineStyle(NMTestActivity.this);
@@ -417,7 +427,7 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
         }
         mOverlayManager.createPathDataOverlay(pathDates);
 
-        if (basePolygonDatas == null) {
+        if (basePolygonDatas == null && DEBUG) {
             basePolygonDatas = new ArrayList<>();
 
             NMapPathLineStyle style = new NMapPathLineStyle(this);

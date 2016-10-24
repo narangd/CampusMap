@@ -86,15 +86,19 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
         String ROOM = SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME;
         SQLiteDatabase database = helper.getWritableDatabase();
 //        String result = bringJSON(URLs[0]);
-        String result = null;
+        String result;
         try {
+            HashMap<String,String> parameters = new HashMap<>();
+            parameters.put("version", String.valueOf(version));
             result = Internet.connectHttpPage(
                     URLs[0],
                     Internet.CONNECTION_METHOD_GET,
-                    new HashMap()
+                    parameters
             );
-        } catch (SocketTimeoutException ignored) {
-
+//            Log.i(TAG, "doInBackground: json length " + json.length() + " contents " + json);
+        } catch (SocketTimeoutException e) {
+            Log.e(TAG, "doInBackground: timeout ");
+            result = null;
         }
         int version = 0;
 

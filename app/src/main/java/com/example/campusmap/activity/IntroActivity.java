@@ -81,7 +81,7 @@ public class IntroActivity extends Activity {
                     SQLiteHelperObstacle helper = SQLiteHelperObstacle.getInstance(IntroActivity.this);
                     SQLiteDatabase database = helper.getWritableDatabase();
                     database.beginTransaction();
-                    int obstacle_index = 0;
+                    int obstacle_index = 0, entrance_index = 0;
 
                     helper.removeObstacle(database);
                     try {
@@ -104,7 +104,22 @@ public class IntroActivity extends Activity {
                                         longitude,
                                         latitude
                                 );
-                                ++obstacle_index;
+
+                            }
+
+                            JSONArray entranceArray = building.getJSONArray("entrance");
+                            for (int ei=0; ei<entranceArray.length(); ei++) {
+                                JSONObject entrance = entranceArray.getJSONObject(ei);
+                                int number = entrance.getInt("building_id");
+                                double longitude = entrance.getDouble("longitude");
+                                double latitude = entrance.getDouble("latitude");
+                                helper.insertEntrance(
+                                        database,
+                                        ++entrance_index,
+                                        number,
+                                        longitude,
+                                        latitude
+                                );
 
                             }
                         }
@@ -115,6 +130,7 @@ public class IntroActivity extends Activity {
                         database.endTransaction();
                     }
                     Log.i(TAG, "doInBackground: obstacle insert " + obstacle_index);
+                    Log.i(TAG, "doInBackground: obstacle insert " + entrance_index);
 
                     return super.doInBackground(URLs);
                 }

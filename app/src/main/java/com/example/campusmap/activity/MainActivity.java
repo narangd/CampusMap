@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -16,7 +17,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.campusmap.R;
-import com.example.campusmap.database.SQLiteHelperObstacle;
 import com.example.campusmap.form.InfoLocation;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.MenuPlannerFragment;
@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity
 
     private SearchView searchView;
     private MenuItem searchItem;
+    private SimpleCursorAdapter mAdapter;
 
     private String previousQuery = "";
 
@@ -68,6 +69,29 @@ public class MainActivity extends AppCompatActivity
 
         searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setOnQueryTextListener(this);
+//        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+//            @Override
+//            public boolean onSuggestionSelect(int position) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onSuggestionClick(int position) {
+//                Cursor cursor = (Cursor) mAdapter.getItem(position);
+//                String select_query = cursor.getString(cursor.getColumnIndex("name"));
+//                searchView.setQuery(select_query, true);
+//                return true;
+//            }
+//        });
+//        mAdapter = new SimpleCursorAdapter(
+//                this,
+//                android.R.layout.simple_list_item_1,
+//                null,
+//                new String[]{SQLiteHelperCampusInfo.BuildingEntry.COLUMN_NAME_NAME},
+//                new int[]{android.R.id.text1},
+//                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER
+//        );
+//        searchView.setSuggestionsAdapter(mAdapter);
 
         return true;
     }
@@ -103,7 +127,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        return false;
+//        Log.i(TAG, "onQueryTextChange: new text : \"" + newText + "\"");
+//        if (newText.isEmpty()) return false;
+//        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(this);
+//        Cursor cursor = helper.searchBuildingInfoName(newText);
+//        Log.i(TAG, "onQueryTextChange: cursor size : " + cursor.getColumnCount());
+//        mAdapter.changeCursor(cursor);
+        return true;
     }
 
     @Override
