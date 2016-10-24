@@ -39,13 +39,19 @@ public class Map {
 
         tiles = new Tile[yTileCount][xTileCount];
 
-        int xIndex, yIndex=0;
 
-        for(double y=min.y; y<=max.y; y+=rect_size,yIndex++)
-        {
-            xIndex = 0;
-            for(double x = min.x; x<max.x; x+=rect_size,xIndex++)
-            {
+//        for(double y=min.y; y<=max.y; y+=rect_size,yIndex++)
+//        {
+//            xIndex = 0;
+//            for(double x = min.x; x<max.x; x+=rect_size,xIndex++)
+//            {
+//                tiles[yIndex][xIndex] = new Tile(x, y, xIndex, yIndex);
+//            }
+//        }
+        double x = min.x, y = min.y;
+        for (int xIndex = 0; xIndex < xTileCount; xIndex ++, x += rect_size) {
+            y = min.y;
+            for (int yIndex = 0; yIndex < yTileCount; yIndex ++, y += rect_size) {
                 tiles[yIndex][xIndex] = new Tile(x, y, xIndex, yIndex);
             }
         }

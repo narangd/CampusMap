@@ -1,6 +1,7 @@
 package com.example.campusmap.activity;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -133,6 +134,11 @@ public class IntroActivity extends Activity {
                     mHandler = new Handler();
                     mHandler.postDelayed(startMainActivity, 500);
                 }
+
+                @Override
+                public void onCancel(DialogInterface dialogInterface) {
+                    super.onCancel(dialogInterface);
+                }
             }.execute(
                     "http://203.232.193.178/download/android/campusmap.php"
             );
@@ -193,6 +199,7 @@ public class IntroActivity extends Activity {
         if (mHandler != null) {
             mHandler.removeCallbacks(startMainActivity);
         }
+
         super.onBackPressed();
     }
 

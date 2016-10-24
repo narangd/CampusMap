@@ -65,6 +65,11 @@ public class PolygonDataManager {
         min.y -= EXTERNAL_GAP;
         max.x += EXTERNAL_GAP;
         max.y += EXTERNAL_GAP;
+
+        if (first) {
+            min = null;
+            max = null;
+        }
     }
 
     public List<NMapPathData> toNMapPathData() {

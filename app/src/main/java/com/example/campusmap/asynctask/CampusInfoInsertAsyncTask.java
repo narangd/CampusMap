@@ -2,6 +2,7 @@ package com.example.campusmap.asynctask;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.XmlResourceParser;
 import android.database.sqlite.SQLiteConstraintException;
@@ -11,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import com.example.campusmap.Internet;
 import com.example.campusmap.R;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 
@@ -29,10 +31,11 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.HashMap;
 
-public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Integer> {
+public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Integer> implements DialogInterface.OnCancelListener {
     private static final String TAG = "CampusInfoInsertAsync";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String ns = null;
     private static final int TIMEOUT = 1000 * 5;
 
@@ -66,6 +69,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
         mDlg.setTitle("데이터베이스를 구성중입니다");
         mDlg.setMessage("읽어오는 중입니다");
         mDlg.setIndeterminate(true);
+        mDlg.setOnCancelListener(this);
         mDlg.show();
     }
 
@@ -81,7 +85,17 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
         String FLOOR = SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME;
         String ROOM = SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME;
         SQLiteDatabase database = helper.getWritableDatabase();
-        String result = bringJSON(URLs[0]);
+//        String result = bringJSON(URLs[0]);
+        String result = null;
+        try {
+            result = Internet.connectHttpPage(
+                    URLs[0],
+                    Internet.CONNECTION_METHOD_GET,
+                    new HashMap()
+            );
+        } catch (SocketTimeoutException ignored) {
+
+        }
         int version = 0;
 
         if (isCancelled()) {
@@ -134,7 +148,6 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
             connection.setRequestMethod("GET");
             connection.setDoOutput(true);
             connection.setDoInput(true);
-//            connection.connect();
 
             OutputStream os = connection.getOutputStream();
             OutputStreamWriter writer = new OutputStreamWriter(os);
@@ -403,8 +416,6 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
 
     }
 
-
-
     @Override
     protected void onPostExecute(Integer version) {
         super.onPostExecute(version);
@@ -417,6 +428,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
     protected void onCancelled() {
         super.onCancelled();
         if (DEBUG) Log.i(TAG, "onCancelled: called!!");
+//        if (mConnection != null) mConnection.disconnect();
         mDlg.dismiss();
         alertDialog.dismiss();
     }
@@ -425,6 +437,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
     protected void onCancelled(Integer version) {
         super.onCancelled(version);
         if (DEBUG) Log.i(TAG, "onCancelled: called!! ("+version+")");
+//        if (mConnection != null) mConnection.disconnect();
         mDlg.dismiss();
         alertDialog.dismiss();
     }
@@ -453,5 +466,10 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
             }
         }
         return count;
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialogInterface) {
+        this.cancel(false);
     }
 }

@@ -28,7 +28,10 @@ public class Path {
 
         if (path.size() > 0) {
             way_point.add(path.get(0).getPoint());
+        } else {
+            return way_point;
         }
+        
         for (int i=1; i<path.size(); i++) {
             Point direction = new Point(
                     path.get(i).getX() - path.get(i-1).getX(),

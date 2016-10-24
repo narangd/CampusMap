@@ -116,6 +116,10 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
 
 //        MapManager mMapManager = new MapManager(mPolygonDataManager.min, mPolygonDataManager.max);
 //        mMapManager.
+        if (mPolygonDataManager.min == null || mPolygonDataManager.max == null) {
+            mPolygonDataManager.min = new PointD(startPoint.longitude, startPoint.latitude);
+            mPolygonDataManager.max = new PointD(startPoint.longitude, startPoint.latitude);
+        }
         map = new Map(mPolygonDataManager.min, mPolygonDataManager.max);
         map.register(mPolygonDataManager.getPolygons());
 
@@ -424,7 +428,7 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
             for (int h=0; h<map.getYTileCount(); h++) {
                 for (int w=0; w<map.getXTileCount(); w++) {
                     Tile tile = map.getTile(w, h);
-                    if (tile.state == Tile.State.WALL) {
+                    if (tile != null && tile.state == Tile.State.WALL) {
                         NMapPathData pathData = mPolygonDataManager.getMapTile(tile, style);
                         basePolygonDatas.add(pathData);
                     }

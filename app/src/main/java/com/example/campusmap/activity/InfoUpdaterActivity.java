@@ -156,14 +156,14 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
             protected List<Updater> doInBackground(Void... params) {
                 ArrayList<Updater> updaters = new ArrayList<>();
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(InfoUpdaterActivity.this);
-                String userid = preferences.getString(getString(R.string.pref_key_app_id), "");
+                String user_id = preferences.getString(getString(R.string.pref_key_app_id), "");
 
                 HashMap<String,String> dataMap = new HashMap<>();
                 dataMap.put("tag", mInfoLocation.getTag());
-                dataMap.put("userid", userid);
+                dataMap.put("userid", user_id);
                 dataMap.put("id", String.valueOf(mID));
 
-                String json = null;
+                String json;
                 try {
                     json = Internet.connectHttpPage(
                             "http://203.232.193.178/campusmap/updater_list.php",
