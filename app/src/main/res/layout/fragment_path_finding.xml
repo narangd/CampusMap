@@ -9,13 +9,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ProgressBar
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/progressBar"
-            android:layout_gravity="center_horizontal" />
-
         <com.example.campusmap.view.ViewTouchImage
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -27,9 +20,8 @@
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton android:id="@+id/fab"
-        android:visibility="invisible"
         android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:layout_gravity="bottom|end" android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_navigation_white" />
+        android:src="@drawable/ic_zoom_out_map_white" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -80,17 +80,25 @@ public class SearchResultActivity extends AppCompatActivity
         builder.setMessage(destination + "(으)로 이동하시겠습니까?")
                 .setPositiveButton("예", this)
                 .setNegativeButton("취소", null)
+                .setNeutralButton("경로탐색", this)
                 .show();
     }
 
     // ## For AlertDialog ##
     @Override
     public void onClick(DialogInterface dialog, int which) {
+        Intent intent;
         switch (which) {
             case DialogInterface.BUTTON_POSITIVE:
-                Intent result = new Intent();
-                result.putExtra(DrawerTestActivity.KEY_INFO_LOCATION, infoLocation);
-                setResult(RESULT_OK, result);
+                intent = new Intent();
+                intent.putExtra(DrawerTestActivity.KEY_INFO_LOCATION, infoLocation);
+                setResult(RESULT_OK, intent);
+                finish();
+                break;
+            case DialogInterface.BUTTON_NEUTRAL:
+                intent = new Intent(this, NMTestActivity.class);
+                intent.putExtra(NMTestActivity.KEY_INFO_LOCATION, infoLocation);
+                startActivity(intent);
                 finish();
                 break;
         }

@@ -1,9 +1,11 @@
 package com.example.campusmap.fragment;
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,7 @@ import android.widget.ListView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.activity.InfoUpdaterActivity;
+import com.example.campusmap.activity.NMTestActivity;
 import com.example.campusmap.data.branch.Floor;
 import com.example.campusmap.data.branch.Room;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
@@ -21,13 +24,14 @@ import com.example.campusmap.form.InfoLocation;
 
 import java.util.ArrayList;
 
-public class RoomListFragment extends Fragment implements AdapterView.OnItemLongClickListener {
+public class RoomListFragment extends Fragment implements AdapterView.OnItemLongClickListener, AdapterView.OnItemClickListener, AlertDialog.OnClickListener {
     private static final String KEY_FLOOR = "floor";
     private static final String TAG = "RoomListFragment";
     private static final boolean DEBUG = false;
     private ListView mListView;
     private ArrayList<Room> mRoomList;
     private int mReservRoomID = -1;
+    private Room clicked_room;
 
     public RoomListFragment() {
         // Required empty public constructor
@@ -47,27 +51,32 @@ public class RoomListFragment extends Fragment implements AdapterView.OnItemLong
         View view = inflater.inflate(R.layout.fragment_room_list, container, false);
         mListView = (ListView) view.findViewById(R.id.room_listview);
 
-        if (getArguments() != null) {
-            Floor mFloor = (Floor) getArguments().getSerializable(KEY_FLOOR);
-            if (mFloor != null) {
-
-                // ## Get DataBase ##
-                SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(getContext());
-
-                ArrayAdapter<String> mAdapter = new ArrayAdapter<>(
-                        getContext(),
-                        android.R.layout.simple_list_item_1
-                );
-                mRoomList = helper.getRoomList(mFloor.getBuildingID(), mFloor.getID());
-                for (Room room : mRoomList){
-                    mAdapter.add(room.toString());
-                }
-
-                mListView.setAdapter(mAdapter);
-                mListView.setOnItemLongClickListener(this);
-            }
-            // getFloorList => arraylist
+        if (getArguments() == null) {
+            return view;
         }
+
+        Floor floor = (Floor) getArguments().getSerializable(KEY_FLOOR);
+        if (floor == null) {
+            return view;
+        }
+
+        // ## Get DataBase ##
+        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(getContext());
+
+        ArrayAdapter<String> mAdapter = new ArrayAdapter<>(
+                getContext(),
+                android.R.layout.simple_list_item_1
+        );
+        mRoomList = helper.getRoomList(floor.getBuildingID(), floor.getID());
+        for (Room room : mRoomList){
+            mAdapter.add(room.toString());
+        }
+
+        mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(this);
+        mListView.setOnItemLongClickListener(this);
+
+        // getFloorList => arraylist
         return view;
     }
 
@@ -94,11 +103,38 @@ public class RoomListFragment extends Fragment implements AdapterView.OnItemLong
     private void focusRoom(int roomID) {
         for (int roomIndex=0; roomIndex<mRoomList.size(); roomIndex++) {
             if (roomID == mRoomList.get(roomIndex).getID()) {
-                if (DEBUG) Log.i(TAG, "focusRoom: room index : " + roomIndex);
+                if (DEBUG) Log.i(TAG, "focusRoom: clicked_room index : " + roomIndex);
                 mListView.setSelection(roomIndex);
                 // focus selection
                 break;
             }
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        clicked_room = mRoomList.get(position);
+        String message = clicked_room.getName() + "에 해당하는 건물로 이동하시겠습니까?";
+        new AlertDialog.Builder(getActivity())
+                .setTitle("이동하시겠습니까?")
+                .setMessage(message)
+                .setPositiveButton("예", this)
+                .setNegativeButton("취소", null)
+                .show();
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        Intent intent;
+        switch (which) {
+            case DialogInterface.BUTTON_POSITIVE:
+                intent = new Intent(getActivity(), NMTestActivity.class);
+                intent.putExtra(
+                        NMTestActivity.KEY_INFO_LOCATION,
+                        new InfoLocation(clicked_room.getName(), InfoLocation.TAG_ROOM, clicked_room.getBuildingID(), clicked_room.getFloorID(), clicked_room.getID())
+                );
+                startActivity(intent);
+                break;
         }
     }
 

@@ -1,6 +1,5 @@
 package com.example.campusmap.fragment;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,7 +16,6 @@ import com.example.campusmap.activity.InfoUpdaterActivity;
 import com.example.campusmap.data.branch.Building;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.form.InfoLocation;
-import com.example.campusmap.view.TouchImageView;
 
 import java.util.ArrayList;
 
@@ -25,8 +23,7 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
     private static final String TAG = "CampusMapFragment";
     public static final int TAP_INDEX = 0;
 
-    private Context context;
-    private ListView listView;
+    private ListView mListView;
     private int prevCheckIndex = 0;
     private ArrayList<Building> mBuildingList;
 
@@ -42,59 +39,43 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_campus_map, container, false);
-        context = rootView.getContext();
 
-        listView = (ListView) rootView.findViewById(R.id.building_list);
+        mListView = (ListView) rootView.findViewById(R.id.building_list);
 
-        ViewGroup imageHeader = (ViewGroup) inflater.inflate(R.layout.header_building, listView, false);
-        if (imageHeader != null) {
-            TouchImageView touchImageView = (TouchImageView) imageHeader.findViewById(R.id.campus_map_view);
-            touchImageView.setMaxZoom(4.0f);
-        }
+        ViewGroup imageHeader = (ViewGroup) inflater.inflate(R.layout.header_building, mListView, false);
 
-        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
+        SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(getActivity());
         mBuildingList = helper.getBuildingList();
 
-        if (listView != null) {
-            listView.addHeaderView(imageHeader, null, false);
+        if (mListView != null) {
+            mListView.addHeaderView(imageHeader, null, false);
             ArrayAdapter<Building> mAdapter = new ArrayAdapter<>(
-                    context,
+                    getActivity(),
                     android.R.layout.simple_list_item_1,
                     mBuildingList
             );
-            listView.setAdapter(mAdapter);
-            listView.setOnItemClickListener(this);
-            listView.setOnItemLongClickListener(this);
+            mListView.setAdapter(mAdapter);
+            mListView.setOnItemClickListener(this);
+            mListView.setOnItemLongClickListener(this);
         }
 
-        if (getArguments() != null) {
-            int building = getArguments().getInt("building");
-            onItemClick(null, null, building, 0);
-        }
         return rootView;
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        listView.setItemChecked(prevCheckIndex, false);
-        listView.setItemChecked(position, true);
-        prevCheckIndex = position;
-//        parent.set
-
         Building building = mBuildingList.get(position-1);
 
-        Intent intent = new Intent(context, DrawerTestActivity.class);
+        Intent intent = new Intent(getActivity(), DrawerTestActivity.class);
         intent.putExtra(
                 DrawerTestActivity.KEY_INFO_LOCATION,
                 new InfoLocation(building.getName(), InfoLocation.TAG_BUILDING, building.getID(), InfoLocation.NONE, InfoLocation.NONE)
         );
-//        intent.putExtra(DrawerTestActivity.KEY_BUILDING_ID, building.getID()); // id to index
         startActivity(intent);
     }
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
         Building building = mBuildingList.get(position-1); // 0 is header
         Intent intent = new Intent(getActivity(), InfoUpdaterActivity.class);
         intent.putExtra(

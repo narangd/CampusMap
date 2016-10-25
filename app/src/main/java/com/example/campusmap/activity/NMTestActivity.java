@@ -2,8 +2,10 @@ package com.example.campusmap.activity;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -23,7 +25,9 @@ import com.example.campusmap.R;
 import com.example.campusmap.data.branch.Building;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.database.SQLiteHelperObstacle;
+import com.example.campusmap.form.InfoLocation;
 import com.example.campusmap.form.PointD;
+import com.example.campusmap.mapviewer.NMapCalloutBasicOverlay;
 import com.example.campusmap.mapviewer.NMapPOIflagType;
 import com.example.campusmap.mapviewer.NMapViewerResourceProvider;
 import com.example.campusmap.mapviewer.PolygonDataManager;
@@ -31,26 +35,26 @@ import com.example.campusmap.pathfinding.Map;
 import com.example.campusmap.pathfinding.Tile;
 import com.nhn.android.maps.NMapActivity;
 import com.nhn.android.maps.NMapController;
+import com.nhn.android.maps.NMapOverlay;
+import com.nhn.android.maps.NMapOverlayItem;
 import com.nhn.android.maps.NMapView;
 import com.nhn.android.maps.maplib.NGeoPoint;
 import com.nhn.android.maps.nmapmodel.NMapError;
-import com.nhn.android.maps.overlay.NMapCircleData;
-import com.nhn.android.maps.overlay.NMapCircleStyle;
 import com.nhn.android.maps.overlay.NMapPOIdata;
 import com.nhn.android.maps.overlay.NMapPOIitem;
 import com.nhn.android.maps.overlay.NMapPathData;
 import com.nhn.android.maps.overlay.NMapPathLineStyle;
+import com.nhn.android.mapviewer.overlay.NMapCalloutOverlay;
 import com.nhn.android.mapviewer.overlay.NMapOverlayManager;
-import com.nhn.android.mapviewer.overlay.NMapPathDataOverlay;
-import com.nhn.android.mapviewer.overlay.NMapResourceProvider;
+import com.nhn.android.mapviewer.overlay.NMapPOIdataOverlay;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class NMTestActivity extends NMapActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
     private static final String CLIENT_ID = "4vY170qiGQL_GaGL1BL4";
     private static final String TAG = "NMTestActivity";
+    public static final String KEY_INFO_LOCATION = "InfoLocation";
     private static final int REQUEST_CODE_GPS = 200;
     private static final boolean DEBUG = false;
 
@@ -60,7 +64,7 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
     private NMapView mMapView;
     private NMapController mMapController;
 
-    private NMapResourceProvider mMapResourceProvider;
+    private NMapViewerResourceProvider mMapResourceProvider;
     private NMapOverlayManager mOverlayManager;
     private PolygonDataManager mPolygonDataManager;
     private LocationManager locationManager;
@@ -80,6 +84,14 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nmtest);
+
+        Intent intent =  getIntent();
+        InfoLocation infoLocation = (InfoLocation) intent.getSerializableExtra(KEY_INFO_LOCATION);
+        Log.i(TAG, "onCreate: infoLocation : " + infoLocation);
+        if (infoLocation != null) {
+            destination_building_number = infoLocation.getBuildingID();
+            Log.i(TAG, "onCreate: destination building number : " + infoLocation.getBuildingID());
+        }
 
         createAlertDialog();
         mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
@@ -111,6 +123,8 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
         mMapResourceProvider = new NMapViewerResourceProvider(this);
 
         mOverlayManager = new NMapOverlayManager(this, mMapView, mMapResourceProvider);
+        // register callout overlay listener to customize it.
+        mOverlayManager.setOnCalloutOverlayListener(onCalloutOverlayListener);
 
 //        new NMapOverlayManager(this, mMapView, mMap)
         mPolygonDataManager = new PolygonDataManager(this);
@@ -135,8 +149,11 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
             setBestLocation();
         }
 
-        displayPolygon();
-        displayBaseRectangles();
+//        displayPolygon();
+//        displayBaseRectangles();
+        if (destination_building_number > 0) {
+            calculatePath();
+        }
     }
 
     @SuppressWarnings("MissingPermission")
@@ -191,7 +208,7 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
         @Override
         public void onMapInitHandler(NMapView nMapView, NMapError nMapError) {
             if (nMapError == null) {
-                mMapController.setMapCenter(startPoint, 11); // ,
+                mMapController.setMapCenter(startPoint, 12); // ,
             } else {
                 Log.e(TAG, "onMapInitHandler: error=" + nMapError.toString());
             }
@@ -258,8 +275,8 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
             map.start = map.getTile(location.getLongitude(), location.getLatitude());
 
             mOverlayManager.clearOverlays();
-            displayBaseRectangles();
-            displayPolygon();
+//            displayBaseRectangles();
+//            displayPolygon();
             displayPath(map.pathFinding());
             displayLocation(location.getLongitude(), location.getLatitude());
             Log.i(TAG, "onLocationChanged()");
@@ -281,8 +298,31 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
         }
     };
 
+    /* POI data State Change Listener*/
+    private final NMapPOIdataOverlay.OnStateChangeListener onPOIdataStateChangeListener = new NMapPOIdataOverlay.OnStateChangeListener() {
+
+        @Override
+        public void onCalloutClick(NMapPOIdataOverlay poiDataOverlay, NMapPOIitem item) {
+
+            // [[TEMP]] handle a click event of the callout
+            Toast.makeText(NMTestActivity.this, "onCalloutClick: " + item.getTitle(), Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onFocusChanged(NMapPOIdataOverlay poiDataOverlay, NMapPOIitem item) {
+        }
+    };
+
+    private final NMapOverlayManager.OnCalloutOverlayListener onCalloutOverlayListener = new NMapOverlayManager.OnCalloutOverlayListener() {
+        @Override
+        public NMapCalloutOverlay onCreateCalloutOverlay(NMapOverlay itemOverlay, NMapOverlayItem overlayItem, Rect itemBounds) {
+            // set your callout overlay
+            return new NMapCalloutBasicOverlay(itemOverlay, overlayItem, itemBounds);
+        }
+    };
+
+
     private void createAlertDialog() {
-        final SQLiteHelperObstacle helperObstacle = SQLiteHelperObstacle.getInstance(this);
         View dialog_layout = getLayoutInflater().inflate(R.layout.dialog_select_destination, null);
         final Button button = (Button) dialog_layout.findViewById(R.id.destination);
         // Button Click Listener
@@ -292,6 +332,12 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
                 select_dialog.show();
             }
         });
+        if (destination_building_number > 0) {
+            InfoLocation infoLocation = (InfoLocation) getIntent().getSerializableExtra(KEY_INFO_LOCATION);
+            if (infoLocation != null) {
+                button.setText(infoLocation.getName());
+            }
+        }
 
         pathfinding_dialog = new AlertDialog.Builder(NMTestActivity.this)
                 .setView(dialog_layout)
@@ -300,38 +346,7 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
                 .setPositiveButton("경로찾기", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Random random = new Random();
-
-                        Tile start = map.getTile(currentLocation.x, currentLocation.y);
-                        Log.e(TAG, "onClick: " + currentLocation);
-                        if (start == null) {
-                            return;
-                        }
-                        Log.e(TAG, "onClick: " + start.getPoint());
-
-//                        map.initRandomToStartGoalTile();
-                        PointD dest = helperObstacle.getEntrance(destination_building_number);
-                        Log.i(TAG, "pathfinding onClick: number:" + destination_building_number);
-                        if (dest == null) {
-                            map.initRandomToStartGoalTile();
-                        } else {
-                            map.goal = map.getTile(dest.x, dest.y);
-                            Log.i(TAG, "pathfinding onClick: goal:"+map.goal);
-                        }
-                        map.start = start;
-
-                        NMapPathLineStyle style = new NMapPathLineStyle(NMTestActivity.this);
-                        style.setLineColor(0xffffff, 0x00);
-                        style.setFillColor(0xff0000, 0xaa);
-                        style.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
-                        NMapPathData pathData = mPolygonDataManager.getMapTile(map.goal, style);
-
-                        mOverlayManager.clearOverlays();
-                        mOverlayManager.createPathDataOverlay(pathData);
-                        displayBaseRectangles();
-                        displayPolygon();
-                        displayPath(map.pathFinding());
-                        displayLocation(currentLocation.x, currentLocation.y);
+                        calculatePath();
                     }
                 })
                 .create();
@@ -367,7 +382,8 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
         currentPOI = poiData.addPOIitem(new NGeoPoint(longitude, latitude), "내 위치!", NMapPOIflagType.PIN, 0);
         poiData.endPOIdata();
 
-        mOverlayManager.createPOIdataOverlay(poiData, null);
+        NMapPOIdataOverlay poiDataOverlay = mOverlayManager.createPOIdataOverlay(poiData, null);
+        poiDataOverlay.setOnStateChangeListener(onPOIdataStateChangeListener);
 
         Tile tile = map.getTile(longitude, latitude);
         if (tile == null) {
@@ -450,24 +466,38 @@ public class NMTestActivity extends NMapActivity implements ActivityCompat.OnReq
 //        }
     }
 
-    private void displayPoint() {
+    private void calculatePath() {
+        SQLiteHelperObstacle helperObstacle = SQLiteHelperObstacle.getInstance(this);
+
+        Tile start = map.getTile(currentLocation.x, currentLocation.y);
+        Log.e(TAG, "onClick: " + currentLocation);
+        if (start == null) {
+            return;
+        }
+        Log.e(TAG, "onClick: " + start.getPoint());
+
+//                        map.initRandomToStartGoalTile();
+        PointD dest = helperObstacle.getEntrance(destination_building_number);
+        Log.i(TAG, "pathfinding onClick: number:" + destination_building_number);
+        if (dest == null) {
+            map.initRandomToStartGoalTile();
+        } else {
+            map.goal = map.getTile(dest.x, dest.y);
+            Log.i(TAG, "pathfinding onClick: goal:"+map.goal);
+        }
+        map.start = start;
+
+        NMapPathLineStyle style = new NMapPathLineStyle(NMTestActivity.this);
+        style.setLineColor(0xffffff, 0x00);
+        style.setFillColor(0xff0000, 0xaa);
+        style.setPataDataType(NMapPathLineStyle.DATA_TYPE_POLYGON);
+        NMapPathData pathData = mPolygonDataManager.getMapTile(map.goal, style);
+
         mOverlayManager.clearOverlays();
-        displayBaseRectangles();
+        mOverlayManager.createPathDataOverlay(pathData);
+//        displayBaseRectangles();
+//        displayPolygon();
+        displayPath(map.pathFinding());
         displayLocation(currentLocation.x, currentLocation.y);
-        Random random = new Random();
-
-        Tile tile = map.getTile(random.nextInt(map.getXTileCount()), random.nextInt(map.getYTileCount()));
-        NMapCircleData circleData = new NMapCircleData(1);
-        circleData.addCirclePoint(tile.getPoint().x, tile.getPoint().y, 10f);
-
-        NMapCircleStyle style = new NMapCircleStyle(this);
-        style.setStrokeColor(0xffffff, 0x00);
-        style.setFillColor(0xA04DD2, 0x88);
-        circleData.setCircleStyle(style);
-
-        NMapPathDataOverlay overlay = mOverlayManager.createPathDataOverlay();
-        overlay.addCircleData(circleData);
-        mOverlayManager.insertOverlay(overlay);
-
     }
 }

@@ -302,9 +302,16 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
                 mAsyncTask = null;
                 mProgressDialog.hide();
 
+                String message;
+                if (result.equals("true")) {
+                    message = "정상적으로 처리되었습니다";
+                } else {
+                    message = "실패하였습니다";
+                }
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(InfoUpdaterActivity.this);
                 builder.setTitle("서버로 보낸 결과");
-                builder.setMessage(result);
+                builder.setMessage(message);
                 builder.show();
 
                 resetInfo();

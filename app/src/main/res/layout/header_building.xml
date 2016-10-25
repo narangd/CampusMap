@@ -6,12 +6,20 @@
 
     android:layout_gravity="center_horizontal">
 
-    <com.example.campusmap.view.TouchImageView
-        android:id="@+id/campus_map_view"
+    <!--<com.example.campusmap.view.TouchImageView-->
+        <!--android:id="@+id/campus_map_view"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:src="@drawable/campus_map"-->
+        <!--android:adjustViewBounds="true" />-->
+
+    <com.example.campusmap.view.ViewTouchImage
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/campus_map"
-        android:adjustViewBounds="true" />
+        android:adjustViewBounds="true"
+        android:id="@+id/path_imageview"
+        android:layout_gravity="center" />
 
     <!--<WebView-->
         <!--android:id="@+id/webview"-->

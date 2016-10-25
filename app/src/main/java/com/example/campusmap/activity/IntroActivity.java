@@ -84,6 +84,7 @@ public class IntroActivity extends Activity {
                     int obstacle_index = 0, entrance_index = 0;
 
                     helper.removeObstacle(database);
+                    helper.removeEntrance(database);
                     try {
                         JSONObject jsonObject = new JSONObject(json);
 

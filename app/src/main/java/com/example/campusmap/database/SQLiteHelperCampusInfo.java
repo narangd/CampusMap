@@ -18,7 +18,7 @@ public class SQLiteHelperCampusInfo extends com.example.campusmap.database.SQLit
     private static final String TAG = "SQLiteHelperCampusInfo";
     private static final boolean DEBUG = true;
     private static final String ns = null;
-    private static final int DATABACE_VERSION = 16;
+    private static final int DATABACE_VERSION = 17;
     private static final String DATABACE_NAME = "CampusInfo.db";
     private static SQLiteHelperCampusInfo instance;
 
@@ -51,7 +51,7 @@ public class SQLiteHelperCampusInfo extends com.example.campusmap.database.SQLit
                 CREATE_TABLE_HEAD + TABLE_NAME + COLUMN_START +
                         _ID + TYPE_INTEGER + PRIMARY_KEY + COMMA_SEP +
                         COLUMN_NAME_BUILDING_ID + TYPE_INTEGER + COMMA_SEP +
-                        COLUMN_NAME_NUMBER + TYPE_CHARACTER + COMMA_SEP +
+                        COLUMN_NAME_NUMBER + TYPE_INTEGER + COMMA_SEP +
                         // # reference building #
                         FOREIGN_KEY + COLUMN_START + COLUMN_NAME_BUILDING_ID + COLUMN_END +
                             REFERENCES + BuildingEntry.TABLE_NAME + COLUMN_START + BuildingEntry._ID + COLUMN_END +
@@ -333,7 +333,7 @@ public class SQLiteHelperCampusInfo extends com.example.campusmap.database.SQLit
                 FloorEntry.COLUMN_NAME_BUILDING_ID + " =?",
                 new String[]{String.valueOf(buildingID)},
                 null, null,
-                FloorEntry._ID + ORDER_BY_ASCENDING
+                FloorEntry.COLUMN_NAME_NUMBER + ORDER_BY_ASCENDING
         );
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndex(FloorEntry._ID));
@@ -358,7 +358,7 @@ public class SQLiteHelperCampusInfo extends com.example.campusmap.database.SQLit
                 RoomEntry.COLUMN_NAME_BUILDING_ID + "=? AND " + RoomEntry.COLUMN_NAME_FLOOR_ID + "=?",
                 new String[]{String.valueOf(buildingID), String.valueOf(floorID)},
                 null, null,
-                RoomEntry._ID + ORDER_BY_ASCENDING
+                RoomEntry.COLUMN_NAME_NAME + ORDER_BY_ASCENDING
         );
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndex(RoomEntry._ID));

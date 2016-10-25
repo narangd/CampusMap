@@ -122,7 +122,7 @@ public class DrawerTestActivity extends AppCompatActivity
 
         // ## Building Description ##
         String desc = mBuilding.getDescription();
-        if (desc == null || desc.length() <= 0) {
+        if (desc == null || desc.length() <= 0 && DEBUG) {
             desc = "여분으로 보여질 텍스트1";
             desc += "\n여분으로 보여질 텍스트2";
             desc += "\n여분으로 보여질 텍스트3";
@@ -136,7 +136,7 @@ public class DrawerTestActivity extends AppCompatActivity
         if (resourceID != 0) {
             mHeaderImageView.setImageResource(resourceID);
         } else {
-            mHeaderImageView.setImageResource(R.drawable.image_not_found);
+            mHeaderImageView.setImageResource(R.mipmap.ic_launcher);
         }
 
         // ## Description Toggle Button ##
