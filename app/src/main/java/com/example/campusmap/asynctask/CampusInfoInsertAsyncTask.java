@@ -111,22 +111,36 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
         if (result != null)
             Log.i(TAG, "doInBackground: result length : " + result.length());
 
-        if (result != null && result.length() > 0 && !result.equals("newest")) {
-            database.beginTransaction();
+        if (result == null || result.length() <= 0 || result.equals("newest")) {
+            InputStream inputStream = mContext.getResources().openRawResource(R.raw.default_info);
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            char[] buffer = new char[1024];
+            StringBuilder stringBuilder = new StringBuilder();
+            try {
+                while (inputStreamReader.read(buffer) > 0) {
+                    stringBuilder.append(buffer);
+                }
 
-            message = "입력하는중입니다";
-            publishProgress(-1);
-
-            helper.deleteTable(database, BUILDING);
-            helper.deleteTable(database, FLOOR);
-            helper.deleteTable(database, ROOM);
-
-            version = parsingJSON(result, helper, database);
-            Log.i(TAG, "doInBackground: JSON version : " + version);
-
-            database.setTransactionSuccessful();
-            database.endTransaction();
+                result = stringBuilder.toString();
+            } catch (IOException e1) {
+                result = "";
+            }
         }
+
+        database.beginTransaction();
+
+        message = "입력하는중입니다";
+        publishProgress(-1);
+
+        helper.deleteTable(database, BUILDING);
+        helper.deleteTable(database, FLOOR);
+        helper.deleteTable(database, ROOM);
+
+        version = parsingJSON(result, helper, database);
+        Log.i(TAG, "doInBackground: JSON version : " + version);
+
+        database.setTransactionSuccessful();
+        database.endTransaction();
         database.close();
 
         return version;

@@ -359,7 +359,7 @@ public class TouchImageView extends ImageView {
     }
 
     /**
-     * Set zoom to the specified scale. Image will be centered by default.
+     * Set zoom to the specified scale. Image will be centered by default_info.
      *
      * @param scale
      */

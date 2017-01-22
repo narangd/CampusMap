@@ -24,6 +24,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
@@ -67,7 +71,7 @@ public class IntroActivity extends Activity {
             mAsyncTask = new CampusInfoInsertAsyncTask(IntroActivity.this) {
                 @Override
                 protected Integer doInBackground(String... URLs) {
-                    String json = null;
+                    String json;
                     try {
                         json = Internet.connectHttpPage(
                                 "http://203.232.193.178/android/obstacle/make.php",
@@ -75,8 +79,21 @@ public class IntroActivity extends Activity {
                                 null
                         );
                     } catch (SocketTimeoutException e) {
-                        json = "";
+                        InputStream inputStream = getResources().openRawResource(R.raw.default_obstacle);
+                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                        char[] buffer = new char[1024];
+                        StringBuilder stringBuilder = new StringBuilder();
+                        try {
+                            while (inputStreamReader.read(buffer) > 0) {
+                                stringBuilder.append(buffer);
+                            }
+
+                            json = stringBuilder.toString();
+                        } catch (IOException e1) {
+                            json = "";
+                        }
                     }
+                    Log.i(TAG, "json length : " + json.length());
 
                     SQLiteHelperObstacle helper = SQLiteHelperObstacle.getInstance(IntroActivity.this);
                     SQLiteDatabase database = helper.getWritableDatabase();

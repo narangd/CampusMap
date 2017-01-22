@@ -19,11 +19,10 @@ import com.example.campusmap.form.InfoLocation;
 
 import java.util.ArrayList;
 
-public class CampusMapFragment extends Fragment implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+public class CampusMapFragment extends Fragment implements AdapterView.OnItemClickListener {
     private static final String TAG = "CampusMapFragment";
     public static final int TAP_INDEX = 0;
 
-    private ListView mListView;
     private int prevCheckIndex = 0;
     private ArrayList<Building> mBuildingList;
 
@@ -40,23 +39,22 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_campus_map, container, false);
 
-        mListView = (ListView) rootView.findViewById(R.id.building_list);
+        ListView listView = (ListView) rootView.findViewById(R.id.building_list);
 
-        ViewGroup imageHeader = (ViewGroup) inflater.inflate(R.layout.header_building, mListView, false);
+        ViewGroup imageHeader = (ViewGroup) inflater.inflate(R.layout.header_building, listView, false);
 
         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(getActivity());
         mBuildingList = helper.getBuildingList();
 
-        if (mListView != null) {
-            mListView.addHeaderView(imageHeader, null, false);
+        if (listView != null) {
+            listView.addHeaderView(imageHeader, null, false);
             ArrayAdapter<Building> mAdapter = new ArrayAdapter<>(
                     getActivity(),
                     android.R.layout.simple_list_item_1,
                     mBuildingList
             );
-            mListView.setAdapter(mAdapter);
-            mListView.setOnItemClickListener(this);
-            mListView.setOnItemLongClickListener(this);
+            listView.setAdapter(mAdapter);
+            listView.setOnItemClickListener(this);
         }
 
         return rootView;
@@ -72,17 +70,5 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
                 new InfoLocation(building.getName(), InfoLocation.TAG_BUILDING, building.getID(), InfoLocation.NONE, InfoLocation.NONE)
         );
         startActivity(intent);
-    }
-
-    @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        Building building = mBuildingList.get(position-1); // 0 is header
-        Intent intent = new Intent(getActivity(), InfoUpdaterActivity.class);
-        intent.putExtra(
-                InfoUpdaterActivity.KEY_INFO_LOCATION,
-                new InfoLocation(building.getName(), InfoLocation.TAG_BUILDING, building.getID(), InfoLocation.NONE, InfoLocation.NONE)
-        );
-        startActivity(intent);
-        return true;
     }
 }
