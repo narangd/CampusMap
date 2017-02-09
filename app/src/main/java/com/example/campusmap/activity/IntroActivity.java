@@ -79,6 +79,8 @@ public class IntroActivity extends Activity {
                                 null
                         );
                     } catch (SocketTimeoutException e) {
+                        // TODO: 2017-02-09 서버가 응답이 없다면, 파일에서 읽지만, 강제로 하기에 버전을 비교해야 한다.
+                        // 아니면 데이터베이스가 비엇을시에 시도.
                         InputStream inputStream = getResources().openRawResource(R.raw.default_obstacle);
                         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                         char[] buffer = new char[1024];

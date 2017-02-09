@@ -11,8 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.campusmap.R;
-import com.example.campusmap.activity.DrawerTestActivity;
-import com.example.campusmap.activity.InfoUpdaterActivity;
+import com.example.campusmap.activity.BuildingActivity;
 import com.example.campusmap.data.branch.Building;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.form.InfoLocation;
@@ -64,9 +63,9 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Building building = mBuildingList.get(position-1);
 
-        Intent intent = new Intent(getActivity(), DrawerTestActivity.class);
+        Intent intent = new Intent(getActivity(), BuildingActivity.class);
         intent.putExtra(
-                DrawerTestActivity.KEY_INFO_LOCATION,
+                BuildingActivity.KEY_INFO_LOCATION,
                 new InfoLocation(building.getName(), InfoLocation.TAG_BUILDING, building.getID(), InfoLocation.NONE, InfoLocation.NONE)
         );
         startActivity(intent);
