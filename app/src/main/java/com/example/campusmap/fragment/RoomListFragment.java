@@ -67,7 +67,7 @@ public class RoomListFragment extends Fragment implements AdapterView.OnItemLong
                 getContext(),
                 android.R.layout.simple_list_item_1
         );
-        mRoomList = helper.getRoomList(floor.getBuildingID(), floor.getID());
+        mRoomList = helper.getRoomList(floor.getBuildingId(), floor.getId());
         for (Room room : mRoomList){
             mAdapter.add(room.toString());
         }
@@ -102,7 +102,7 @@ public class RoomListFragment extends Fragment implements AdapterView.OnItemLong
 
     private void focusRoom(int roomID) {
         for (int roomIndex=0; roomIndex<mRoomList.size(); roomIndex++) {
-            if (roomID == mRoomList.get(roomIndex).getID()) {
+            if (roomID == mRoomList.get(roomIndex).getId()) {
                 if (DEBUG) Log.i(TAG, "focusRoom: clicked_room index : " + roomIndex);
                 mListView.setSelection(roomIndex);
                 // focus selection
@@ -131,7 +131,7 @@ public class RoomListFragment extends Fragment implements AdapterView.OnItemLong
                 intent = new Intent(getActivity(), NMTestActivity.class);
                 intent.putExtra(
                         NMTestActivity.KEY_INFO_LOCATION,
-                        new InfoLocation(clicked_room.getName(), InfoLocation.TAG_ROOM, clicked_room.getBuildingID(), clicked_room.getFloorID(), clicked_room.getID())
+                        new InfoLocation(clicked_room.getName(), InfoLocation.TAG_ROOM, clicked_room.getBuildingId(), clicked_room.getFloorId(), clicked_room.getId())
                 );
                 startActivity(intent);
                 break;
@@ -144,7 +144,7 @@ public class RoomListFragment extends Fragment implements AdapterView.OnItemLong
         Intent intent = new Intent(getActivity(), InfoUpdaterActivity.class);
         intent.putExtra(
                 InfoUpdaterActivity.KEY_INFO_LOCATION,
-                new InfoLocation(room.getName(), InfoLocation.TAG_ROOM, room.getBuildingID(), room.getFloorID(), room.getID())
+                new InfoLocation(room.getName(), InfoLocation.TAG_ROOM, room.getBuildingId(), room.getFloorId(), room.getId())
         );
         startActivity(intent);
         return true;

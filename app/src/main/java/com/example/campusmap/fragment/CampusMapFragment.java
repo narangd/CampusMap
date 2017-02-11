@@ -66,7 +66,7 @@ public class CampusMapFragment extends Fragment implements AdapterView.OnItemCli
         Intent intent = new Intent(getActivity(), BuildingActivity.class);
         intent.putExtra(
                 BuildingActivity.KEY_INFO_LOCATION,
-                new InfoLocation(building.getName(), InfoLocation.TAG_BUILDING, building.getID(), InfoLocation.NONE, InfoLocation.NONE)
+                new InfoLocation(building.getName(), InfoLocation.TAG_BUILDING, building.getId(), InfoLocation.NONE, InfoLocation.NONE)
         );
         startActivity(intent);
     }

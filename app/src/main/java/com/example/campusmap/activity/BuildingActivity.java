@@ -248,7 +248,7 @@ public class BuildingActivity extends AppCompatActivity
 
         for (int i = 0; i < mFloorAdapter.getCount(); i++) {
             Floor floor = mFloorAdapter.getFloor(i);
-            if (floorID == floor.getID()) {
+            if (floorID == floor.getId()) {
                 if (DEBUG) Log.i(TAG, "focusRoom: floor index : " + i);
                 floorIndex = i;
                 break;

@@ -64,6 +64,9 @@ public class IntroActivity extends Activity {
             mHandler = new Handler();
             mHandler.postDelayed(startMainActivity, 1000);
         }
+
+        // test
+        
     }
 
     private void runAsyncTask() {

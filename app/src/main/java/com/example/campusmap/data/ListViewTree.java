@@ -227,7 +227,7 @@ public class ListViewTree {
                 }
                 mFloorAdapter.clear();
                 Building currentBuilding = mBuildingAdapter.getItem(position);
-                mFloorAdapter.addAll(helper.getFloorList(currentBuilding.getID()));
+                mFloorAdapter.addAll(helper.getFloorList(currentBuilding.getId()));
                 for (int i=0; i<mFloorAdapter.getCount(); i++) {
                     Floor floor = mFloorAdapter.getItem(i);
                     dataAdapter.add(floor.toString());
@@ -242,7 +242,7 @@ public class ListViewTree {
                 }
                 mRoomAdapter.clear();
                 Floor currentFloor = mFloorAdapter.getItem(position);
-                mRoomAdapter.addAll( helper.getRoomList(currentFloor.getBuildingID(), currentFloor.getID()) );
+                mRoomAdapter.addAll( helper.getRoomList(currentFloor.getBuildingId(), currentFloor.getId()) );
                 for (int i=0; i<mRoomAdapter.getCount(); i++) {
                     Room room = mRoomAdapter.getItem(i);
                     dataAdapter.add(room.toString());
