@@ -1,6 +1,7 @@
 package com.example.campusmap.activity;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -21,6 +22,9 @@ import com.example.campusmap.form.InfoLocation;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.MenuPlannerFragment;
 import com.example.campusmap.fragment.PathFindingFragment;
+
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
 
 public class MainActivity extends AppCompatActivity
         implements SearchView.OnQueryTextListener, MenuItemCompat.OnActionExpandListener {
@@ -104,11 +108,33 @@ public class MainActivity extends AppCompatActivity
             case  R.id.action_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
-//            case  R.id.action_only_test:
-////                startActivity(new Intent(this, InfoUpdaterActivity.class));
-//                SQLiteHelperObstacle helper = SQLiteHelperObstacle.getInstance(this);
-//                helper.removeObstacle(helper.getWritableDatabase());
-//                return true;
+            case  R.id.action_only_test:
+//                RestTemplate restTemplate = new RestTemplate();
+//                MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter();
+//                restTemplate.getMessageConverters().add(converter);
+//                String response = restTemplate.getForObject("https://api.bithumb.com/public/ticker", Object.class).toString();
+//                Log.d(TAG, response);
+
+                new AsyncTask<Void,Void,Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+
+                        String url = "https://api.bithumb.com/public/ticker";
+
+// Create a new RestTemplate instance
+                        RestTemplate restTemplate = new RestTemplate();
+
+// Add the String message converter
+                        restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+
+// Make the HTTP GET request, marshaling the response to a String
+                        String result = restTemplate.getForObject(url, String.class, "Android");
+
+                        Log.d(TAG, "onOptionsItemSelected: " + result);
+                        return null;
+                    }
+                }.execute();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

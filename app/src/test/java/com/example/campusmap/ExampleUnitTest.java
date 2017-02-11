@@ -1,6 +1,7 @@
 package com.example.campusmap;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.*;
