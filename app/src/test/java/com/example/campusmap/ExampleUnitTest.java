@@ -2,6 +2,7 @@ package com.example.campusmap;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.*;
@@ -17,8 +18,12 @@ public class ExampleUnitTest {
 
     @Test
     public void restTemplate() throws Exception {
+
+        String url = "https://api.bithumb.com/public/ticker";
         RestTemplate restTemplate = new RestTemplate();
-        String response = restTemplate.getForObject("https://api.bithumb.com/public/ticker", String.class);
-        System.out.println(response);
+        restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+        String result = restTemplate.getForObject(url, String.class);
+
+        System.out.println(result);
     }
 }

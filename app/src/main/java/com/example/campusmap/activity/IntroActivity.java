@@ -19,6 +19,8 @@ import com.example.campusmap.R;
 import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
 import com.example.campusmap.database.SQLiteHelperObstacle;
 import com.example.campusmap.fragment.MenuPlannerFragment;
+import com.example.campusmap.util.Json;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -85,18 +87,20 @@ public class IntroActivity extends Activity {
                         // TODO: 2017-02-09 서버가 응답이 없다면, 파일에서 읽지만, 강제로 하기에 버전을 비교해야 한다.
                         // 아니면 데이터베이스가 비엇을시에 시도.
                         InputStream inputStream = getResources().openRawResource(R.raw.default_obstacle);
-                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                        char[] buffer = new char[1024];
-                        StringBuilder stringBuilder = new StringBuilder();
-                        try {
-                            while (inputStreamReader.read(buffer) > 0) {
-                                stringBuilder.append(buffer);
-                            }
-
-                            json = stringBuilder.toString();
-                        } catch (IOException e1) {
-                            json = "";
-                        }
+                        json = Json.toClass(inputStream, String.class);
+                        json = json == null ? "" : json;
+//                        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+//                        char[] buffer = new char[1024];
+//                        StringBuilder stringBuilder = new StringBuilder();
+//                        try {
+//                            while (inputStreamReader.read(buffer) > 0) {
+//                                stringBuilder.append(buffer);
+//                            }
+//
+//                            json = stringBuilder.toString();
+//                        } catch (IOException e1) {
+//                            json = "";
+//                        }
                     }
                     Log.i(TAG, "json length : " + json.length());
 
