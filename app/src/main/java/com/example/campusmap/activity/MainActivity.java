@@ -31,6 +31,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.InputStream;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class MainActivity extends AppCompatActivity
         implements SearchView.OnQueryTextListener, MenuItemCompat.OnActionExpandListener {
     private static final String TAG = "MainActivity";

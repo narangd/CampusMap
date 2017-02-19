@@ -33,6 +33,9 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.HashMap;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Integer> implements DialogInterface.OnCancelListener {
     private static final String TAG = "CampusInfoInsertAsync";
     private static final boolean DEBUG = true;
@@ -80,6 +83,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
             Log.e(TAG, "doInBackground: parameter expected");
             return 0;
         }
+
 
         String BUILDING = SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME;
         String FLOOR = SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME;
@@ -220,73 +224,6 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
         }
 
         return builder.toString();
-    }
-
-    private void parsingXML(XmlResourceParser parser, SQLiteHelperCampusInfo helper, SQLiteDatabase database)
-            throws IOException, XmlPullParserException {
-
-        int count=0;
-        int currentBuildingID=0, currentFloorID=0, currentRoomID=0;
-
-        int number;
-        String buildingName="", path="", roomName;
-        String text, main;
-
-        while ( parser.next() != XmlResourceParser.END_DOCUMENT ) {
-            if ( parser.getEventType() != XmlResourceParser.START_TAG ) {
-                continue;
-            }
-
-            switch ( parser.getName() ) {
-                case "building":  // ## <building num="1" name="100주년 기념관"> ##
-                    number = Integer.parseInt(parser.getAttributeValue(ns, "num"));
-                    if (number == 0)
-                        number = Integer.parseInt(parser.getAttributeValue(ns, "number"));
-                    buildingName = parser.getAttributeValue(ns, "name");
-                    helper.insertBuilding(database,
-                            ++currentBuildingID,             // # id #
-                            number,                          // # number #
-                            buildingName,                    // # name #
-                            ""                               // # description #
-                    );
-                    break;
-                case "floor":     // ## <floor num="1"> ##
-                    number = Integer.parseInt( parser.getAttributeValue(ns, "num") );
-                    if (number == 0)
-                        number = Integer.parseInt(parser.getAttributeValue(ns, "number"));
-                    path = buildingName + " / " + String.valueOf(number)+"층";
-                    helper.insertFloor(database,
-                            ++currentFloorID,                // # id #
-                            number,                          // # number #
-                            currentBuildingID                // # building id #
-                    );
-                    break;
-                case "room":      // ## <room name="방재센터"> ##
-                    roomName = parser.getAttributeValue(ns, "name");
-                    main = parser.getAttributeValue(ns, "main");
-                    parser.require(XmlResourceParser.START_TAG, ns, "room");
-                    parser.next();
-                    text = parser.getText();
-                    helper.insertRoom(database,
-                            ++currentRoomID,                  // # id #
-                            roomName,                         // # name
-                            text,                             // # description #
-                            path,                             // # path string #
-                            currentFloorID,                   // # floor id #
-                            currentBuildingID,                // # building id #
-                            main != null                      // # is main room? #
-                    );
-                    break;
-            }
-
-            publishProgress(++count);
-        }
-
-        if (DEBUG) {
-            Log.d( TAG, "database insert building count : " + currentBuildingID
-                    + ", floor count : " + currentFloorID
-                    + ", insert room count : " + currentRoomID );
-        }
     }
 
     private int parsingJSON(String json, SQLiteHelperCampusInfo helper, SQLiteDatabase database) {

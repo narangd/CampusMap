@@ -36,7 +36,9 @@ import java.util.UUID;
 import java.util.concurrent.CancellationException;
 
 import io.fabric.sdk.android.Fabric;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class IntroActivity extends Activity {
     private static final String TAG = "IntroActivity";
     private static final boolean DEBUG = false;

@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class SQLiteHelperObstacle extends com.example.campusmap.database.SQLiteOpenHelper {
     private static final boolean DEBUG = true;
     private static final String DATABASE_NAME = "campus.db";

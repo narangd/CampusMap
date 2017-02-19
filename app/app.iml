@@ -130,8 +130,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="lombok-1.16.12" level="project" />
     <orderEntry type="library" exported="" name="naver-map-api-2.1.2" level="project" />
-    <orderEntry type="library" exported="" name="jsoup-1.9.2" level="project" />
     <orderEntry type="library" exported="" name="design-25.1.1" level="project" />
+    <orderEntry type="library" exported="" name="jsoup-1.10.2" level="project" />
     <orderEntry type="library" exported="" name="transition-25.1.1" level="project" />
     <orderEntry type="library" exported="" name="spring-android-rest-template-2.0.0.M3" level="project" />
     <orderEntry type="library" exported="" name="cardview-v7-25.1.1" level="project" />
