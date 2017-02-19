@@ -1,11 +1,14 @@
 package com.example.campusmap.data.server;
 
-import lombok.Value;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Value
+import lombok.Data;
+
+@Data
 public class FloorJson {
     int id;
     int number;
+    @JsonProperty("building_id")
     int buildingId;
     RoomJson[] room;
 }

@@ -1,8 +1,8 @@
 package com.example.campusmap.data.server;
 
-import lombok.Value;
+import lombok.Data;
 
-@Value
+@Data
 public class BuildingJson {
     int id;
     int number;

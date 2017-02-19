@@ -17,6 +17,7 @@ import com.crashlytics.android.Crashlytics;
 import com.example.campusmap.Internet;
 import com.example.campusmap.R;
 import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
+import com.example.campusmap.data.server.RootJson;
 import com.example.campusmap.database.SQLiteHelperObstacle;
 import com.example.campusmap.fragment.MenuPlannerFragment;
 import com.example.campusmap.util.Json;
@@ -59,7 +60,8 @@ public class IntroActivity extends Activity {
         if (Internet.isInternetConnect(this)) {
             Log.i(TAG, "onStart: 인터넷에 연결되어 있습니다");
 
-            runAsyncTask();
+//            runAsyncTask();
+            runAsyncTaskTest();
         } else {
             Log.e(TAG, "onStart: 인터넷에 연결되어 있지 않습니다");
 
@@ -69,6 +71,20 @@ public class IntroActivity extends Activity {
 
         // test
         
+    }
+
+    private void runAsyncTaskTest() {
+
+        InputStream inputStream = getResources().openRawResource(R.raw.default_obstacle);
+         RootJson rootJson = Json.toClass(inputStream, RootJson.class);
+        Log.i(TAG, "runAsyncTaskTest: " + rootJson);
+        if (rootJson == null) {
+            mHandler = new Handler();
+            mHandler.postDelayed(startMainActivity, 500);
+            return;
+        }
+        postExecute(rootJson.getVersion());
+
     }
 
     private void runAsyncTask() {

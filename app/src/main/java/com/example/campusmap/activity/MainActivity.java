@@ -18,13 +18,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.campusmap.R;
+import com.example.campusmap.data.server.RootJson;
 import com.example.campusmap.form.InfoLocation;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.MenuPlannerFragment;
 import com.example.campusmap.fragment.PathFindingFragment;
+import com.example.campusmap.util.Json;
+import com.example.campusmap.util.ResourceUtl;
 
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity
         implements SearchView.OnQueryTextListener, MenuItemCompat.OnActionExpandListener {
@@ -122,15 +127,20 @@ public class MainActivity extends AppCompatActivity
                         String url = "https://api.bithumb.com/public/ticker";
 
 // Create a new RestTemplate instance
-                        RestTemplate restTemplate = new RestTemplate();
+//                        RestTemplate restTemplate = new RestTemplate();
+//
+//// Add the String message converter
+//                        restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+//
+//// Make the HTTP GET request, marshaling the response to a String
+//                        String result = restTemplate.getForObject(url, String.class, "Android");
+//
+//                        Log.d(TAG, "onOptionsItemSelected: " + result);
 
-// Add the String message converter
-                        restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-
-// Make the HTTP GET request, marshaling the response to a String
-                        String result = restTemplate.getForObject(url, String.class, "Android");
-
-                        Log.d(TAG, "onOptionsItemSelected: " + result);
+//                        InputStream is = getResources().openRawResource(R.raw.default_info);
+//                        RootJson rootJson = Json.toClass(is, RootJson.class);
+                        String input = ResourceUtl.getRaw(MainActivity.this, R.raw.default_info);
+                        Log.i(TAG, "doInBackground RootJson : " + Json.toString(input));
                         return null;
                     }
                 }.execute();
