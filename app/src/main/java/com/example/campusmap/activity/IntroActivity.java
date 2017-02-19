@@ -75,15 +75,13 @@ public class IntroActivity extends Activity {
 
     private void runAsyncTaskTest() {
 
-        InputStream inputStream = getResources().openRawResource(R.raw.default_obstacle);
-         RootJson rootJson = Json.toClass(inputStream, RootJson.class);
-        Log.i(TAG, "runAsyncTaskTest: " + rootJson);
-        if (rootJson == null) {
-            mHandler = new Handler();
-            mHandler.postDelayed(startMainActivity, 500);
-            return;
+        InputStream inputStream = getResources().openRawResource(R.raw.default_info);
+        RootJson rootJson = Json.toClass(inputStream, RootJson.class);
+        if (rootJson != null) {
+            postExecute(rootJson.getVersion());
         }
-        postExecute(rootJson.getVersion());
+        mHandler = new Handler();
+        mHandler.postDelayed(startMainActivity, 500);
 
     }
 
