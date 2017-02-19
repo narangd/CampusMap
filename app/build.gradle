@@ -19,8 +19,6 @@ repositories {
 
 
 android {
-
-
     compileSdkVersion 25
     buildToolsVersion '23.0.3'
 
@@ -45,6 +43,7 @@ android {
         else {
             throw new GradleException("Could not read version.properties!")
         }
+        // end version auto increment
 
         minSdkVersion 15
         targetSdkVersion 25
@@ -81,6 +80,7 @@ def lombokVersion = "1.16.12"
 def jacksonVersion = "2.8.6"
 def jsoupVersion = "1.10.2"
 def restTemplateVersion = "2.0.0.M3"
+def slf4jVersion = "1.7.23"
 
 dependencies {
 
@@ -109,4 +109,14 @@ dependencies {
     compile (group:'com.fasterxml.jackson.core', name:'jackson-annotations', version:jacksonVersion)
 
     compile (group:'org.springframework.android', name:'spring-android-rest-template', version:restTemplateVersion)
+
+    compile (group: 'org.slf4j', name: 'slf4j-nop', version: slf4jVersion)
+    compile (group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion)
+    compile (group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion)
+    compile (group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4jVersion)
+
+
+
+
+
 }

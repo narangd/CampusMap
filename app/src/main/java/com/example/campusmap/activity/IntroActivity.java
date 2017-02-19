@@ -48,7 +48,6 @@ public class IntroActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (DEBUG) Log.i(TAG, "onCreate: =============================================");
 
         // ## Layout ##
         super.onCreate(savedInstanceState);
@@ -56,16 +55,15 @@ public class IntroActivity extends Activity {
 
         Fabric.with(this, new Crashlytics());
 
-
-        if (DEBUG) Log.i(TAG, "onStart: DataBase Check");
+        log.info("start connect server");
 
         if (Internet.isInternetConnect(this)) {
-            Log.i(TAG, "onStart: 인터넷에 연결되어 있습니다");
+            log.info("인터넷에 연결되어 있습니다");
 
 //            runAsyncTask();
             runAsyncTaskTest();
         } else {
-            Log.e(TAG, "onStart: 인터넷에 연결되어 있지 않습니다");
+            log.info("인터넷에 연결되어 있지 않습니다");
 
             mHandler = new Handler();
             mHandler.postDelayed(startMainActivity, 1000);
