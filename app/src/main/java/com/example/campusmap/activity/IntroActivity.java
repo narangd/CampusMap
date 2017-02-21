@@ -16,21 +16,17 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.example.campusmap.Internet;
 import com.example.campusmap.R;
-import com.example.campusmap.asynctask.CampusInfoInsertAsyncTask;
+import com.example.campusmap.asynctask.VersionUpdateAsyncTask;
 import com.example.campusmap.data.server.RootJson;
 import com.example.campusmap.database.SQLiteHelperObstacle;
 import com.example.campusmap.fragment.MenuPlannerFragment;
 import com.example.campusmap.util.Json;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
@@ -57,7 +53,7 @@ public class IntroActivity extends Activity {
 
         log.info("start connect server");
 
-        if (Internet.isInternetConnect(this)) {
+        if (Internet.isConnect(this)) {
             log.info("인터넷에 연결되어 있습니다");
 
 //            runAsyncTask();
@@ -87,7 +83,7 @@ public class IntroActivity extends Activity {
 
     private void runAsyncTask() {
         try {
-            mAsyncTask = new CampusInfoInsertAsyncTask(IntroActivity.this) {
+            mAsyncTask = new VersionUpdateAsyncTask(this) {
                 @Override
                 protected Integer doInBackground(String... URLs) {
                     String json;

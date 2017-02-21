@@ -24,7 +24,7 @@ public class Internet {
     private static final int TIMEOUT_CONNECT = 1000;
     private static final int TIMEOUT_READ = 1000 * 5;
 
-    public static boolean isInternetConnect(Context context) {
+    public static boolean isConnect(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();

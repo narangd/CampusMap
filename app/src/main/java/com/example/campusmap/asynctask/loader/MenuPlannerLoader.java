@@ -31,7 +31,7 @@ public class MenuPlannerLoader extends AsyncTaskLoader<Pair<Integer,ArrayList<Me
         ArrayList<MenuPlanner> menuPlanners = new ArrayList<>();
         int today_index = 0;
 
-        if (!Internet.isInternetConnect(getContext())) {
+        if (!Internet.isConnect(getContext())) {
             return new Pair<>(null, null);
         }
 

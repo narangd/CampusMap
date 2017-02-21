@@ -36,7 +36,7 @@ import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Integer> implements DialogInterface.OnCancelListener {
+public class VersionUpdateAsyncTask extends AsyncTask<String, Integer, Integer> implements DialogInterface.OnCancelListener {
     private static final String TAG = "CampusInfoInsertAsync";
     private static final boolean DEBUG = true;
     private static final String ns = null;
@@ -44,29 +44,28 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
 
     private SharedPreferences preferences;
     private int version;
-    private Context mContext;
+    private Context context;
     private ProgressDialog mDlg;
     private SQLiteHelperCampusInfo helper;
     private String message = "";
 
     final AlertDialog alertDialog;
 
-    public CampusInfoInsertAsyncTask(Context context) {
-        mContext = context;
+    protected VersionUpdateAsyncTask(Context context) {
+        this.context = context;
         helper = SQLiteHelperCampusInfo.getInstance(context);
-        alertDialog = new AlertDialog.Builder(mContext).create();
+        alertDialog = new AlertDialog.Builder(this.context).create();
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        Log.i(TAG, "-=##=- onPreExecute -=##=-");
 
-        version = preferences.getInt( mContext.getString(R.string.pref_key_db_version), 0 );
-        Log.i(TAG, "onPreExecute: preferences version : " + version);
+        version = preferences.getInt( context.getString(R.string.pref_key_db_version), 0 );
+        log.info("DB version : {}", version);
 
-        mDlg = new ProgressDialog(mContext);
+        mDlg = new ProgressDialog(context);
         mDlg.setCancelable(false);
         mDlg.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mDlg.setTitle("데이터베이스를 구성중입니다");
@@ -116,7 +115,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
             Log.i(TAG, "doInBackground: result length : " + result.length());
 
         if (result == null || result.length() <= 0 || result.equals("newest")) {
-            InputStream inputStream = mContext.getResources().openRawResource(R.raw.default_info);
+            InputStream inputStream = context.getResources().openRawResource(R.raw.default_info);
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             char[] buffer = new char[1024];
             StringBuilder stringBuilder = new StringBuilder();
@@ -399,7 +398,7 @@ public class CampusInfoInsertAsyncTask extends AsyncTask<String, Integer, Intege
 
     private int getTotalCampusInfoTag(int xml_ID) {
         int max = 0;
-        XmlResourceParser parser = mContext.getResources().getXml(xml_ID);
+        XmlResourceParser parser = context.getResources().getXml(xml_ID);
         try {
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
                 if (parser.getEventType() == XmlPullParser.START_TAG) {

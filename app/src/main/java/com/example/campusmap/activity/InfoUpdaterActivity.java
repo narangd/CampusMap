@@ -58,7 +58,7 @@ public class InfoUpdaterActivity extends AppCompatActivity implements AdapterVie
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (!Internet.isInternetConnect(this)) {
+        if (!Internet.isConnect(this)) {
             Toast.makeText(this, "인터넷에 연결되어 있지 않습니다.", Toast.LENGTH_SHORT).show();
             finish();
         }
