@@ -4,21 +4,15 @@ import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class Request {
     private static final String TAG = "Request";
@@ -42,13 +36,7 @@ public class Request {
 //        factory.setHttpClient();
 // http://stackoverflow.com/questions/27420841/how-to-do-a-progress-bar-to-show-progress-download-of-a-big-file-with-androidann
         RestTemplate restTemplate = new RestTemplate(factory);
-        try {
-            factory.setHttpClient();
 
-
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-        }
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         return restTemplate;
     }
