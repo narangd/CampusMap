@@ -1,35 +1,56 @@
 package com.example.campusmap.util;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
-@Slf4j
+
 public class Request {
+    private static final String TAG = "Request";
 
     private String url = "";
     private HttpMethod method = HttpMethod.GET;
-    private JSONObject datas = new JSONObject();
+    private Map<String,Object> datas = new HashMap<>();
 
-    private int connectionTimeout = 5000;
-    private int readTimeout = 20000;
+    private int connectionTimeout = 3000;
+    private int readTimeout = 10000;
 
     private Request(String url, HttpMethod method) {
         this.url = url;
         this.method = method;
     }
 
-    private RestTemplate newRestTemplate(int connectionOut, int readOut) {
+    private RestTemplate newRestTemplate() {
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        factory.setConnectTimeout(connectionOut);
-        factory.setReadTimeout(readOut);
-        return new RestTemplate(factory);
+        factory.setConnectTimeout(connectionTimeout);
+        factory.setReadTimeout(readTimeout);
+//        factory.setHttpClient();
+// http://stackoverflow.com/questions/27420841/how-to-do-a-progress-bar-to-show-progress-download-of-a-big-file-with-androidann
+        RestTemplate restTemplate = new RestTemplate(factory);
+        try {
+            factory.setHttpClient();
+
+
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        return restTemplate;
     }
 
     public Request connectionOut(int connectionTimeout) {
@@ -47,25 +68,39 @@ public class Request {
     }
 
     public Request data(String name, Object value) {
-        try {
-            datas.put(name, value);
-        } catch (JSONException e) {
-            log.info("data insert error : {}", e.getMessage());
-        }
+        datas.put(name, value);
         return this;
     }
 
-    public Request data(JSONObject datas) {
+    public Request data(Map<String,Object> datas) {
         this.datas = datas;
         return this;
     }
 
     public <ResponseObject> ResponseObject send(Class<ResponseObject> returnType) {
-        RestTemplate restTemplate = newRestTemplate(connectionTimeout, readTimeout);
+        RestTemplate restTemplate = newRestTemplate();
 //        restTemplate.
 
-        HttpEntity<String> entity = new HttpEntity<>(datas.toString());
-        ResponseEntity<ResponseObject> responseEntity = restTemplate.exchange(url, method, entity, returnType);
+        ResponseEntity<ResponseObject> responseEntity = new ResponseEntity<>(HttpStatus.OK);
+        try {
+//            responseEntity = restTemplate.exchange(url, method, entity, returnType);
+            switch (method) {
+                case GET:
+                    responseEntity = restTemplate.getForEntity(url, returnType, datas);
+                    break;
+                case POST:
+                    responseEntity = restTemplate.postForEntity(url, datas, returnType);
+                    break;
+                case PUT:
+//                    responseEntity = restTemplate.put
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "send: ", e);
+            responseEntity = new ResponseEntity<>(HttpStatus.OK);
+        }
+
+        Log.i(TAG, "send: content length : " + responseEntity.getHeaders().getContentLength());
+//        restTemplate
 
         responseEntity.getStatusCode(); // ResponseHandler ...
 

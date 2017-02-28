@@ -9,7 +9,7 @@ public class RoomJson {
     int id;
     String name;
     String description;
-    boolean main;
+    int main;
     @JsonProperty("floor_id")
     int floorId;
 }

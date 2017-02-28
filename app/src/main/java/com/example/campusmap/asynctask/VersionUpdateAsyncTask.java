@@ -12,9 +12,13 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
-import com.example.campusmap.Internet;
 import com.example.campusmap.R;
+import com.example.campusmap.data.server.BuildingJson;
+import com.example.campusmap.data.server.FloorJson;
+import com.example.campusmap.data.server.RoomJson;
+import com.example.campusmap.data.server.RootJson;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
+import com.example.campusmap.server.ServerClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,36 +26,24 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.util.HashMap;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-public class VersionUpdateAsyncTask extends AsyncTask<String, Integer, Integer> implements DialogInterface.OnCancelListener {
+public class VersionUpdateAsyncTask extends AsyncTask<Void, String, Integer> implements DialogInterface.OnCancelListener {
     private static final String TAG = "CampusInfoInsertAsync";
     private static final boolean DEBUG = true;
-    private static final String ns = null;
-    private static final int TIMEOUT = 1000 * 5;
 
     private SharedPreferences preferences;
     private int version;
     private Context context;
     private ProgressDialog mDlg;
     private SQLiteHelperCampusInfo helper;
-    private String message = "";
 
-    final AlertDialog alertDialog;
+    private static final String Progress_Progress = "progress";
+    private static final String Progress_Dialog = "dialog";
 
-    protected VersionUpdateAsyncTask(Context context) {
+    private AlertDialog alertDialog;
+
+    public VersionUpdateAsyncTask(Context context) {
         this.context = context;
         helper = SQLiteHelperCampusInfo.getInstance(context);
         alertDialog = new AlertDialog.Builder(this.context).create();
@@ -63,166 +55,70 @@ public class VersionUpdateAsyncTask extends AsyncTask<String, Integer, Integer> 
         super.onPreExecute();
 
         version = preferences.getInt( context.getString(R.string.pref_key_db_version), 0 );
-        log.info("DB version : {}", version);
+        Log.i(TAG, "onPreExecute: DB version : " + version);
 
         mDlg = new ProgressDialog(context);
         mDlg.setCancelable(false);
         mDlg.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mDlg.setTitle("데이터베이스를 구성중입니다");
-        mDlg.setMessage("읽어오는 중입니다");
+        mDlg.setMessage("");
         mDlg.setIndeterminate(true);
         mDlg.setOnCancelListener(this);
         mDlg.show();
     }
 
     @Override
-    protected Integer doInBackground(String... URLs) {
+    protected Integer doInBackground(Void... voids) {
         if (DEBUG) Log.i(TAG, "doInBackground: called");
-        if (URLs == null || URLs.length < 1) {
-            Log.e(TAG, "doInBackground: parameter expected");
-            return 0;
-        }
 
+        publishProgress(Progress_Dialog, "읽어오는 중입니다");
 
-        String BUILDING = SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME;
-        String FLOOR = SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME;
-        String ROOM = SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME;
+        RootJson rootJson = ServerClient.datas(version);
+
+        publishProgress(Progress_Dialog, "입력하는중입니다");
+
         SQLiteDatabase database = helper.getWritableDatabase();
-//        String result = bringJSON(URLs[0]);
-        String result;
         try {
-            HashMap<String,String> parameters = new HashMap<>();
-            parameters.put("version", String.valueOf(version));
-            result = Internet.connectHttpPage(
-                    URLs[0],
-                    Internet.CONNECTION_METHOD_GET,
-                    parameters
-            );
-//            Log.i(TAG, "doInBackground: json length " + json.length() + " contents " + json);
-        } catch (SocketTimeoutException e) {
-            Log.e(TAG, "doInBackground: timeout ");
-            result = null;
-        }
-        int version = 0;
+            database.beginTransaction();
 
-        if (isCancelled()) {
-            return null;
-        }
+            helper.delete(database);
 
-        message = result;
-        publishProgress(-2);
-        if (result != null)
-            Log.i(TAG, "doInBackground: result length : " + result.length());
+            version = rootJson.getVersion();
+            Log.i(TAG, "doInBackground: Server Version : " + version);
 
-        if (result == null || result.length() <= 0 || result.equals("newest")) {
-            InputStream inputStream = context.getResources().openRawResource(R.raw.default_info);
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            char[] buffer = new char[1024];
-            StringBuilder stringBuilder = new StringBuilder();
-            try {
-                while (inputStreamReader.read(buffer) > 0) {
-                    stringBuilder.append(buffer);
-                }
+            int count = 0;
 
-                result = stringBuilder.toString();
-            } catch (IOException e1) {
-                result = "";
-            }
-        }
+            for (BuildingJson buildingJson : rootJson.getBuilding()) {
+                helper.insert(database, buildingJson);
+                int buildingId = buildingJson.getId();
 
-        database.beginTransaction();
+                for (FloorJson floorJson : buildingJson.getFloor()) {
+                    helper.insert(database, floorJson);
 
-        message = "입력하는중입니다";
-        publishProgress(-1);
+                    for (RoomJson roomJson : floorJson.getRoom()) {
+                        helper.insert(database, roomJson, buildingId,
+                                buildingJson.getName() + "/" + floorJson.getNumber() + "층");
+//                        path = buildingName + " / " + String.valueOf(number)+"층";
 
-        helper.deleteTable(database, BUILDING);
-        helper.deleteTable(database, FLOOR);
-        helper.deleteTable(database, ROOM);
+                        publishProgress(Progress_Progress, ++count + "");
+                    }
 
-        version = parsingJSON(result, helper, database);
-        Log.i(TAG, "doInBackground: JSON version : " + version);
-
-        database.setTransactionSuccessful();
-        database.endTransaction();
-        database.close();
-
-        return version;
-    }
-
-    private String bringJSON(String urlString) {
-        StringBuilder builder = new StringBuilder();
-
-        HttpURLConnection connection = null;
-        try {
-            long startMilli = System.currentTimeMillis();
-
-            message ="서버에 접속하는 중입니다";
-
-            urlString += "?version=" + version;
-            if (DEBUG) Log.i(TAG, "bringJSON: URL : " + urlString);
-
-            URL url = new URL(urlString);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("Accept-Encoding", "identity");
-            connection.setConnectTimeout( TIMEOUT );
-            connection.setReadTimeout( TIMEOUT );
-            connection.setRequestMethod("GET");
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-
-            OutputStream os = connection.getOutputStream();
-            OutputStreamWriter writer = new OutputStreamWriter(os);
-            writer.write("version=" + version);
-            writer.flush();
-            writer.close();
-
-            if (DEBUG) {
-
-                Log.d(TAG, "bringJSON: take Time : " + (System.currentTimeMillis() - startMilli) + "ms");
-                Log.d(TAG, "bringJSON: Content Encoding : " + connection.getContentEncoding());
-                Log.d(TAG, "bringJSON: Content Length : " + connection.getContentLength());
-
-                Log.d(TAG, "bringJSON: Response Message : " + connection.getResponseMessage());
-                Log.d(TAG, "bringJSON: Response Code : " + connection.getResponseCode());
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                cancel(true);
-                Log.e(TAG, "bringJSON: i return null : " + connection.getResponseCode());
-                return null;
-            }
-
-            String line;
-            InputStream is = connection.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader reader  = new BufferedReader(isr);
-
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-            }
-
-            reader.close();
-
-        } catch (SocketTimeoutException e) {
-            Log.e(TAG, "bringJSON: Time Out : " + e.getMessage());
-            cancel(true);
-            return null;
-        } catch (IOException e) {
-            Log.e(TAG, "bringJSON: local.. " + e.getLocalizedMessage());
-//            e.printStackTrace();
+            database.setTransactionSuccessful();
+        } catch (Exception ignored) {
+            Log.e(TAG, "doInBackground: ", ignored);
         } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+            database.endTransaction();
+            database.close();
         }
-
-        return builder.toString();
+        return version;
     }
 
     private int parsingJSON(String json, SQLiteHelperCampusInfo helper, SQLiteDatabase database) {
@@ -258,7 +154,7 @@ public class VersionUpdateAsyncTask extends AsyncTask<String, Integer, Integer> 
                         buildingName,                   // # name #
                         description             // # description #
                 );
-                publishProgress(++count);
+                publishProgress("progress", ++count + "");
 //                if (DEBUG) {
 //                    Log.d(TAG, "parsingJSON(building)["+rowID+"] id : " + currentBuildingID +
 //                            ", number : " + number +
@@ -280,7 +176,7 @@ public class VersionUpdateAsyncTask extends AsyncTask<String, Integer, Integer> 
                             number,                          // # number #
                             currentBuildingID                // # building id #
                     );
-                    publishProgress(++count);
+                    publishProgress("progress", ++count + "");
 //                    if (DEBUG) {
 //                        Log.d(TAG, "parsingJSON(floor)["+rowID+"] id : " + currentFloorID +
 //                                ", number : " + number);
@@ -306,7 +202,7 @@ public class VersionUpdateAsyncTask extends AsyncTask<String, Integer, Integer> 
                                 currentBuildingID,                // # building id #
                                 main.equals("1")                      // # is main room? #
                         );
-                        publishProgress(++count);
+                        publishProgress("progress", ++count + "");
 //                        if (DEBUG) {
 //                            Log.d(TAG, "parsingJSON(room)["+rowID+"] id : " + currentRoomID +
 //                                    ", roomName : " + roomName +
@@ -317,19 +213,13 @@ public class VersionUpdateAsyncTask extends AsyncTask<String, Integer, Integer> 
                     }
 
 //                    if (DEBUG) {
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
 //                    }
                 }
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
-            message = json;
-            publishProgress(-2);
+            publishProgress(Progress_Dialog, json);
         } catch (SQLiteConstraintException e) {
             e.printStackTrace();
             Log.e(TAG, "parsingJSON: 실패");
@@ -346,28 +236,24 @@ public class VersionUpdateAsyncTask extends AsyncTask<String, Integer, Integer> 
     }
 
     @Override
-    protected void onProgressUpdate(Integer... values) {
+    protected void onProgressUpdate(String... values) {
         if (values == null || values.length < 1) {
             return;
         }
 
-        if (values[0] >= 0) {
-            mDlg.setIndeterminate(false);
-            mDlg.setProgress(values[0]);
-        } else {
-            switch (-values[0]) {
-                case 1:
-                    mDlg.setMessage(message);
-                    break;
-                case 2:
+        switch (values[0]) {
+            case Progress_Progress:
+                mDlg.setIndeterminate(false);
+                mDlg.setProgress(Integer.parseInt(values[1]));
+                break;
+            case Progress_Dialog:
+                mDlg.setMessage(values[1]);
+                break;
 //                    alertDialog.setTitle("JSON 결과");
 //                    alertDialog.setMessage(message);
 //                    alertDialog.setCanceledOnTouchOutside(true);
 //                    alertDialog.show();
-                    break;
-            }
         }
-
     }
 
     @Override

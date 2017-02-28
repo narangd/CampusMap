@@ -32,10 +32,8 @@ import com.example.campusmap.fragment.pager.FloorPagerAdapter;
 
 import java.util.ArrayList;
 
-import lombok.extern.slf4j.Slf4j;
 import nl.codesoup.cubicbezier.CubicBezierInterpolator;
 
-@Slf4j
 public class BuildingActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, DrawerLayout.DrawerListener {
 

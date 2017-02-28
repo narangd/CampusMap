@@ -104,18 +104,12 @@ dependencies {
     compile (group:'org.projectlombok', name:'lombok', version:lombokVersion)
 //    provided("org.projectlombok:lombok:$lombokVersion")
 
-    compile (group:'com.fasterxml.jackson.core', name:'jackson-core', version:jacksonVersion)
-    compile (group:'com.fasterxml.jackson.core', name:'jackson-databind', version:jacksonVersion)
-    compile (group:'com.fasterxml.jackson.core', name:'jackson-annotations', version:jacksonVersion)
+    compile ('org.springframework.android:spring-android-rest-template:1.0.1.RELEASE')
+    compile ('com.fasterxml.jackson.core:jackson-databind:2.3.2')
 
-    compile (group:'org.springframework.android', name:'spring-android-rest-template', version:restTemplateVersion)
-
-    compile (group: 'org.slf4j', name: 'slf4j-nop', version: slf4jVersion)
-    compile (group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion)
-    compile (group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion)
-    compile (group: 'org.slf4j', name: 'slf4j-jdk14', version: slf4jVersion)
-
-
+//    compile (group:'org.springframework.android', name:'spring-android-rest-template', version:restTemplateVersion)
+//
+//    compile 'com.fasterxml.jackson.core:jackson-databind:2.3.2'
 
 
 

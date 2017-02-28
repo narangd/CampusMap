@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class RootJson {
     int version;
-    BuildingJson[] building;
+    BuildingJson[] building = new BuildingJson[0];
 }

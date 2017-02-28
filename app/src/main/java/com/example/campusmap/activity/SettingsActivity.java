@@ -65,9 +65,7 @@ public class SettingsActivity extends AppCompatActivity implements ActivityCompa
                         SQLiteHelperCampusInfo helper = SQLiteHelperCampusInfo.getInstance(context);
                         SQLiteDatabase db = helper.getWritableDatabase();
 
-                        helper.deleteTable(db, SQLiteHelperCampusInfo.BuildingEntry.TABLE_NAME);
-                        helper.deleteTable(db, SQLiteHelperCampusInfo.FloorEntry.TABLE_NAME);
-                        helper.deleteTable(db, SQLiteHelperCampusInfo.RoomEntry.TABLE_NAME);
+                        helper.delete(db);
 
                         db.close();
 

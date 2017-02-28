@@ -18,7 +18,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.campusmap.R;
-import com.example.campusmap.data.server.RootJson;
 import com.example.campusmap.form.InfoLocation;
 import com.example.campusmap.fragment.CampusMapFragment;
 import com.example.campusmap.fragment.MenuPlannerFragment;
@@ -26,14 +25,6 @@ import com.example.campusmap.fragment.PathFindingFragment;
 import com.example.campusmap.util.Json;
 import com.example.campusmap.util.ResourceUtl;
 
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.web.client.RestTemplate;
-
-import java.io.InputStream;
-
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class MainActivity extends AppCompatActivity
         implements SearchView.OnQueryTextListener, MenuItemCompat.OnActionExpandListener {
     private static final String TAG = "MainActivity";
