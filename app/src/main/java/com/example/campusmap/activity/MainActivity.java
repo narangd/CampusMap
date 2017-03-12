@@ -1,8 +1,10 @@
 package com.example.campusmap.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -40,13 +42,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String campusName = preferences.getString(getString(R.string.pref_key_campus_name), getString(R.string.app_name));
 
         // ## Layout ##
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         // ## Toolbar ##
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(campusName);
         setSupportActionBar(toolbar);
 
         // Set up the ViewPager with the sections adapter.
@@ -132,7 +138,7 @@ public class MainActivity extends AppCompatActivity
 //                        Log.d(TAG, "onOptionsItemSelected: " + result);
 
 //                        InputStream is = getResources().openRawResource(R.raw.default_info);
-//                        RootJson rootJson = Json.toClass(is, RootJson.class);
+//                        RootJson rootJson = Json.to(is, RootJson.class);
                         String input = ResourceUtl.getRaw(MainActivity.this, R.raw.default_info);
                         Log.i(TAG, "doInBackground RootJson : " + Json.toString(input));
                         return null;

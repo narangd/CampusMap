@@ -1,5 +1,6 @@
 package com.example.campusmap.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONArray;
@@ -10,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class Json {
-    public static <T> T toClass(String json, Class<T> returnType) {
+    public static <T> T to(String json, Class<T> returnType) {
         try {
             return new ObjectMapper().readValue(json, returnType);
         } catch (IOException e) {
@@ -18,12 +19,20 @@ public class Json {
             return null;
         }
     }
-    public static <T> T toClass(InputStream is, Class<T> returnType) {
+    public static <T> T to(InputStream is, Class<T> returnType) {
         try {
             return new ObjectMapper().readValue(is, returnType);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    public static String from(Object object) {
+        try {
+            return new ObjectMapper().writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 

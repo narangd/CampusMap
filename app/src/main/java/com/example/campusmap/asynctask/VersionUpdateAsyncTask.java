@@ -4,8 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.res.XmlResourceParser;
-import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -20,16 +18,8 @@ import com.example.campusmap.data.server.RootJson;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.server.ServerClient;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
-
-public class VersionUpdateAsyncTask extends AsyncTask<Void, String, Integer> implements DialogInterface.OnCancelListener {
-    private static final String TAG = "CampusInfoInsertAsync";
+public class VersionUpdateAsyncTask extends AsyncTask<Void, String, RootJson> implements DialogInterface.OnCancelListener {
+    private static final String TAG = "VersionUpdateAsyncTask";
     private static final boolean DEBUG = true;
 
     private SharedPreferences preferences;
@@ -40,6 +30,7 @@ public class VersionUpdateAsyncTask extends AsyncTask<Void, String, Integer> imp
 
     private static final String Progress_Progress = "progress";
     private static final String Progress_Dialog = "dialog";
+    private static final String Progress_JobDone = "job_done";
 
     private AlertDialog alertDialog;
 
@@ -55,7 +46,7 @@ public class VersionUpdateAsyncTask extends AsyncTask<Void, String, Integer> imp
         super.onPreExecute();
 
         version = preferences.getInt( context.getString(R.string.pref_key_db_version), 0 );
-        Log.i(TAG, "onPreExecute: DB version : " + version);
+        Log.i(TAG, "onPreExecute: mobile version : " + version);
 
         mDlg = new ProgressDialog(context);
         mDlg.setCancelable(false);
@@ -68,14 +59,27 @@ public class VersionUpdateAsyncTask extends AsyncTask<Void, String, Integer> imp
     }
 
     @Override
-    protected Integer doInBackground(Void... voids) {
+    protected RootJson doInBackground(Void... voids) {
         if (DEBUG) Log.i(TAG, "doInBackground: called");
 
         publishProgress(Progress_Dialog, "읽어오는 중입니다");
 
-        RootJson rootJson = ServerClient.datas(version);
+        RootJson rootJson = ServerClient.versions(version);
+
+        if (rootJson == null || version >= rootJson.getVersion()) {
+            publishProgress(Progress_JobDone, "최신버전입니다");
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return rootJson;
+        }
 
         publishProgress(Progress_Dialog, "입력하는중입니다");
+
+        mDlg.setMax(getTotalCampusInfoJSONObject(rootJson));
 
         SQLiteDatabase database = helper.getWritableDatabase();
         try {
@@ -118,121 +122,7 @@ public class VersionUpdateAsyncTask extends AsyncTask<Void, String, Integer> imp
             database.endTransaction();
             database.close();
         }
-        return version;
-    }
-
-    private int parsingJSON(String json, SQLiteHelperCampusInfo helper, SQLiteDatabase database) {
-        int count=0;
-        int currentBuildingID=0, currentFloorID=0, currentRoomID=0;
-
-        int version = 0;
-        int id, number;
-        String buildingName, path, roomName;
-        String description, main;
-
-        long rowID;
-        mDlg.setMax(getTotalCampusInfoJSONObject(json));
-        Log.i(TAG, "parsingJSON: json object count : " + mDlg.getMax());
-
-        try {
-            JSONObject buildingInfo = new JSONObject(json);
-            version = buildingInfo.getInt("version");
-
-            JSONArray buildings = buildingInfo.getJSONArray("building");
-            for (int buildingIndex=0; buildingIndex<buildings.length(); buildingIndex++) {
-
-                JSONObject building = buildings.getJSONObject(buildingIndex);
-                currentBuildingID = Integer.parseInt( building.getString("id") );
-                number = Integer.parseInt( building.getString("number") );
-                buildingName = building.getString("name");
-                description = building.getString("description");
-                description = description == null ? "" : description;
-
-                helper.insertBuilding(database,
-                        currentBuildingID,    // # id #
-                        number,                 // # number #
-                        buildingName,                   // # name #
-                        description             // # description #
-                );
-                publishProgress("progress", ++count + "");
-//                if (DEBUG) {
-//                    Log.d(TAG, "parsingJSON(building)["+rowID+"] id : " + currentBuildingID +
-//                            ", number : " + number +
-//                            ", name : " + buildingName +
-//                            ", description : " + description);
-//                }
-
-                JSONArray floors = building.getJSONArray("floor");
-                for (int floorIndex=0; floorIndex<floors.length(); floorIndex++) {
-
-                    JSONObject floor = floors.getJSONObject(floorIndex);
-                    currentFloorID = Integer.parseInt( floor.getString("id") );
-                    number = Integer.parseInt( floor.getString("number") );
-//                    currentBuildingID = Integer.parseInt( floor.getString("building_id") );
-
-                    path = buildingName + " / " + String.valueOf(number)+"층";
-                    helper.insertFloor(database,
-                            currentFloorID,                // # id #
-                            number,                          // # number #
-                            currentBuildingID                // # building id #
-                    );
-                    publishProgress("progress", ++count + "");
-//                    if (DEBUG) {
-//                        Log.d(TAG, "parsingJSON(floor)["+rowID+"] id : " + currentFloorID +
-//                                ", number : " + number);
-//                    }
-
-                    JSONArray rooms = floor.getJSONArray("room");
-                    for (int roomIndex=0; roomIndex<rooms.length(); roomIndex++) {
-
-                        JSONObject room = rooms.getJSONObject(roomIndex);
-                        currentRoomID = Integer.parseInt( room.getString("id") );
-                        roomName = room.getString("name");
-                        description = room.getString("description");
-                        description = description == null ? "" : description;
-                        main = room.getString("main");
-//                        currentFloorID = Integer.parseInt( building.getstring)
-
-                        helper.insertRoom(database,
-                                currentRoomID,                  // # id #
-                                roomName,                         // # name
-                                description,                             // # description #
-                                path,                             // # path string #
-                                currentFloorID,                   // # floor id #
-                                currentBuildingID,                // # building id #
-                                main.equals("1")                      // # is main room? #
-                        );
-                        publishProgress("progress", ++count + "");
-//                        if (DEBUG) {
-//                            Log.d(TAG, "parsingJSON(room)["+rowID+"] id : " + currentRoomID +
-//                                    ", roomName : " + roomName +
-//                                    ", description : " + description +
-//                                    ", main : " + main +
-//                                    ", roomName : " + roomName);
-//                        }
-                    }
-
-//                    if (DEBUG) {
-//                    }
-                }
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            publishProgress(Progress_Dialog, json);
-        } catch (SQLiteConstraintException e) {
-            e.printStackTrace();
-            Log.e(TAG, "parsingJSON: 실패");
-            return -1;
-        }
-
-        if (DEBUG) {
-            Log.d( TAG, "database insert building count : " + currentBuildingID
-                    + ", floor count : " + currentFloorID
-                    + ", insert room count : " + currentRoomID );
-        }
-
-        return version;
+        return rootJson;
     }
 
     @Override
@@ -246,7 +136,10 @@ public class VersionUpdateAsyncTask extends AsyncTask<Void, String, Integer> imp
                 mDlg.setIndeterminate(false);
                 mDlg.setProgress(Integer.parseInt(values[1]));
                 break;
+            case Progress_JobDone:
+                mDlg.setIndeterminate(false);
             case Progress_Dialog:
+                mDlg.setIndeterminate(true);
                 mDlg.setMessage(values[1]);
                 break;
 //                    alertDialog.setTitle("JSON 결과");
@@ -254,12 +147,21 @@ public class VersionUpdateAsyncTask extends AsyncTask<Void, String, Integer> imp
 //                    alertDialog.setCanceledOnTouchOutside(true);
 //                    alertDialog.show();
         }
+
+        mDlg.show();
     }
 
     @Override
-    protected void onPostExecute(Integer version) {
-        super.onPostExecute(version);
+    protected void onPostExecute(RootJson rootJson) {
+        super.onPostExecute(rootJson);
         Log.i(TAG, "-=##=- onPostExecute -=##=-");
+
+        if (rootJson != null && version >= rootJson.getVersion()) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(context.getString(R.string.pref_key_campus_name), rootJson.getName());
+            editor.apply();
+        }
+
         mDlg.dismiss();
         alertDialog.dismiss();
     }
@@ -274,35 +176,22 @@ public class VersionUpdateAsyncTask extends AsyncTask<Void, String, Integer> imp
     }
 
     @Override
-    protected void onCancelled(Integer version) {
-        super.onCancelled(version);
+    protected void onCancelled(RootJson rootJson) {
+        super.onCancelled(rootJson);
         if (DEBUG) Log.i(TAG, "onCancelled: called!! ("+version+")");
 //        if (mConnection != null) mConnection.disconnect();
         mDlg.dismiss();
         alertDialog.dismiss();
     }
 
-    private int getTotalCampusInfoTag(int xml_ID) {
-        int max = 0;
-        XmlResourceParser parser = context.getResources().getXml(xml_ID);
-        try {
-            while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                if (parser.getEventType() == XmlPullParser.START_TAG) {
-                    max ++;
-                }
-            }
-        } catch (XmlPullParserException | IOException e) {
-            e.printStackTrace();
-        }
-        parser.close();
-        return max;
-    }
-
-    private int getTotalCampusInfoJSONObject(final String json) {
+    private int getTotalCampusInfoJSONObject(RootJson rootJson) {
         int count = 0;
-        for (int i=0; i<json.length(); i++) {
-            if (json.charAt(i) == '{') { // count json start object '{'
-                count++;
+
+        for (BuildingJson buildingJson : rootJson.getBuilding()) {
+            for (FloorJson floorJson : buildingJson.getFloor()) {
+                for (RoomJson roomJson : floorJson.getRoom()) {
+                    ++count;
+                }
             }
         }
         return count;

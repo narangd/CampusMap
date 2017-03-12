@@ -4,6 +4,8 @@ import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +21,10 @@ public class Request {
 
     private String url = "";
     private HttpMethod method = HttpMethod.GET;
+    private HttpHeaders headers = new HttpHeaders();
     private Map<String,Object> datas = new HashMap<>();
 
-    private int connectionTimeout = 3000;
+    private int connectionTimeout = 5000;
     private int readTimeout = 10000;
 
     private Request(String url, HttpMethod method) {
@@ -55,33 +58,33 @@ public class Request {
         return new Request(url, HttpMethod.GET);
     }
 
+    public Request header(String name, String value) {
+        headers.add(name, value);
+        return this;
+    }
+
     public Request data(String name, Object value) {
         datas.put(name, value);
         return this;
     }
 
-    public Request data(Map<String,Object> datas) {
-        this.datas = datas;
-        return this;
-    }
+//    public Request data(Map<String,Object> datas) {
+//        this.datas = datas;
+//        return this;
+//    }
 
     public <ResponseObject> ResponseObject send(Class<ResponseObject> returnType) {
         RestTemplate restTemplate = newRestTemplate();
 //        restTemplate.
 
-        ResponseEntity<ResponseObject> responseEntity = new ResponseEntity<>(HttpStatus.OK);
+        Log.d(TAG, "Request url: " + url);
+        String json = Json.from(datas);
+        Log.d(TAG, "Request request json: " + json);
+
+        ResponseEntity<ResponseObject> responseEntity;
+        HttpEntity<String> httpEntity = new HttpEntity<>("{\"version\":8}", headers);
         try {
-//            responseEntity = restTemplate.exchange(url, method, entity, returnType);
-            switch (method) {
-                case GET:
-                    responseEntity = restTemplate.getForEntity(url, returnType, datas);
-                    break;
-                case POST:
-                    responseEntity = restTemplate.postForEntity(url, datas, returnType);
-                    break;
-                case PUT:
-//                    responseEntity = restTemplate.put
-            }
+            responseEntity = restTemplate.exchange(url, method, httpEntity, returnType);
         } catch (Exception e) {
             Log.e(TAG, "send: ", e);
             responseEntity = new ResponseEntity<>(HttpStatus.OK);

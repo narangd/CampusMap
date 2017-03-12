@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.campusmap.R;
 import com.example.campusmap.form.MenuPlanner;
@@ -40,6 +41,7 @@ public class MenuPlannerPagerAdapter extends FragmentPagerAdapter {
 
         private MenuPlanner menuPlanner;
         private RecyclerView recyclerView;
+        private TextView headerTextView;
 
         public static MenuPlannerFragment newInstance(MenuPlanner menuPlanner) {
             MenuPlannerFragment fragment = new MenuPlannerFragment();
@@ -56,7 +58,7 @@ public class MenuPlannerPagerAdapter extends FragmentPagerAdapter {
         @Nullable
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_menu_planner_piece, container, false);
+            View rootView = inflater.inflate(R.layout.fragment_menu_planner_a_day, container, false);
 
             recyclerView = (RecyclerView) rootView.findViewById(R.id.menu_recycler_view);
             recyclerView.setHasFixedSize(true);

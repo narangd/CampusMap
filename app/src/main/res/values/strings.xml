@@ -207,4 +207,5 @@
     <string name="pref_key_phone_number">phone_number</string>
     <string name="pref_title_phone_number">폰 번호</string>
     <string name="str_done">완료</string>
+    <string name="pref_key_campus_name">campus_name</string>
 </resources>

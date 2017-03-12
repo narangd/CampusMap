@@ -4,22 +4,20 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.campusmap.R;
 
 import org.jsoup.helper.StringUtil;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MenuPlanner implements Serializable {
+// 세트마다
+
 //    private static final String[] HEADER = {
 //            "조식", "중식", "석식", "교직원"
 //    };
@@ -35,8 +33,8 @@ public class MenuPlanner implements Serializable {
         return date;
     }
 
-    public void addMeal(int index, String header, String ... menus) {
-        meals.add(new Meal(header, menus));
+    public void addMeal(int index, String mealType, String ... menus) {
+        meals.add(new Meal(mealType, menus));
     }
 
     public List<Meal> getMeals() {
@@ -54,21 +52,23 @@ public class MenuPlanner implements Serializable {
     }
 
     public static class Meal implements Serializable {
-        private String header;
+        private String mealType;
         private ArrayList<String> menuArray = new ArrayList<>();
 
-        public Meal(String header, String ... menus) {
-            this.header = header;
-            Collections.addAll(menuArray, menus);
+        public Meal(String mealType, String ... menus) {
+            this.mealType = mealType;
+            for (String menu : menus) {
+                int index = menu.indexOf("</");
+                if (index >= 0) {
+                    menu = menu.substring(0, index);
+                }
+                menuArray.add(menu);
+            }
+//            Collections.addAll(menuArray, menus);
         }
 
-        public void setMenus(String ... menus) {
-            menuArray.clear();
-            Collections.addAll(menuArray, menus);
-        }
-
-        public String getHeader() {
-            return header;
+        public String getMealType() {
+            return mealType;
         }
         public ArrayList<String> getMenus() {
             return menuArray;
@@ -77,7 +77,7 @@ public class MenuPlanner implements Serializable {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("<").append(header).append(">\n");
+            builder.append("<").append(mealType).append(">\n");
             for (String menu : menuArray) {
                 builder.append(menu).append("\n");
             }
@@ -91,24 +91,34 @@ public class MenuPlanner implements Serializable {
         private MenuPlanner menuPlanner;
         private List<Meal> meals;
 
-        public static class ViewHolder extends RecyclerView.ViewHolder {
-            public View root;
-            public TextView title;
+        public static class CardHolder extends RecyclerView.ViewHolder {
+            TextView menuTypeView;
             public TextView menu;
 
-            public ViewHolder(View view) {
-                super(view);
-                root = view;
-                title = (TextView) view.findViewById(R.id.title);
-                menu = (TextView) view.findViewById(R.id.menu);
+            public CardHolder(View view, ViewGroup parent) {
+                super(view); // not ViewGroup
+
+                menuTypeView = (TextView) view.findViewById(R.id.menu_type);
+                LinearLayout cardListLayout = (LinearLayout) view.findViewById(R.id.card_list);
+                View cardView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.card_menu, parent, false);
+                cardListLayout.addView(cardView);
+
+                menu = (TextView) cardView.findViewById(R.id.menu);
             }
+
+            void setMenu(String... menus) {
+
+            }
+
+//            void setMeals()
         }
         public static class HeaderHolder extends RecyclerView.ViewHolder {
-            public TextView header;
+            public TextView dateTextView;
 
             public HeaderHolder(View view) {
                 super(view);
-                header = (TextView) view.findViewById(R.id.header);
+                dateTextView = (TextView) view.findViewById(R.id.date);
             }
         }
 
@@ -121,31 +131,24 @@ public class MenuPlanner implements Serializable {
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             if (viewType == HEADER_VIEW) {
                 View header = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.menu_planer_card_header, parent, false);
+                        .inflate(R.layout.card_header_menu_planer, parent, false);
                 return new HeaderHolder(header);
             }
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.menu_planer_card, parent, false);
-            return new ViewHolder(view);
+                    .inflate(R.layout.card_menu_planer, parent, false);
+            return new CardHolder(view, parent);
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof  HeaderHolder) {
                 HeaderHolder headerHolder = (HeaderHolder) holder;
-                headerHolder.header.setText(menuPlanner.getDate());
-            } else if (holder instanceof ViewHolder) {
+                headerHolder.dateTextView.setText(menuPlanner.getDate());
+            } else if (holder instanceof CardHolder) {
                 position --;
-                ViewHolder viewHolder = (ViewHolder) holder;
-                viewHolder.title.setText(meals.get(position).getHeader());
-                viewHolder.menu.setText(StringUtil.join(meals.get(position).getMenus(), "\n"));
-
-                try {
-                    XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
-                    parser.setInput(new ByteArrayInputStream(StringUtil.join(meals.get(position).getMenus(), "").getBytes()), "UTF-8");
-                } catch (XmlPullParserException e) {
-                    e.printStackTrace();
-                }
+                CardHolder cardHolder = (CardHolder) holder;
+                cardHolder.menuTypeView.setText(meals.get(position).getMealType());
+                cardHolder.menu.setText(StringUtil.join(meals.get(position).getMenus(), "\n"));
             }
         }
 

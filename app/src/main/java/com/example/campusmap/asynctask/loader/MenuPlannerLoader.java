@@ -56,7 +56,7 @@ public class MenuPlannerLoader extends AsyncTaskLoader<Pair<Integer,ArrayList<Me
             }
 
             Element tbody = tags.get(1).select("tbody").first();
-            // 조, 중, 석, 교
+            // 조식, 중식, 석식, 교직원 (세로)
             for (int meal_index=0; meal_index<tbody.children().size(); meal_index++) {
 
                 Elements tr_days = tbody.children().get(meal_index).children();
