@@ -62,11 +62,10 @@ public class MenuPlannerLoader extends AsyncTaskLoader<Pair<Integer,ArrayList<Me
                 Elements tr_days = tbody.children().get(meal_index).children();
                 // 구분 일 (월 화 수 목 금) 토
                 for (int day_index=1; day_index<tr_days.size(); day_index++) {
-                    String menu = tr_days.get(day_index).html().replace("&amp;","&").replace("\n", "").replace(" ", "");
+                    String menu = tr_days.get(day_index).html().replace("&amp;","&").replaceAll("(\n| )", "");
                     menuPlanners.get(day_index-1).addMeal(
-                            meal_index,
                             tr_days.get(0).ownText(),
-                            menu.split("<br>")
+                            menu.split("<br><br>")
                     );
 
                 }

@@ -2,6 +2,7 @@ package com.example.campusmap.form;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -33,7 +34,7 @@ public class MenuPlanner implements Serializable {
         return date;
     }
 
-    public void addMeal(int index, String mealType, String ... menus) {
+    public void addMeal(String mealType, String ... menus) {
         meals.add(new Meal(mealType, menus));
     }
 
@@ -93,22 +94,28 @@ public class MenuPlanner implements Serializable {
 
         public static class CardHolder extends RecyclerView.ViewHolder {
             TextView menuTypeView;
-            public TextView menu;
+//            public TextView menu;
+            ViewGroup parent;
+            LinearLayout cardListLayout;
 
             public CardHolder(View view, ViewGroup parent) {
                 super(view); // not ViewGroup
-
+                this.parent = parent;
                 menuTypeView = (TextView) view.findViewById(R.id.menu_type);
-                LinearLayout cardListLayout = (LinearLayout) view.findViewById(R.id.card_list);
-                View cardView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.card_menu, parent, false);
-                cardListLayout.addView(cardView);
+                cardListLayout = (LinearLayout) view.findViewById(R.id.card_list);
 
-                menu = (TextView) cardView.findViewById(R.id.menu);
+//                menu = (TextView) cardView.findViewById(R.id.menu);
             }
 
-            void setMenu(String... menus) {
-
+            void setMenu(ArrayList<String> menus) {
+                cardListLayout.removeAllViews();
+                for (String menu : menus) {
+                    View cardView = LayoutInflater.from(parent.getContext())
+                            .inflate(R.layout.card_menu, parent, false);
+                    cardListLayout.addView(cardView);
+                    TextView menuView = (TextView) cardView.findViewById(R.id.menu);
+                    menuView.setText(menu.replace("<br>", "\n"));
+                }
             }
 
 //            void setMeals()
@@ -148,7 +155,8 @@ public class MenuPlanner implements Serializable {
                 position --;
                 CardHolder cardHolder = (CardHolder) holder;
                 cardHolder.menuTypeView.setText(meals.get(position).getMealType());
-                cardHolder.menu.setText(StringUtil.join(meals.get(position).getMenus(), "\n"));
+                cardHolder.setMenu(meals.get(position).getMenus());
+//                cardHolder.menu.setText(StringUtil.join(meals.get(position).getMenus(), "\n"));
             }
         }
 
