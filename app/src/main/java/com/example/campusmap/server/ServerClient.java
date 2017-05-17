@@ -7,7 +7,7 @@ import com.example.campusmap.util.Request;
 public class ServerClient {
     private static final String root = BuildConfig.BUILD_TYPE.contentEquals("debuga")
             ? "http://118.91.120.158:8000"
-            : "http://34.194.159.2:8000";
+            : "http://52.78.215.51:8000";
     private static final String datas = root + "/api/versions/";
 
     private static ServerClient client = new ServerClient();

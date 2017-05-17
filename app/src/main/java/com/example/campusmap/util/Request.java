@@ -33,12 +33,12 @@ public class Request {
     }
 
     private RestTemplate newRestTemplate() {
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        factory.setConnectTimeout(connectionTimeout);
-        factory.setReadTimeout(readTimeout);
+//        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+//        factory.setConnectTimeout(connectionTimeout);
+//        factory.setReadTimeout(readTimeout);
 //        factory.setHttpClient();
 // http://stackoverflow.com/questions/27420841/how-to-do-a-progress-bar-to-show-progress-download-of-a-big-file-with-androidann
-        RestTemplate restTemplate = new RestTemplate(factory);
+        RestTemplate restTemplate = new RestTemplate();
 
         restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
         return restTemplate;
