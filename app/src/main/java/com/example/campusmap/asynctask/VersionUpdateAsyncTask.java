@@ -11,12 +11,15 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.example.campusmap.R;
+import com.example.campusmap.activity.MainActivity;
 import com.example.campusmap.data.server.BuildingJson;
 import com.example.campusmap.data.server.FloorJson;
 import com.example.campusmap.data.server.RoomJson;
 import com.example.campusmap.data.server.RootJson;
 import com.example.campusmap.database.SQLiteHelperCampusInfo;
 import com.example.campusmap.server.ServerClient;
+import com.example.campusmap.util.Json;
+import com.example.campusmap.util.ResourceUtl;
 
 public class VersionUpdateAsyncTask extends AsyncTask<Void, String, RootJson> implements DialogInterface.OnCancelListener {
     private static final String TAG = "VersionUpdateAsyncTask";
@@ -66,7 +69,9 @@ public class VersionUpdateAsyncTask extends AsyncTask<Void, String, RootJson> im
 
         RootJson rootJson = ServerClient.versions(version);
 
-        if (rootJson == null || version >= rootJson.getVersion()) {
+        if (rootJson == null) {
+            return new RootJson();
+        } else if (version >= rootJson.getVersion()) {
             publishProgress(Progress_JobDone, "최신버전입니다");
 
             try {
@@ -75,6 +80,12 @@ public class VersionUpdateAsyncTask extends AsyncTask<Void, String, RootJson> im
                 e.printStackTrace();
             }
             return rootJson;
+        } else {
+            String default_json = ResourceUtl.getRaw(context, R.raw.default_info);
+            rootJson = Json.to(default_json, RootJson.class);
+            if (rootJson == null) {
+                rootJson = new RootJson();
+            }
         }
 
         publishProgress(Progress_Dialog, "입력하는중입니다");

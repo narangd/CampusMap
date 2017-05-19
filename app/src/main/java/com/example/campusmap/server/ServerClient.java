@@ -15,8 +15,12 @@ public class ServerClient {
     private ServerClient() {}
 
     public static RootJson versions(int version) {
-        return Request.get(datas + version)
-                .send(RootJson.class);
+//        return Request.get(datas + version)
+//                .send(RootJson.class);
+        RootJson rootJson = new RootJson();
+        rootJson.setVersion(0);
+        rootJson.setName("GNTech");
+        return rootJson;
     }
 
     public static RootJson datasTemp(int version) {
